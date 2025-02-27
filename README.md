@@ -1,3 +1,3 @@
-# landingPage
+https://opencryptopay.io/
 
-add DEV
+Feel free to submit suggestions for improvement as a pull request or as an issue.
