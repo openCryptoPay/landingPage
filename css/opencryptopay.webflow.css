@@ -3595,7 +3595,7 @@ body {
 }
 
 .logo-carousel-horizontal {
-  width: 100%;
+  width: 60%;
   position: relative;
   overflow: hidden;
 }
@@ -3646,8 +3646,8 @@ body {
 }
 
 .logo-carousel-content {
-  grid-column-gap: 52px;
-  grid-row-gap: 52px;
+  grid-column-gap: 64px;
+  grid-row-gap: 64px;
   display: flex;
 }
 
