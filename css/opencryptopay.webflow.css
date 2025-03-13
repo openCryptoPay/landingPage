@@ -406,7 +406,7 @@ body {
 .section.blue {
   background-color: var(--brand-colors--opc-blue);
   border: 0 #000;
-  border-top: 1px solid #ffffff1a;
+  border-top: 1px #ffffff1a;
   border-radius: 0;
 }
 
@@ -4075,7 +4075,7 @@ body {
 
 .container-wallets {
   max-width: 1200px;
-  padding-top: 80px;
+  padding-top: 76px;
   padding-bottom: 88px;
 }
 
@@ -4115,6 +4115,26 @@ body {
   padding-top: 1px;
   padding-bottom: 1px;
   text-decoration: none;
+  display: flex;
+}
+
+.line_blurred {
+  background-image: linear-gradient(90deg, #fff0, #ffffff59 50%, #fff0);
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  width: 60%;
+  max-width: none;
+  height: 1px;
+  padding-top: 0;
+  padding-bottom: 0;
+  text-decoration: none;
+  display: flex;
+}
+
+.line_div {
+  justify-content: center;
+  align-items: center;
   display: flex;
 }
 
