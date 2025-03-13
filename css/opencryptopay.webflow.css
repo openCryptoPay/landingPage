@@ -4075,8 +4075,8 @@ body {
 
 .container-wallets {
   max-width: 1200px;
-  padding-top: 60px;
-  padding-bottom: 72px;
+  padding-top: 80px;
+  padding-bottom: 88px;
 }
 
 .headline {
@@ -4104,6 +4104,18 @@ body {
   font-size: var(--body-2xl);
   line-height: var(--body-2xl);
   font-weight: 300;
+}
+
+.frame-427322441 {
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 820px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  text-decoration: none;
+  display: flex;
 }
 
 @media screen and (max-width: 991px) {
