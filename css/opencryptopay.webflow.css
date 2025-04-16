@@ -2934,17 +2934,14 @@ body {
 
 .faq-question {
   background-color: #0000;
-  border: 0 #000;
   border-bottom: 1px solid #ced1da;
   border-radius: 0;
   padding: 20px 32px;
   text-decoration: none;
 }
 
-.faq-question:hover {
-  background-color: #0000;
-  border: 1px #000;
-  border-bottom: 1px solid #ced1da;
+.faq-question.is-3 {
+  border-bottom-width: 0;
 }
 
 .faq-wrapper {
@@ -4014,6 +4011,10 @@ body {
   display: flex;
 }
 
+.wallet_cont.fade-in-200ms {
+  grid-row-gap: 10px;
+}
+
 .metamask_wallet {
   background-color: #190066;
   border: 1px solid #ffffff4d;
@@ -4618,6 +4619,12 @@ body {
   .who-runs-the-server-mb {
     display: block;
   }
+
+  .wallets {
+    grid-column-gap: 24px;
+    padding-left: 0;
+    padding-right: 0;
+  }
 }
 
 @media screen and (max-width: 767px) {
@@ -4807,6 +4814,15 @@ body {
 
   .footer-ecosystem, .footer-assets {
     background-position: 70%;
+  }
+
+  .wallets {
+    grid-column-gap: 32px;
+    grid-row-gap: 32px;
+    grid-template-rows: auto auto;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-auto-columns: 1fr;
+    display: grid;
   }
 }
 
@@ -5401,7 +5417,7 @@ body {
   .wallets {
     grid-column-gap: 16px;
     grid-row-gap: 36px;
-    grid-template-rows: auto auto;
+    grid-template-rows: auto auto auto;
     grid-template-columns: 1fr 1fr;
     grid-auto-columns: 1fr;
     display: grid;
@@ -5412,7 +5428,7 @@ body {
   }
 }
 
-#all-about.w-node-_607c3190-56a6-e6db-f72f-bc0d46e0b24a-79461ddd, #all-about.w-node-_4b6cebed-4686-e2ce-9182-a0e2bfab47ee-79461ddd, #w-node-cc3f32a8-0b33-934e-d96a-36830b106c4f-79461ddf {
+#q1.w-node-_607c3190-56a6-e6db-f72f-bc0d46e0b24a-79461ddd, #double-spends.w-node-_4b6cebed-4686-e2ce-9182-a0e2bfab47ee-79461ddd, #q3.w-node-_974dabbc-af05-dffa-4b59-6ec5872f6226-79461ddd, #w-node-cc3f32a8-0b33-934e-d96a-36830b106c4f-79461ddf {
   grid-area: span 1 / span 1 / span 1 / span 1;
 }
 

@@ -1,4 +1,4 @@
-<!DOCTYPE html><!--  This site was created in Webflow. https://webflow.com  --><!--  Last Published: Thu Mar 13 2025 21:43:04 GMT+0000 (Coordinated Universal Time)  -->
+<!DOCTYPE html><!--  This site was created in Webflow. https://webflow.com  --><!--  Last Published: Wed Apr 16 2025 17:00:49 GMT+0000 (Coordinated Universal Time)  -->
 <html data-wf-page="670cd765309520b679461ddd" data-wf-site="670cd765309520b679461de0" lang="en">
 <head>
   <meta charset="utf-8">
@@ -177,12 +177,16 @@
         </div>
         <div class="wallets">
           <div class="wallet_cont fade-in-200ms">
+            <a href="https://cakewallet.com" target="_blank" class="w-inline-block"><img src="images/Cake_Wallet_button.svg" loading="lazy" alt="" class="wallet-icon-hero"></a>
+            <div class="walletname">Cake Wallet</div>
+          </div>
+          <div class="wallet_cont fade-in-200ms">
             <a href="https://frankencoin.app/" target="_blank" class="w-inline-block"><img src="images/Frankencoin-Wallet-hero.svg" loading="lazy" alt="" class="wallet-icon-hero"></a>
             <div class="walletname">Frankencoin Wallet</div>
           </div>
           <div class="wallet_cont fade-in-400ms">
             <a href="https://phoenix.acinq.co/" target="_blank" class="w-inline-block"><img src="images/Phoenix-hero.svg" loading="lazy" alt="" class="wallet-icon-hero"></a>
-            <div class="walletname">Phonix</div>
+            <div class="walletname">Phoenix</div>
           </div>
           <div class="wallet_cont fade-in-600ms">
             <a href="https://dfx.swiss/bitcoin.html" target="_blank" class="w-inline-block"><img src="images/BTC-Taro-hero.svg" loading="lazy" alt="" class="wallet-icon-hero"></a>
@@ -371,22 +375,30 @@
         <div class="faq-base">
           <div class="faq-wrapper">
             <div class="w-layout-grid faq-grid">
-              <a id="all-about" href="#" class="faq-question w-node-_607c3190-56a6-e6db-f72f-bc0d46e0b24a-79461ddd w-inline-block">
+              <div id="q1" class="faq-question w-node-_607c3190-56a6-e6db-f72f-bc0d46e0b24a-79461ddd">
                 <div class="faq-question-bar">
                   <div class="body-1-stronger">What is this all about?</div><img width="19.5" height="19.5" alt="" src="images/Union.svg" loading="lazy" class="faq-plus">
                 </div>
                 <div class="faq-content">
                   <p id="all-about" class="body-1">The Open CryptoPay system is a permissionless, open payment standard that enables digital payments for everyone.</p>
                 </div>
-              </a>
-              <a id="all-about" href="#" class="faq-question w-node-_4b6cebed-4686-e2ce-9182-a0e2bfab47ee-79461ddd w-inline-block">
+              </div>
+              <div id="double-spends" class="faq-question w-node-_4b6cebed-4686-e2ce-9182-a0e2bfab47ee-79461ddd">
+                <div class="faq-question-bar">
+                  <div class="body-1-stronger">If I pay on chain, how is the merchant protected from double spends?</div><img width="19.5" height="19.5" alt="" src="images/Union.svg" loading="lazy" class="faq-plus">
+                </div>
+                <div class="faq-content">
+                  <p class="body-1">We at OpenCrypto Pay are aware that double-spending in on-chain transactions is a theoretical issue, but not a practical problem for physical merchants. Executing a double spend is technically complex and far less likely than traditional forms of non-payment, such as leaving a store without paying. In the rare case of an attempted double spend in a physical store, it is treated as theft and may lead to legal consequences. Given the low risk, we do not implement specific double-spend protection for physical stores, ensuring a smooth and efficient payment process for merchants and customers.</p>
+                </div>
+              </div>
+              <div id="q3" class="faq-question is-3 w-node-_974dabbc-af05-dffa-4b59-6ec5872f6226-79461ddd">
                 <div class="faq-question-bar">
                   <div class="body-1-stronger">When will more Q&amp;A questions be added?</div><img width="19.5" height="19.5" alt="" src="images/Union.svg" loading="lazy" class="faq-plus">
                 </div>
                 <div class="faq-content">
                   <p id="all-about" class="body-1">Our website is still in its early stages, and we&#x27;re continuously working on expanding it. More Q&amp;A questions will be added over time as we gather feedback and further develop our content. <br>Thank you for your patience!</p>
                 </div>
-              </a>
+              </div>
             </div>
           </div>
         </div>
@@ -485,6 +497,26 @@
         $('.w-nav-button').click();
       }
     });
+  });
+</script>
+  <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const hash = window.location.hash;
+    const idsToClick = ["double-spends", "all-about", "q3"];
+    const targetId = hash.slice(1);
+    if (idsToClick.includes(targetId)) {
+      const target = document.getElementById(targetId);
+      if (target) {
+        setTimeout(() => {
+          const event = new MouseEvent("click", {
+            view: window,
+            bubbles: true,
+            cancelable: true
+          });
+          target.dispatchEvent(event);
+        }, 500); // Подстрой по ситуации, если нужно
+      }
+    }
   });
 </script>
 </body>

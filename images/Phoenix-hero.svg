@@ -2,7 +2,6 @@
 <g clip-path="url(#clip0_4240_663)">
 <rect x="-4.33301" y="-4.33337" width="60.6667" height="60.6667" fill="url(#pattern0_4240_663)"/>
 </g>
-<path d="M6 0.5H46C49.0376 0.5 51.5 2.96243 51.5 6V46C51.5 49.0376 49.0376 51.5 46 51.5H6C2.96244 51.5 0.5 49.0376 0.5 46V6C0.5 2.96244 2.96243 0.5 6 0.5Z" stroke="#2231EF" stroke-opacity="0.5"/>
 <defs>
 <pattern id="pattern0_4240_663" patternContentUnits="objectBoundingBox" width="1" height="1">
 <use xlink:href="#image0_4240_663" transform="scale(0.00195312)"/>
