@@ -1,3 +1,99 @@
+@font-face {
+  font-family: "Avenir Oblique 400";
+  src: url('../fonts/Avenir-Oblique-11.ttf') format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Avenir Light 300";
+  src: url('../fonts/Avenir-Light-07.ttf') format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Avenir LightOblique 300";
+  src: url('../fonts/Avenir-LightOblique-08.ttf') format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Avenir Roman 400";
+  src: url('../fonts/Avenir-Roman-12.ttf') format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Avenir MediumOblique 500";
+  src: url('../fonts/Avenir-MediumOblique-10.ttf') format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Avenir Heavy 900";
+  src: url('../fonts/Avenir-Heavy-05.ttf') format("truetype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Avenir HeavyOblique 900";
+  src: url('../fonts/Avenir-HeavyOblique-06.ttf') format("truetype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Avenir BlackOblique 900";
+  src: url('../fonts/Avenir-BlackOblique-04.ttf') format("truetype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Avenir BookOblique 400";
+  src: url('../fonts/Avenir-BookOblique-02.ttf') format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Avenir Black 900";
+  src: url('../fonts/Avenir-Black-03.ttf') format("truetype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Avenir Medium 500";
+  src: url('../fonts/Avenir-Medium-09.ttf') format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Avenir Book 400";
+  src: url('../fonts/Avenir-Book-01.ttf') format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --white: var(--black);
   --gray--95: #272b38;
