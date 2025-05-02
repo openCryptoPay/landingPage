@@ -4,6 +4,8 @@ Open CryptoPay is a permissionless and open payment standard. It enables crypto 
 
 The following explains how crypto wallets can use the Open CryptoPay standard to interact with crypto-enabled cash registers to allow users to pay with their cryptos in stores.
 
+All examples use the domain of DFX.swiss but this is not mandatory. Everyone is authorized to offer an OpenCryptoPay service under their own domain. 
+
 ## Basic Principle
 
 Every cash register is equipped with a dedicated static QR code, which is attached with an adhesive near the cash register. The QR code contains encoded information about the associated cash register and has two purposes.  
