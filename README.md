@@ -56,7 +56,7 @@ A GET HTTP call to either of these endpoints will return a JSON with the followi
 ```JSON
 {
   "id": "pl_beeddb41cd4b6d9e",
-  "externalId": "TestfürAlle",
+  "externalId": "a-custom-id",
   "tag": "payRequest",
   "callback": "https://api.dfx.swiss/v1/lnurlp/cb/pl_beeddb41cd4b6d9e",
   "minSendable": 1267000,
@@ -197,7 +197,7 @@ If there is still no payment pending after the waiting time has elapsed, an HTTP
 ```JSON
 {
   "id": "pl_beeddb41cd4b6d9e",
-  "externalId": "a-custom-payment-id",
+  "externalId": "a-custom-id",
   "displayName": "Test Shop",
   "standard": "OpenCryptoPay",
   "possibleStandards": ["OpenCryptoPay"],
