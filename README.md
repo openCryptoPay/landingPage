@@ -51,10 +51,12 @@ The `lightning` parameter can be decoded following the [LUD-01 standard](https:/
 
 The URL can be constructed by replacing `app` with `api` in the URL from the QR code. In the example above this would be https://api.dfx.swiss/pl/?lightning=LNURL1DP68GURN8GHJ7CTSDYHXGENC9EEHW6TNWVHHVVF0D3H82UNVWQHHQMZLVFJK2ERYVG6RZCMYX33RVEPEV5YEJ9WT.
 
-A GET HTTP call to either of these endpoints will return a JSON with the following structure. It contains recipient details, quote information, a list of available payment methods and crypto assets and the callback URL to fetch the transaction details.
+A GET HTTP call to either of these endpoints will return a JSON with the following structure. It contains recipient details, quote information, a list of available payment methods and crypto assets and the callback URL to fetch the transaction details. Some payment methods might be flagged as unavailable.
 
 ```JSON
 {
+  "id": "pl_beeddb41cd4b6d9e",
+  "externalId": "a-custom-id",
   "tag": "payRequest",
   "callback": "https://api.dfx.swiss/v1/lnurlp/cb/pl_beeddb41cd4b6d9e",
   "minSendable": 1267000,
@@ -95,7 +97,8 @@ A GET HTTP call to either of these endpoints will return a JSON with the followi
           "asset": "BTC",
           "amount": "0.00001267"
         }
-      ]
+      ],
+      "available": true
     },
     {
       "method": "Ethereum",
@@ -129,27 +132,32 @@ A GET HTTP call to either of these endpoints will return a JSON with the followi
           "asset": "dEURO",
           "amount": "1.07776033"
         }
-      ]
+      ],
+      "available": true
     },
     {
       "method": "Polygon",
       "minFee": 36000004963,
-      "assets": [ ... ]
+      "assets": [ ... ],
+      "available": true
     },
     {
       "method": "Arbitrum",
       "minFee": 12000000,
-      "assets": [ ... ]
+      "assets": [ ... ],
+      "available": true
     },
     {
       "method": "Optimism",
       "minFee": 1200769,
-      "assets": [ ... ]
+      "assets": [ ... ],
+      "available": true
     },
     {
       "method": "Base",
       "minFee": 5233418,
-      "assets": [ ... ]
+      "assets": [ ... ],
+      "available": true
     },
     {
       "method": "Monero",
@@ -159,13 +167,60 @@ A GET HTTP call to either of these endpoints will return a JSON with the followi
           "asset": "XMR",
           "amount": "0.00448355"
         }
-      ]
+      ],
+      "available": true
+    },
+    {
+      "method": "BinancePay",
+      "minFee": 0,
+      "assets": [],
+      "available": false
+    },
+    {
+      "method": "KuCoinPay",
+      "minFee": 0,
+      "assets": [],
+      "available": false
     }
   ]
 }
 ```
 
 Please note that the offer has an expiry date after which it can no longer be used. If a quote has expired, the wallet should fetch a new one (as explained above) to get the latest exchange rates.
+
+#### Exceptions
+
+If no payment is currently pending at the involved cash register, the above HTTP call waits for a payment for 10 seconds by default. This timeout can be customized with the `timeout` query parameter (in seconds). E.g. use https://api.dfx.swiss/v1/lnurlp/pl_beeddb41cd4b6d9e?timeout=0 for an instant response.
+
+If there is still no payment pending after the waiting time has elapsed, an HTTP 404 is returned with the following content.
+
+```JSON
+{
+  "id": "pl_beeddb41cd4b6d9e",
+  "externalId": "a-custom-id",
+  "displayName": "Test Shop",
+  "standard": "OpenCryptoPay",
+  "possibleStandards": ["OpenCryptoPay"],
+  "displayQr": true,
+  "recipient": {
+    "name": "My Company",
+    "address": {
+      "street": "Example Street",
+      "houseNumber": "7",
+      "zip": "6300",
+      "city": "Zug",
+      "country": "Switzerland"
+    },
+    "phone": "+123456789",
+    "mail": "mail@my-company.com",
+    "website": "https://my-company.com/"
+  },
+  "statusCode": 404,
+  "message": "No pending payment found",
+  "error": "Not Found"
+}
+
+```
 
 ### 3. Transaction Details
 
@@ -216,6 +271,6 @@ Use the invoice from the `pr` field from [step 3](#3-transaction-details) to exe
 
 ### Simplified Flow
 
-To simplify the process, steps 2 and 3 can be done with a single HTTP call by adding the `method` and `asset` query parameters to the API URL used to fetch the payment details (in [step 2](#2-payment-details)). This call will return the transaction details as shown in [step 3](#3-transaction-details) or an error code, if the selected method and asset are not available with the payment provider.
+To simplify the process, steps 2 and 3 can be done with a single HTTP call by adding the `method` and `asset` query parameters to the API URL used to fetch the payment details (in [step 2](#2-payment-details)). This call will return the transaction details as shown in [step 3](#3-transaction-details) or an error code, if the selected method and asset are not available with the payment provider. The simplified flow can be used with both approaches described in [step 2](#2-payment-details).
 
 In our example the URL would be https://api.dfx.swiss/v1/lnurlp/pl_beeddb41cd4b6d9e?method=Ethereum&asset=ETH or https://api.dfx.swiss/pl/?lightning=LNURL1DP68GURN8GHJ7CTSDYHXGENC9EEHW6TNWVHHVVF0D3H82UNVWQHHQMZLVFJK2ERYVG6RZCMYX33RVEPEV5YEJ9WT&method=Ethereum&asset=ETH.
