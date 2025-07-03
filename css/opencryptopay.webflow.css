@@ -4235,6 +4235,87 @@ body {
   display: flex;
 }
 
+.padding-global {
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+}
+
+.padding-global.padding-section-map {
+  padding-top: 8rem;
+  padding-bottom: 0;
+}
+
+.home-map_legend {
+  grid-column-gap: .625rem;
+  grid-row-gap: .625rem;
+  flex-flow: column;
+  margin-top: 0;
+  display: flex;
+}
+
+.home-map_legend-point {
+  border-radius: .25rem;
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.home-map_legend-point.is-gray {
+  background-color: #8d8d98;
+}
+
+.home-map_legend-point.is-red {
+  background-color: #ff4750;
+}
+
+.home-map_legend-point.is-yellow {
+  background-color: #f2c24f;
+}
+
+.container-main {
+  width: 100%;
+  max-width: 75rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 20px;
+  padding-right: 20px;
+  position: relative;
+}
+
+.map-wrapper {
+  border: 1px solid #e5e6eb;
+  border-radius: 1.25rem;
+  margin-top: 2.75rem;
+  margin-left: 0;
+  margin-right: 0;
+  display: block;
+  overflow: hidden;
+}
+
+.home-map_legend-line {
+  grid-column-gap: .5rem;
+  grid-row-gap: .5rem;
+  justify-content: flex-start;
+  align-items: center;
+  display: flex;
+}
+
+.map {
+  width: auto;
+  height: 42.5rem;
+  margin: -2px;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.home-map_header-wrapper {
+  grid-column-gap: 2rem;
+  grid-row-gap: 2rem;
+  flex-flow: column;
+  max-width: 80ch;
+  display: flex;
+}
+
 @media screen and (max-width: 991px) {
   .navbar {
     flex-flow: row;
@@ -4920,6 +5001,20 @@ body {
     grid-auto-columns: 1fr;
     display: grid;
   }
+
+  .padding-global {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  .padding-global.padding-section-map {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+
+  .map {
+    height: 32rem;
+  }
 }
 
 @media screen and (max-width: 479px) {
@@ -5521,6 +5616,18 @@ body {
 
   .container-wallets {
     border-top: 1px solid #ffffff1a;
+  }
+
+  .padding-global.padding-section-map {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+  }
+
+  .container-main {
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
   }
 }
 
