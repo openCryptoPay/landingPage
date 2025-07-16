@@ -103,6 +103,40 @@ A GET HTTP call to either of these endpoints will return a JSON with the followi
       ],
       "available": true
     },
+      "method": "Ethereum",
+      "minFee": 1682009661,
+      "assets": [
+        {
+          "asset": "dEURO",
+          "amount": "1.08608535"
+        },
+        {
+          "asset": "ZCHF",
+          "amount": "1."
+        },
+        {
+          "asset": "USDT",
+          "amount": "1.26157"
+        },
+        {
+          "asset": "USDC",
+          "amount": "1.261582"
+        },
+        {
+          "asset": "DAI",
+          "amount": "1.26158231"
+        },
+        {
+          "asset": "ETH",
+          "amount": "0.00040256"
+        },
+        {
+          "asset": "WBTC",
+          "amount": "0.00001069"
+        }
+      ],
+      "available": true
+    },
     {
       "method": "Polygon",
       "minFee": 36000000139,
