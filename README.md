@@ -55,7 +55,6 @@ A GET HTTP call to either of these endpoints will return a JSON with the followi
 
 ```JSON
 {
-  {
   "id": "pl_beeddb41cd4b6d9e",
   "externalId": "TestfürAlle",
   "mode": "Multiple",
