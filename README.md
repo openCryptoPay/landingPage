@@ -55,12 +55,14 @@ A GET HTTP call to either of these endpoints will return a JSON with the followi
 
 ```JSON
 {
+  {
   "id": "pl_beeddb41cd4b6d9e",
-  "externalId": "a-custom-id",
+  "externalId": "TestfürAlle",
+  "mode": "Multiple",
   "tag": "payRequest",
   "callback": "https://api.dfx.swiss/v1/lnurlp/cb/pl_beeddb41cd4b6d9e",
-  "minSendable": 1267000,
-  "maxSendable": 1267000,
+  "minSendable": 1069000,
+  "maxSendable": 1069000,
   "metadata": "[[\"text/plain\", \"Test Shop - CHF 1\"]]",
   "displayName": "Test Shop",
   "standard": "OpenCryptoPay",
@@ -79,9 +81,10 @@ A GET HTTP call to either of these endpoints will return a JSON with the followi
     "mail": "mail@my-company.com",
     "website": "https://my-company.com/"
   },
+  "route": "DFX VM 01",
   "quote": {
-    "id": "plq_9af8927afe14f2d0",
-    "expiration": "2025-05-01T12:28:47.750Z",
+    "id": "plq_d170b11b44340eb1",
+    "expiration": "2025-07-16T01:20:06.476Z",
     "payment": "plp_f1ba466e2f1c0a4e"
   },
   "requestedAmount": {
@@ -95,49 +98,14 @@ A GET HTTP call to either of these endpoints will return a JSON with the followi
       "assets": [
         {
           "asset": "BTC",
-          "amount": "0.00001267"
-        }
-      ],
-      "available": true
-    },
-    {
-      "method": "Ethereum",
-      "minFee": 618579738,
-      "assets": [
-        {
-          "asset": "ETH",
-          "amount": "0.0006582"
-        },
-        {
-          "asset": "USDT",
-          "amount": "1.218359"
-        },
-        {
-          "asset": "WBTC",
-          "amount": "0.00001267"
-        },
-        {
-          "asset": "USDC",
-          "amount": "1.218322"
-        },
-        {
-          "asset": "DAI",
-          "amount": "1.21834677"
-        },
-        {
-          "asset": "ZCHF",
-          "amount": "1."
-        },
-        {
-          "asset": "dEURO",
-          "amount": "1.07776033"
+          "amount": "0.00001069"
         }
       ],
       "available": true
     },
     {
       "method": "Polygon",
-      "minFee": 36000004963,
+      "minFee": 36000000139,
       "assets": [ ... ],
       "available": true
     },
@@ -161,23 +129,51 @@ A GET HTTP call to either of these endpoints will return a JSON with the followi
     },
     {
       "method": "Monero",
-      "minFee": 20000,
+      "minFee": 0,
       "assets": [
         {
           "asset": "XMR",
-          "amount": "0.00448355"
+          "amount": "0.00377501"
         }
       ],
       "available": true
     },
     {
+      "method": "Bitcoin",
+      "minFee": 4.5,
+      "assets": [
+        {
+          "asset": "BTC",
+          "amount": "0.00001069"
+        }
+      ],
+      "available": true
+    },
+    {
+      "method": "Solana",
+      "minFee": 0,
+      "assets": [ ... ],
+      "available": true
+    },
+    {
       "method": "BinancePay",
+      "minFee": 0,
+      "assets": [
+        {
+          "asset": "USDT",
+          "amount": "1.2615697"
+        }
+      ],
+      "available": true
+    },
+    {
+      "method": "KuCoinPay",
       "minFee": 0,
       "assets": [],
       "available": false
     },
     {
-      "method": "KuCoinPay",
+      "method": "BitcoinOnChainTaprootAsset",
       "minFee": 0,
       "assets": [],
       "available": false
