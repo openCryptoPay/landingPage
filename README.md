@@ -103,6 +103,7 @@ A GET HTTP call to either of these endpoints will return a JSON with the followi
       ],
       "available": true
     },
+    {
       "method": "Ethereum",
       "minFee": 1682009661,
       "assets": [
