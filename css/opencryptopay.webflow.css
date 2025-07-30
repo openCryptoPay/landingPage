@@ -4914,8 +4914,12 @@ body {
     display: block;
   }
 
+  .content_works-with {
+    grid-row-gap: 36px;
+  }
+
   .wallets {
-    grid-column-gap: 24px;
+    grid-column-gap: 0px;
     padding-left: 0;
     padding-right: 0;
   }
