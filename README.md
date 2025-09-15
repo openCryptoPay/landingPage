@@ -279,21 +279,31 @@ Please note that the transaction details received belong to the quote from [step
 
 ### 4. Crypto Transaction
 
-The transaction details received in [step 3](#3-transaction-details) should now be used to construct the blockchain transaction. This process depends on the selected method.  
-Please make sure to use a transaction fee higher or equal to the minimum fee specified in the `minFee` field (gas price in WEI for EVM chains, sat/vB for Bitcoin) for the specific payment method (in JSON from [step 2](#2-payment-details)).  
+The transaction details received in [step 3](#3-transaction-details) should now be used to construct the blockchain transaction. This process depends on the selected method.
+Please make sure to use a transaction fee higher or equal to the minimum fee specified in the `minFee` field (gas price in WEI for EVM chains, sat/vB for Bitcoin) for the specific payment method (in JSON from [step 2](#2-payment-details)).
 The API URL to send the transaction prove back to the payment provider (see below) can be constructed by using the callback URL from [step 3](#3-transaction-details) and replacing `/cb` with `/tx`.
+
+**Important:** All transaction submission endpoints require the following query parameters:
+- `quote`: The quote ID from [step 2](#2-payment-details)
+- `method`: The blockchain/payment method name (must match exactly the method name from the `transferAmounts` array, e.g., "Ethereum", "BinanceSmartChain", "Polygon", etc.)
+- `hex`: The raw signed transaction in hexadecimal format
+- `tx`: The transaction ID after broadcasting (only for Monero and certain other blockchains)
 
 #### EVM and Bitcoin
 
-Use the `uri` field from [step 3](#3-transaction-details) to construct and sign a valid transaction. Do not broadcast the transaction but send the raw signed transaction HEX to the payment provider with a GET HTTP request to the URL specified above. If the call returns a success HTTP code, the Open CryptoPay payment has been successfully completed.
+Use the `uri` field from [step 3](#3-transaction-details) to construct and sign a valid transaction. Do not broadcast the transaction but send the raw signed transaction HEX to the payment provider with a GET HTTP request to the URL specified above. You must include the `quote` ID from [step 2](#2-payment-details) and the `method` parameter (blockchain name) in the request. If the call returns a success HTTP code, the Open CryptoPay payment has been successfully completed.
 
-In our example the URL would be https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?hex={raw-tx-hex}.
+In our example the URL would be https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote={quote-id}&method={selected-method}&hex={raw-tx-hex}.
+
+Further examples:
+- Ethereum payment: https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote=plq_9af8927afe14f2d0&method=Ethereum&hex={raw-tx-hex}.
+- BNB Smart Chain payment: https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote=plq_9af8927afe14f2d0&method=BinanceSmartChain&hex={raw-tx-hex}.
 
 #### Monero
 
-Use the `uri` field from [step 3](#3-transaction-details) to construct a valid transaction. Broadcast this transaction to the network and send the resulting raw transaction HEX and the transaction ID to the payment provider with a GET HTTP request to the URL specified above. If the call returns a success HTTP code, the Open CryptoPay payment has been successfully completed.
+Use the `uri` field from [step 3](#3-transaction-details) to construct a valid transaction. Broadcast this transaction to the network and send the resulting raw transaction HEX and the transaction ID to the payment provider with a GET HTTP request to the URL specified above. You must include the `quote` ID from [step 2](#2-payment-details) and the `method` parameter in the request. If the call returns a success HTTP code, the Open CryptoPay payment has been successfully completed.
 
-In our example the URL would be https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?hex={raw-tx-hex}&tx={tx-id}.
+In our example the URL would be https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote={quote-id}&method=Monero&hex={raw-tx-hex}&tx={tx-id}.
 
 #### Lightning
 
