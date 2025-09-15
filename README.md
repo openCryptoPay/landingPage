@@ -287,7 +287,7 @@ The API URL to send the transaction prove back to the payment provider (see belo
 - `quote`: The quote ID from [step 2](#2-payment-details)
 - `method`: The blockchain/payment method name (must match exactly the method name from the `transferAmounts` array, e.g., "Ethereum", "BinanceSmartChain", "Polygon", etc.)
 - `hex`: The raw signed transaction in hexadecimal format
-- `tx`: (Only for Monero and certain other blockchains) The transaction ID after broadcasting
+- `tx`: The transaction ID after broadcasting (only for Monero and certain other blockchains)
 
 #### EVM and Bitcoin
 
@@ -295,8 +295,9 @@ Use the `uri` field from [step 3](#3-transaction-details) to construct and sign 
 
 In our example the URL would be https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote={quote-id}&method={selected-method}&hex={raw-tx-hex}.
 
-For example, for an Ethereum payment: https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote=plq_9af8927afe14f2d0&method=Ethereum&hex={raw-tx-hex}.
-For a BNB Smart Chain payment: https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote=plq_9af8927afe14f2d0&method=BinanceSmartChain&hex={raw-tx-hex}.
+Further examples:
+- Ethereum payment: https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote=plq_9af8927afe14f2d0&method=Ethereum&hex={raw-tx-hex}.
+- BNB Smart Chain payment: https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote=plq_9af8927afe14f2d0&method=BinanceSmartChain&hex={raw-tx-hex}.
 
 #### Monero
 
