@@ -74,11 +74,16 @@ A GET HTTP call to either of these endpoints will return a JSON with the followi
       "houseNumber": "7",
       "zip": "6300",
       "city": "Zug",
-      "country": "Switzerland"
+      "country": "CH"
     },
     "phone": "+123456789",
     "mail": "mail@my-company.com",
-    "website": "https://my-company.com/"
+    "website": "https://my-company.com/",
+    "registrationNumber": "CHE-123.456.789",
+    "storeType": "Physical",
+    "merchantCategory": "RetailTradeOthers",
+    "goodsType": "Tangible",
+    "goodsCategory": "FoodGroceryHealthProducts"
   },
   "route": "DFX VM 01",
   "quote": {
@@ -100,6 +105,30 @@ A GET HTTP call to either of these endpoints will return a JSON with the followi
           "amount": "0.00001069"
         }
       ],
+      "available": true
+    },
+    {
+      "method": "Polygon",
+      "minFee": 36000000139,
+      "assets": [ ... ],
+      "available": true
+    },
+    {
+      "method": "Arbitrum",
+      "minFee": 12000000,
+      "assets": [ ... ],
+      "available": true
+    },
+    {
+      "method": "Optimism",
+      "minFee": 1200769,
+      "assets": [ ... ],
+      "available": true
+    },
+    {
+      "method": "Base",
+      "minFee": 5233418,
+      "assets": [ ... ],
       "available": true
     },
     {
@@ -138,36 +167,24 @@ A GET HTTP call to either of these endpoints will return a JSON with the followi
       "available": true
     },
     {
-      "method": "Polygon",
-      "minFee": 36000000139,
-      "assets": [ ... ],
-      "available": true
-    },
-    {
-      "method": "Arbitrum",
-      "minFee": 12000000,
-      "assets": [ ... ],
-      "available": true
-    },
-    {
-      "method": "Optimism",
-      "minFee": 1200769,
-      "assets": [ ... ],
-      "available": true
-    },
-    {
-      "method": "Base",
-      "minFee": 5233418,
-      "assets": [ ... ],
-      "available": true
-    },
-    {
-      "method": "Monero",
-      "minFee": 0,
+      "method": "BinanceSmartChain",
+      "minFee": 1000000000,
       "assets": [
         {
-          "asset": "XMR",
-          "amount": "0.00377501"
+          "asset": "USDT",
+          "amount": "1.26157"
+        },
+        {
+          "asset": "USDC",
+          "amount": "1.261582"
+        },
+        {
+          "asset": "DAI",
+          "amount": "1.26158231"
+        },
+        {
+          "asset": "BNB",
+          "amount": "0.00168"
         }
       ],
       "available": true
@@ -184,9 +201,59 @@ A GET HTTP call to either of these endpoints will return a JSON with the followi
       "available": true
     },
     {
+      "method": "Firo",
+      "minFee": 0,
+      "assets": [
+        {
+          "asset": "FIRO",
+          "amount": "0.58823529"
+        }
+      ],
+      "available": true
+    },
+    {
+      "method": "Monero",
+      "minFee": 0,
+      "assets": [
+        {
+          "asset": "XMR",
+          "amount": "0.00377501"
+        }
+      ],
+      "available": true
+    },
+    {
+      "method": "Zano",
+      "minFee": 0,
+      "assets": [
+        {
+          "asset": "ZANO",
+          "amount": "0.58823529"
+        }
+      ],
+      "available": true
+    },
+    {
       "method": "Solana",
       "minFee": 0,
       "assets": [ ... ],
+      "available": true
+    },
+    {
+      "method": "Tron",
+      "minFee": 0,
+      "assets": [ ... ],
+      "available": true
+    },
+    {
+      "method": "Cardano",
+      "minFee": 0,
+      "assets": [
+        {
+          "asset": "ADA",
+          "amount": "4.883112"
+        }
+      ],
       "available": true
     },
     {
@@ -201,13 +268,13 @@ A GET HTTP call to either of these endpoints will return a JSON with the followi
       "available": true
     },
     {
-      "method": "KuCoinPay",
+      "method": "TaprootAsset",
       "minFee": 0,
       "assets": [],
       "available": false
     },
     {
-      "method": "BitcoinOnChainTaprootAsset",
+      "method": "Spark",
       "minFee": 0,
       "assets": [],
       "available": false
@@ -215,6 +282,13 @@ A GET HTTP call to either of these endpoints will return a JSON with the followi
   ]
 }
 ```
+
+The `recipient` object includes additional fields describing the merchant:
+- `registrationNumber`: Company registration number (e.g. Swiss UID)
+- `storeType`: Type of store (`Physical`, `Online`, etc.)
+- `merchantCategory`: Category of the merchant
+- `goodsType`: Type of goods (`Tangible`, `Intangible`)
+- `goodsCategory`: Category of goods being sold
 
 Please note that the offer has an expiry date after which it can no longer be used. If a quote has expired, the wallet should fetch a new one (as explained above) to get the latest exchange rates.
 
@@ -239,11 +313,16 @@ If there is still no payment pending after the waiting time has elapsed, an HTTP
       "houseNumber": "7",
       "zip": "6300",
       "city": "Zug",
-      "country": "Switzerland"
+      "country": "CH"
     },
     "phone": "+123456789",
     "mail": "mail@my-company.com",
-    "website": "https://my-company.com/"
+    "website": "https://my-company.com/",
+    "registrationNumber": "CHE-123.456.789",
+    "storeType": "Physical",
+    "merchantCategory": "RetailTradeOthers",
+    "goodsType": "Tangible",
+    "goodsCategory": "FoodGroceryHealthProducts"
   },
   "statusCode": 404,
   "message": "No pending payment found",
@@ -261,7 +340,7 @@ In our example the URL to fetch the transaction details for a payment in ETH on 
 A GET HTTP call to this endpoint will return a JSON with the following structure.
 
 ```JSON
-// EVM, Bitcoin and Monero
+// EVM chains (Ethereum, Polygon, Arbitrum, Optimism, Base, BinanceSmartChain), Bitcoin and Firo
 {
   "expiryDate": "2025-05-01T14:34:40.881Z",
   "blockchain": "Ethereum",
@@ -269,9 +348,24 @@ A GET HTTP call to this endpoint will return a JSON with the following structure
   "hint": "Use this data to create a transaction and sign it. Send the signed transaction back as HEX via the endpoint https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e. We check the transferred HEX and broadcast the transaction to the blockchain."
 }
 
+// Monero, Zano, Solana, Tron and Cardano
+{
+  "expiryDate": "2025-05-01T14:34:40.881Z",
+  "blockchain": "Cardano",
+  "uri": "cardano:addr1qyqjzchnayplhgueg33gukpp2max9gkge4gh6jly93a0dzcm67tl9f0pkykty8my4j4hg8e9suj8nzdrjygmfy6c8d0skmaq5q?amount=4.883112",
+  "hint": "Use this data to create a transaction and sign it. Broadcast the signed transaction to the blockchain and send the transaction hash back via the endpoint https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e"
+}
+
 // Lightning
 {
   "pr": "lnbc12590n1p5p8p66pp5eh5manf8yj39ktlfm7h9y4uzph0wjnt6ngu2c709s9z5wndrfxkshp5kyucf7yxx97e0axrwke7xdy599csdhy67jd5pysz2n3m4d636cgqcqzzsxqzgvsp5wl7m20pwux8p49cumznt2vk3p6x08h0vshnpf2ckqzkwfw6fjdms9qyyssqy4mtye0fekxpgcjftmtqqre43xewmnsu94xmkq4yr8yfuj8se4ynd57s3etcdt3qwrrzx9x2qfm0kpz6kj9wy6ys328znrdvsq6mzrcpw0nfqs"
+}
+
+// BinancePay
+{
+  "expiryDate": "2025-05-01T14:34:40.881Z",
+  "uri": "bnc://app.binance.com/payment/secpay?tempToken=IzjFLlGOoHAdeUth9FurNGjONDeI5Hq9",
+  "hint": "Pay in the Binance app by following the deep link bnc://app.binance.com/payment/secpay?tempToken=IzjFLlGOoHAdeUth9FurNGjONDeI5Hq9."
 }
 ```
 
@@ -286,28 +380,38 @@ The API URL to send the transaction prove back to the payment provider (see belo
 **Important:** All transaction submission endpoints require the following query parameters:
 - `quote`: The quote ID from [step 2](#2-payment-details)
 - `method`: The blockchain/payment method name (must match exactly the method name from the `transferAmounts` array, e.g., "Ethereum", "BinanceSmartChain", "Polygon", etc.)
-- `hex`: The raw signed transaction in hexadecimal format
-- `tx`: The transaction ID after broadcasting (only for Monero and certain other blockchains)
+- For EVM, Bitcoin and Firo: `hex` — the raw signed transaction in hexadecimal format
+- For Monero, Zano, Solana, Tron and Cardano: `tx` — the transaction hash after broadcasting
+- For Lightning and BinancePay: no transaction submission needed (handled differently)
 
-#### EVM and Bitcoin
+#### EVM, Bitcoin and Firo
 
 Use the `uri` field from [step 3](#3-transaction-details) to construct and sign a valid transaction. Do not broadcast the transaction but send the raw signed transaction HEX to the payment provider with a GET HTTP request to the URL specified above. You must include the `quote` ID from [step 2](#2-payment-details) and the `method` parameter (blockchain name) in the request. If the call returns a success HTTP code, the Open CryptoPay payment has been successfully completed.
+
+Note that BinanceSmartChain uses the `ethereum:` URI scheme (EIP-681 format with chain ID 56).
 
 In our example the URL would be https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote={quote-id}&method={selected-method}&hex={raw-tx-hex}.
 
 Further examples:
 - Ethereum payment: https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote=plq_9af8927afe14f2d0&method=Ethereum&hex={raw-tx-hex}.
 - BNB Smart Chain payment: https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote=plq_9af8927afe14f2d0&method=BinanceSmartChain&hex={raw-tx-hex}.
+- Firo payment: https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote=plq_9af8927afe14f2d0&method=Firo&hex={raw-tx-hex}.
 
-#### Monero
+#### Monero, Zano, Solana, Tron and Cardano
 
-Use the `uri` field from [step 3](#3-transaction-details) to construct a valid transaction. Broadcast this transaction to the network and send the resulting raw transaction HEX and the transaction ID to the payment provider with a GET HTTP request to the URL specified above. You must include the `quote` ID from [step 2](#2-payment-details) and the `method` parameter in the request. If the call returns a success HTTP code, the Open CryptoPay payment has been successfully completed.
+Use the `uri` field from [step 3](#3-transaction-details) to construct a valid transaction. Broadcast the signed transaction to the blockchain yourself and then send the resulting transaction hash to the payment provider with a GET HTTP request to the URL specified above. You must include the `quote` ID from [step 2](#2-payment-details) and the `method` parameter in the request. If the call returns a success HTTP code, the Open CryptoPay payment has been successfully completed.
 
-In our example the URL would be https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote={quote-id}&method=Monero&hex={raw-tx-hex}&tx={tx-id}.
+The URL format is `{tx-url}?quote={quote-id}&method={method}&tx={tx-hash}`.
+
+In our example the URL would be https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote=plq_9af8927afe14f2d0&method=Cardano&tx={tx-hash}.
 
 #### Lightning
 
 Use the invoice from the `pr` field from [step 3](#3-transaction-details) to execute the transaction. The Open CryptoPay payment will be completed as soon as the transaction has been successfully executed.
+
+#### BinancePay
+
+Use the deep link from the `uri` field from [step 3](#3-transaction-details) to open the Binance app. The payment will be completed within the Binance app.
 
 ### Simplified Flow
 
