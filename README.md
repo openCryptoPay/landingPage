@@ -211,6 +211,33 @@ A GET HTTP call to either of these endpoints will return a JSON with the followi
       "minFee": 0,
       "assets": [],
       "available": false
+    },
+    {
+      "method": "InternetComputer",
+      "minFee": 0,
+      "assets": [
+        {
+          "asset": "ICP",
+          "amount": "0.08415"
+        },
+        {
+          "asset": "ckBTC",
+          "amount": "0.00001069"
+        },
+        {
+          "asset": "ckETH",
+          "amount": "0.00040256"
+        },
+        {
+          "asset": "ckUSDC",
+          "amount": "1.261582"
+        },
+        {
+          "asset": "ckUSDT",
+          "amount": "1.26157"
+        }
+      ],
+      "available": true
     }
   ]
 }
@@ -269,6 +296,14 @@ A GET HTTP call to this endpoint will return a JSON with the following structure
   "hint": "Use this data to create a transaction and sign it. Send the signed transaction back as HEX via the endpoint https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e. We check the transferred HEX and broadcast the transaction to the blockchain."
 }
 
+// Internet Computer (ICP)
+{
+  "expiryDate": "2025-05-01T14:34:40.881Z",
+  "blockchain": "InternetComputer",
+  "uri": "icp:ryjl3-tyaaa-aaaaa-aaaba-cai?amount=8415000&to=6bf47-...-cai",
+  "hint": "Approve the address from the URI for the required amount plus transfer fee using icrc2_approve. Then send your Principal ID as the sender parameter via the endpoint https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e."
+}
+
 // Lightning
 {
   "pr": "lnbc12590n1p5p8p66pp5eh5manf8yj39ktlfm7h9y4uzph0wjnt6ngu2c709s9z5wndrfxkshp5kyucf7yxx97e0axrwke7xdy599csdhy67jd5pysz2n3m4d636cgqcqzzsxqzgvsp5wl7m20pwux8p49cumznt2vk3p6x08h0vshnpf2ckqzkwfw6fjdms9qyyssqy4mtye0fekxpgcjftmtqqre43xewmnsu94xmkq4yr8yfuj8se4ynd57s3etcdt3qwrrzx9x2qfm0kpz6kj9wy6ys328znrdvsq6mzrcpw0nfqs"
@@ -288,6 +323,7 @@ The API URL to send the transaction prove back to the payment provider (see belo
 - `method`: The blockchain/payment method name (must match exactly the method name from the `transferAmounts` array, e.g., "Ethereum", "BinanceSmartChain", "Polygon", etc.)
 - `hex`: The raw signed transaction in hexadecimal format
 - `tx`: The transaction ID after broadcasting (only for Monero and certain other blockchains)
+- `sender`: The sender's Principal ID (only for Internet Computer ICRC-2 approve flow)
 
 #### EVM and Bitcoin
 
@@ -304,6 +340,26 @@ Further examples:
 Use the `uri` field from [step 3](#3-transaction-details) to construct a valid transaction. Broadcast this transaction to the network and send the resulting raw transaction HEX and the transaction ID to the payment provider with a GET HTTP request to the URL specified above. You must include the `quote` ID from [step 2](#2-payment-details) and the `method` parameter in the request. If the call returns a success HTTP code, the Open CryptoPay payment has been successfully completed.
 
 In our example the URL would be https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote={quote-id}&method=Monero&hex={raw-tx-hex}&tx={tx-id}.
+
+#### Internet Computer (ICP)
+
+The Internet Computer supports two payment flows:
+
+**Option A: ICRC-2 Approve (recommended)**
+
+1. Parse the `uri` field from [step 3](#3-transaction-details) to extract the canister ID (host part) and the `to` address (payment provider's Principal).
+2. Call `icrc2_approve` on the token canister, approving the `to` address for the required amount plus the transfer fee.
+3. Send your Principal ID to the payment provider with a GET HTTP request to the URL specified above, using the `sender` parameter instead of `hex` or `tx`.
+
+In our example the URL would be https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote={quote-id}&method=InternetComputer&sender={principal-id}.
+
+The payment provider will then execute `icrc2_transfer_from` to pull the approved amount. If the call returns a success HTTP code, the payment has been successfully completed.
+
+**Option B: Direct Transfer (TxId)**
+
+Alternatively, construct and broadcast a transfer transaction (ICP transfer or `icrc1_transfer` for ICRC-1 tokens) directly to the address specified in the `uri` field. Then send the transaction ID to the payment provider.
+
+In our example the URL would be https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote={quote-id}&method=InternetComputer&tx={tx-id}.
 
 #### Lightning
 
