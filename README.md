@@ -300,7 +300,7 @@ A GET HTTP call to this endpoint will return a JSON with the following structure
 {
   "expiryDate": "2025-05-01T14:34:40.881Z",
   "blockchain": "InternetComputer",
-  "uri": "internetComputer:6bf47-...-cai?amount=0.08415",
+  "uri": "icp:6bf47-...-cai?amount=0.08415",
   "hint": "Approve the address from the URI for the required amount plus transfer fee using icrc2_approve. Then send your Principal ID as the sender parameter via the endpoint https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e."
 }
 
@@ -348,7 +348,7 @@ The Internet Computer supports two payment flows:
 
 **Option A: ICRC-2 Approve (recommended)**
 
-1. Parse the `uri` field from [step 3](#3-transaction-details) to extract the payment provider's Principal (the address directly after `internetComputer:`) and the amount.
+1. Parse the `uri` field from [step 3](#3-transaction-details) to extract the payment provider's Principal (the address directly after `icp:`) and the amount.
 2. Call `icrc2_approve` on the token canister, approving the payment provider's Principal for the required amount plus the transfer fee.
 3. Send your Principal ID to the payment provider with a GET HTTP request to the URL specified above, using the `sender` parameter instead of `hex` or `tx`.
 
