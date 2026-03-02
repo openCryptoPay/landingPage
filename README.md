@@ -300,7 +300,7 @@ A GET HTTP call to this endpoint will return a JSON with the following structure
 {
   "expiryDate": "2025-05-01T14:34:40.881Z",
   "blockchain": "InternetComputer",
-  "uri": "icp:ryjl3-tyaaa-aaaaa-aaaba-cai?amount=8415000&to=6bf47-...-cai",
+  "uri": "internetComputer:6bf47-...-cai?amount=0.08415",
   "hint": "Approve the address from the URI for the required amount plus transfer fee using icrc2_approve. Then send your Principal ID as the sender parameter via the endpoint https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e."
 }
 
@@ -347,11 +347,11 @@ The Internet Computer supports two payment flows:
 
 **Option A: ICRC-2 Approve (recommended)**
 
-1. Parse the `uri` field from [step 3](#3-transaction-details) to extract the canister ID (host part) and the `to` address (payment provider's Principal).
-2. Call `icrc2_approve` on the token canister, approving the `to` address for the required amount plus the transfer fee.
+1. Parse the `uri` field from [step 3](#3-transaction-details) to extract the payment provider's Principal (the address directly after `internetComputer:`) and the amount.
+2. Call `icrc2_approve` on the token canister, approving the payment provider's Principal for the required amount plus the transfer fee.
 3. Send your Principal ID to the payment provider with a GET HTTP request to the URL specified above, using the `sender` parameter instead of `hex` or `tx`.
 
-In our example the URL would be https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote={quote-id}&method=InternetComputer&sender={principal-id}.
+In our example the URL would be https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote={quote-id}&method=InternetComputer&asset=ICP&sender={principal-id}.
 
 The payment provider will then execute `icrc2_transfer_from` to pull the approved amount. If the call returns a success HTTP code, the payment has been successfully completed.
 
@@ -359,7 +359,7 @@ The payment provider will then execute `icrc2_transfer_from` to pull the approve
 
 Alternatively, construct and broadcast a transfer transaction (ICP transfer or `icrc1_transfer` for ICRC-1 tokens) directly to the address specified in the `uri` field. Then send the transaction ID to the payment provider.
 
-In our example the URL would be https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote={quote-id}&method=InternetComputer&tx={tx-id}.
+In our example the URL would be https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote={quote-id}&method=InternetComputer&asset=ICP&tx={tx-id}.
 
 #### Lightning
 
