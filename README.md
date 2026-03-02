@@ -278,6 +278,33 @@ A GET HTTP call to either of these endpoints will return a JSON with the followi
       "minFee": 0,
       "assets": [],
       "available": false
+    },
+    {
+      "method": "InternetComputer",
+      "minFee": 0,
+      "assets": [
+        {
+          "asset": "ICP",
+          "amount": "0.08415"
+        },
+        {
+          "asset": "ckBTC",
+          "amount": "0.00001069"
+        },
+        {
+          "asset": "ckETH",
+          "amount": "0.00040256"
+        },
+        {
+          "asset": "ckUSDC",
+          "amount": "1.261582"
+        },
+        {
+          "asset": "ckUSDT",
+          "amount": "1.26157"
+        }
+      ],
+      "available": true
     }
   ]
 }
@@ -356,6 +383,14 @@ A GET HTTP call to this endpoint will return a JSON with the following structure
   "hint": "Use this data to create a transaction and sign it. Broadcast the signed transaction to the blockchain and send the transaction hash back via the endpoint https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e"
 }
 
+// Internet Computer (ICP)
+{
+  "expiryDate": "2025-05-01T14:34:40.881Z",
+  "blockchain": "InternetComputer",
+  "uri": "icp:6bf47-...-cai?amount=0.08415",
+  "hint": "Approve the address from the URI for the required amount plus transfer fee using icrc2_approve. Then send your Principal ID as the sender parameter via the endpoint https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e."
+}
+
 // Lightning
 {
   "pr": "lnbc12590n1p5p8p66pp5eh5manf8yj39ktlfm7h9y4uzph0wjnt6ngu2c709s9z5wndrfxkshp5kyucf7yxx97e0axrwke7xdy599csdhy67jd5pysz2n3m4d636cgqcqzzsxqzgvsp5wl7m20pwux8p49cumznt2vk3p6x08h0vshnpf2ckqzkwfw6fjdms9qyyssqy4mtye0fekxpgcjftmtqqre43xewmnsu94xmkq4yr8yfuj8se4ynd57s3etcdt3qwrrzx9x2qfm0kpz6kj9wy6ys328znrdvsq6mzrcpw0nfqs"
@@ -375,13 +410,14 @@ Please note that the transaction details received belong to the quote from [step
 
 The transaction details received in [step 3](#3-transaction-details) should now be used to construct the blockchain transaction. This process depends on the selected method.
 Please make sure to use a transaction fee higher or equal to the minimum fee specified in the `minFee` field (gas price in WEI for EVM chains, sat/vB for Bitcoin) for the specific payment method (in JSON from [step 2](#2-payment-details)).
-The API URL to send the transaction prove back to the payment provider (see below) can be constructed by using the callback URL from [step 3](#3-transaction-details) and replacing `/cb` with `/tx`.
+The API URL to send the transaction proof back to the payment provider (see below) can be constructed by using the callback URL from [step 3](#3-transaction-details) and replacing `/cb` with `/tx`.
 
 **Important:** All transaction submission endpoints require the following query parameters:
 - `quote`: The quote ID from [step 2](#2-payment-details)
 - `method`: The blockchain/payment method name (must match exactly the method name from the `transferAmounts` array, e.g., "Ethereum", "BinanceSmartChain", "Polygon", etc.)
 - For EVM, Bitcoin and Firo: `hex` — the raw signed transaction in hexadecimal format
 - For Monero, Zano, Solana, Tron and Cardano: `tx` — the transaction hash after broadcasting
+- For Internet Computer: `asset` — the asset name (e.g. "ICP", "ckBTC", "ckUSDC") and either `sender` (Principal ID, for ICRC-2 approve flow) or `tx` (transaction ID, for direct transfer)
 - For Lightning and BinancePay: no transaction submission needed (handled differently)
 
 #### EVM, Bitcoin and Firo
@@ -404,6 +440,26 @@ Use the `uri` field from [step 3](#3-transaction-details) to construct a valid t
 The URL format is `{tx-url}?quote={quote-id}&method={method}&tx={tx-hash}`.
 
 In our example the URL would be https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote=plq_9af8927afe14f2d0&method=Cardano&tx={tx-hash}.
+
+#### Internet Computer (ICP)
+
+The Internet Computer supports two payment flows:
+
+**Option A: ICRC-2 Approve (recommended)**
+
+1. Parse the `uri` field from [step 3](#3-transaction-details) to extract the payment provider's Principal (the address directly after `icp:`) and the amount.
+2. Call `icrc2_approve` on the token canister, approving the payment provider's Principal for the required amount plus the transfer fee.
+3. Send your Principal ID to the payment provider with a GET HTTP request to the URL specified above, using the `sender` parameter instead of `hex` or `tx`.
+
+In our example the URL would be https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote={quote-id}&method=InternetComputer&asset=ICP&sender={principal-id}.
+
+The payment provider will then execute `icrc2_transfer_from` to pull the approved amount. If the call returns a success HTTP code, the payment has been successfully completed.
+
+**Option B: Direct Transfer (TxId)**
+
+Alternatively, construct and broadcast a transfer transaction (ICP transfer or `icrc1_transfer` for ICRC-1 tokens) directly to the address specified in the `uri` field. Then send the transaction ID to the payment provider.
+
+In our example the URL would be https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote={quote-id}&method=InternetComputer&asset=ICP&tx={tx-id}.
 
 #### Lightning
 
