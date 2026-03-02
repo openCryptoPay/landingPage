@@ -316,13 +316,14 @@ Please note that the transaction details received belong to the quote from [step
 
 The transaction details received in [step 3](#3-transaction-details) should now be used to construct the blockchain transaction. This process depends on the selected method.
 Please make sure to use a transaction fee higher or equal to the minimum fee specified in the `minFee` field (gas price in WEI for EVM chains, sat/vB for Bitcoin) for the specific payment method (in JSON from [step 2](#2-payment-details)).
-The API URL to send the transaction prove back to the payment provider (see below) can be constructed by using the callback URL from [step 3](#3-transaction-details) and replacing `/cb` with `/tx`.
+The API URL to send the transaction proof back to the payment provider (see below) can be constructed by using the callback URL from [step 3](#3-transaction-details) and replacing `/cb` with `/tx`.
 
 **Important:** All transaction submission endpoints require the following query parameters:
 - `quote`: The quote ID from [step 2](#2-payment-details)
 - `method`: The blockchain/payment method name (must match exactly the method name from the `transferAmounts` array, e.g., "Ethereum", "BinanceSmartChain", "Polygon", etc.)
 - `hex`: The raw signed transaction in hexadecimal format
 - `tx`: The transaction ID after broadcasting (only for Monero and certain other blockchains)
+- `asset`: The asset name (required for Internet Computer, e.g. "ICP", "ckBTC", "ckUSDC")
 - `sender`: The sender's Principal ID (only for Internet Computer ICRC-2 approve flow)
 
 #### EVM and Bitcoin
