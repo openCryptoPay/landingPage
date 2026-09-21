@@ -471,7 +471,7 @@ The transfer ID is the UUID that the Spark SDK returns for the transfer (e.g. `0
 - it was created after Spark transaction details were requested for this payment in [step 3](#3-transaction-details) and before they expired,
 - its ID is not assigned to another quote.
 
-If the transfer is rejected, the quote has failed and cannot be used again. To retry, for example because the transfer was not visible yet, fetch a new quote ([step 2](#2-payment-details)) and report the same transfer ID with the new quote ID. Do not send a second transfer.
+If the call returns an error, the transfer has not been accepted. To retry, for example because the transfer was not visible yet, fetch the payment details again ([step 2](#2-payment-details)) and report the same transfer ID with the quote ID returned there. A quote that has rejected a transfer cannot be used again. Do not send a second transfer.
 
 If the call returns a success HTTP code, the transfer has been accepted. The Open CryptoPay payment is completed once the payment provider has booked the transfer. This usually takes a few seconds, and longer while the transfer is still settling on Spark. A transfer that expires or is returned before it settles does not complete the payment.
 
