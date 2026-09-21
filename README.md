@@ -471,7 +471,7 @@ The transfer ID is the UUID that the Spark SDK returns for the transfer (e.g. `0
 - it was created after the transaction details were requested in [step 3](#3-transaction-details) and before the quote expired,
 - its ID has not been reported for another quote.
 
-If the call returns a success HTTP code, the transfer has been accepted and the Open CryptoPay payment is completed a few seconds later, as soon as the payment provider has booked the transfer.
+If the call returns a success HTTP code, the transfer has been accepted. The Open CryptoPay payment is completed once the payment provider has booked the transfer. This usually takes a few seconds, and longer while the transfer is still settling on Spark. A transfer that expires or is returned before it settles does not complete the payment.
 
 #### Internet Computer (ICP)
 
