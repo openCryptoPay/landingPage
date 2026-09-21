@@ -468,8 +468,10 @@ In our example the URL would be https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2
 The transfer ID is the UUID that the Spark SDK returns for the transfer (e.g. `0198c2f4-7a1b-7c3d-9e2f-5a6b7c8d9e0f`), not a transaction hash. The payment provider looks the transfer up and accepts it if:
 - it was sent to the address from the `uri` field,
 - its amount matches the amount from the `uri` field exactly,
-- it was created after the transaction details were requested in [step 3](#3-transaction-details) and before the quote expired,
-- its ID has not been reported for another quote.
+- it was created after Spark transaction details were requested for this payment in [step 3](#3-transaction-details) and before they expired,
+- its ID is not assigned to another quote.
+
+If the transfer is rejected, the quote has failed and cannot be used again. To retry, for example because the transfer was not visible yet, fetch a new quote ([step 2](#2-payment-details)) and report the same transfer ID with the new quote ID. Do not send a second transfer.
 
 If the call returns a success HTTP code, the transfer has been accepted. The Open CryptoPay payment is completed once the payment provider has booked the transfer. This usually takes a few seconds, and longer while the transfer is still settling on Spark. A transfer that expires or is returned before it settles does not complete the payment.
 
