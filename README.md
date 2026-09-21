@@ -276,8 +276,13 @@ A GET HTTP call to either of these endpoints will return a JSON with the followi
     {
       "method": "Spark",
       "minFee": 0,
-      "assets": [],
-      "available": false
+      "assets": [
+        {
+          "asset": "BTC",
+          "amount": "0.00001069"
+        }
+      ],
+      "available": true
     },
     {
       "method": "InternetComputer",
@@ -383,6 +388,14 @@ A GET HTTP call to this endpoint will return a JSON with the following structure
   "hint": "Use this data to create a transaction and sign it. Broadcast the signed transaction to the blockchain and send the transaction hash back via the endpoint https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e"
 }
 
+// Spark
+{
+  "expiryDate": "2025-05-01T14:34:40.881Z",
+  "blockchain": "Spark",
+  "uri": "spark:spark1...?amount=0.00001069",
+  "hint": "Pay the URI on Spark and send the transfer ID back as the tx parameter via the endpoint https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e"
+}
+
 // Internet Computer (ICP)
 {
   "expiryDate": "2025-05-01T14:34:40.881Z",
@@ -417,6 +430,7 @@ The API URL to send the transaction proof back to the payment provider (see belo
 - `method`: The blockchain/payment method name (must match exactly the method name from the `transferAmounts` array, e.g., "Ethereum", "BinanceSmartChain", "Polygon", etc.)
 - For EVM, Bitcoin and Firo: `hex` — the raw signed transaction in hexadecimal format
 - For Monero, Zano, Solana, Tron and Cardano: `tx` — the transaction hash after broadcasting
+- For Spark: `tx` — the Spark transfer ID after the transfer
 - For Internet Computer: `asset` — the asset name (e.g. "ICP", "ckBTC", "ckUSDC") and either `sender` (Principal ID, for ICRC-2 approve flow) or `tx` (transaction ID, for direct transfer)
 - For Lightning and BinancePay: no transaction submission needed (handled differently)
 
@@ -440,6 +454,24 @@ Use the `uri` field from [step 3](#3-transaction-details) to construct a valid t
 The URL format is `{tx-url}?quote={quote-id}&method={method}&tx={tx-hash}`.
 
 In our example the URL would be https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote=plq_9af8927afe14f2d0&method=Cardano&tx={tx-hash}.
+
+#### Spark
+
+Use the `uri` field from [step 3](#3-transaction-details) to send a Spark transfer to the address in the URI, for exactly the amount in the URI. Then send the ID of that transfer to the payment provider with a GET HTTP request to the URL specified above. You must include the `quote` ID from [step 2](#2-payment-details) and the `method` parameter in the request.
+
+This call is required. All Spark payments go to the same address, so the payment provider can only assign a transfer to a payment once the wallet has reported its ID. Unlike Lightning, a Spark transfer that is never reported stays unassigned, even though it arrived.
+
+The URL format is `{tx-url}?quote={quote-id}&method=Spark&tx={transfer-id}`.
+
+In our example the URL would be https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote=plq_9af8927afe14f2d0&method=Spark&tx={transfer-id}.
+
+The transfer ID is the UUID that the Spark SDK returns for the transfer (e.g. `0198c2f4-7a1b-7c3d-9e2f-5a6b7c8d9e0f`), not a transaction hash. The payment provider looks the transfer up and accepts it if:
+- it was sent to the address from the `uri` field,
+- its amount matches the amount from the `uri` field exactly,
+- it was created after the transaction details were requested in [step 3](#3-transaction-details) and before the quote expired,
+- its ID has not been reported for another quote.
+
+If the call returns a success HTTP code, the transfer has been accepted and the Open CryptoPay payment is completed a few seconds later, as soon as the payment provider has booked the transfer.
 
 #### Internet Computer (ICP)
 
