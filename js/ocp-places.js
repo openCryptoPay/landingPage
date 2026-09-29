@@ -13,7 +13,7 @@
   if (!own) return;
 
   if (google) google.remove();
-  if (googleLegend) googleLegend.hidden = true;
+  if (googleLegend) googleLegend.remove();
   own.hidden = false;
   if (note) note.hidden = false;
   if (blurb) {
