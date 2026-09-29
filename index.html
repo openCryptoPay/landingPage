@@ -291,8 +291,8 @@
       <div class="container-main">
         <div class="home-map_header-wrapper slide-in-bottom-200ms">
           <h2 class="large-title left">Pay with Crypto – in More and More SPAR Stores</h2>
-          <p class="paragraph gray">Discover where you can already pay with Bitcoin and other cryptocurrencies – and which additional locations are already in the pipeline.</p>
-          <div class="home-map_legend">
+          <p id="ocp-map-blurb" class="paragraph gray">Discover where you can already pay with Bitcoin and other cryptocurrencies – and which additional locations are already in the pipeline.</p>
+          <div id="ocp-google-legend" class="home-map_legend">
             <div class="home-map_legend-line">
               <div class="home-map_legend-point is-red"></div>
               <p class="paragraph gray">Available now</p>
@@ -308,8 +308,11 @@
           </div>
         </div>
         <div class="map-wrapper">
-          <div class="map w-embed w-iframe"><iframe src="https://www.google.com/maps/d/embed?mid=1DzX6z5tnUqn1zlzFnL6G58xREItorRM&ehbc=2E312F&noprof=1" width="100%" height="100%"></iframe></div>
+          <div id="ocp-places" class="map" hidden></div>
+          <div id="ocp-google" class="map w-embed w-iframe"><iframe src="https://www.google.com/maps/d/embed?mid=1DzX6z5tnUqn1zlzFnL6G58xREItorRM&ehbc=2E312F&noprof=1" width="100%" height="100%"></iframe></div>
+          <p id="ocp-places-note" class="ocp-places-note" hidden></p>
         </div>
+        <script src="js/ocp-places.js"></script>
       </div>
     </div>
   </section>
