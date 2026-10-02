@@ -53,6 +53,57 @@
     return typeof value === "number" && isFinite(value) && value >= min && value <= max;
   }
 
+  function techProviderOf(place) {
+    var value = place.techProvider;
+    if (typeof value !== "string" || !value.trim()) {
+      return "DFX.swiss";
+    }
+    return value;
+  }
+
+  function uniqueProviders(places) {
+    var seen = {};
+    var names = [];
+    places.forEach(function (place) {
+      if (!place) return;
+      var name = techProviderOf(place);
+      if (seen[name]) return;
+      seen[name] = true;
+      names.push(name);
+    });
+    names.sort(function (a, b) {
+      return a.localeCompare(b);
+    });
+    return names;
+  }
+
+  function insertTechProviderControl(providers) {
+    var label = document.createElement("label");
+    label.className = "ocp-tech-provider";
+    label.appendChild(document.createTextNode("Tech Provider"));
+
+    var select = document.createElement("select");
+    var allOption = document.createElement("option");
+    allOption.value = "";
+    allOption.textContent = "All";
+    allOption.selected = true;
+    select.appendChild(allOption);
+
+    providers.forEach(function (name) {
+      var option = document.createElement("option");
+      option.value = name;
+      option.textContent = name;
+      select.appendChild(option);
+    });
+
+    label.appendChild(select);
+
+    var mapWrapper = document.querySelector(".map-wrapper");
+    var before = mapWrapper || own;
+    before.parentNode.insertBefore(label, before);
+    return select;
+  }
+
   loadCss("css/maplibre-gl.css");
   loadCss("css/ocp-places.css");
 
@@ -73,15 +124,15 @@
         })
         .then(function (body) {
           var places = body && Array.isArray(body.places) ? body.places : [];
-          var bounds = new maplibregl.LngLatBounds();
-          var count = 0;
+          var select = insertTechProviderControl(uniqueProviders(places));
+          var entries = [];
 
           places.forEach(function (place) {
             if (!place || !finiteCoord(place.lat, -90, 90) || !finiteCoord(place.lon, -180, 180)) {
               return;
             }
-            var marker = document.createElement("div");
-            marker.className = "ocp-place-marker";
+            var markerEl = document.createElement("div");
+            markerEl.className = "ocp-place-marker";
             var popupNode = document.createElement("div");
             var name = document.createElement("strong");
             name.textContent = typeof place.name === "string" && place.name ? place.name : "Location";
@@ -91,25 +142,46 @@
               category.textContent = place.category;
               popupNode.appendChild(category);
             }
-            new maplibregl.Marker({ element: marker })
+            var marker = new maplibregl.Marker({ element: markerEl })
               .setLngLat([place.lon, place.lat])
-              .setPopup(new maplibregl.Popup({ offset: 16 }).setDOMContent(popupNode))
-              .addTo(map);
-            bounds.extend([place.lon, place.lat]);
-            count += 1;
+              .setPopup(new maplibregl.Popup({ offset: 16 }).setDOMContent(popupNode));
+            entries.push({ marker: marker, provider: techProviderOf(place) });
           });
 
-          if (count === 0) {
+          function applyFilter() {
+            var selected = select.value;
+            var visible = [];
+            entries.forEach(function (entry) {
+              if (!selected || entry.provider === selected) {
+                entry.marker.addTo(map);
+                visible.push(entry.marker);
+              } else {
+                entry.marker.remove();
+              }
+            });
+            if (visible.length === 0) {
+              return;
+            }
+            if (visible.length === 1) {
+              map.setCenter(visible[0].getLngLat());
+              map.setZoom(12);
+              return;
+            }
+            var bounds = new maplibregl.LngLatBounds();
+            visible.forEach(function (marker) {
+              bounds.extend(marker.getLngLat());
+            });
+            map.fitBounds(bounds, { padding: 48, maxZoom: 12 });
+          }
+
+          select.addEventListener("change", applyFilter);
+          applyFilter();
+
+          if (entries.length === 0) {
             setNote("No locations published yet.");
             return;
           }
           if (note) note.remove();
-          if (count === 1) {
-            map.setCenter(bounds.getCenter());
-            map.setZoom(12);
-            return;
-          }
-          map.fitBounds(bounds, { padding: 48, maxZoom: 12 });
         });
     })
     .catch(function () {
