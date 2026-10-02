@@ -1,7 +1,3 @@
-[data-ocp-dev-only] {
+html:not(.ocp-dev) [data-ocp-dev-only] {
   display: none !important;
-}
-
-html.ocp-dev [data-ocp-dev-only] {
-  display: inline-block !important;
 }
