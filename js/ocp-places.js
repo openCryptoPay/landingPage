@@ -80,7 +80,10 @@
   function insertTechProviderControl(providers) {
     var label = document.createElement("label");
     label.className = "ocp-tech-provider";
-    label.appendChild(document.createTextNode("Tech Provider"));
+    var caption = document.createElement("span");
+    caption.className = "ocp-tech-provider-label";
+    caption.appendChild(document.createTextNode("Tech Provider"));
+    label.appendChild(caption);
 
     var select = document.createElement("select");
     var allOption = document.createElement("option");
@@ -98,9 +101,14 @@
 
     label.appendChild(select);
 
-    var mapWrapper = document.querySelector(".map-wrapper");
-    var before = mapWrapper || own;
-    before.parentNode.insertBefore(label, before);
+    var header = document.querySelector(".home-map_header-wrapper");
+    if (header) {
+      header.appendChild(label);
+    } else {
+      var mapWrapper = document.querySelector(".map-wrapper");
+      var before = mapWrapper || own;
+      before.parentNode.insertBefore(label, before);
+    }
     return select;
   }
 

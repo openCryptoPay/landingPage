@@ -19,3 +19,9 @@ jobs:
           server: ${{ secrets.PRD_HOST }}
           username: ${{ secrets.PRD_USER }}
           password: ${{ secrets.PRD_PASSWORD }}
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            baselines/**
+            **/baselines/**

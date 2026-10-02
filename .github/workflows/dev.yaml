@@ -19,3 +19,9 @@ jobs:
           server: ${{ secrets.DEV_HOST }}
           username: ${{ secrets.DEV_USER }}
           password: ${{ secrets.DEV_PASSWORD }}
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            baselines/**
+            **/baselines/**
