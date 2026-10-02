@@ -23,3 +23,13 @@
   background: #d23b3b;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
 }
+
+.ocp-tech-provider {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+  color: #333;
+  font-size: 0.9rem;
+}
