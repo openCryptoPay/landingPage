@@ -1,0 +1,3 @@
+html:not(.ocp-dev) [data-ocp-dev-only] {
+  display: none !important;
+}
