@@ -1,7 +1,13 @@
-// Development site only. Plots locations from the OpenCryptoPay place list.
+// Public and development sites. Plots locations from the OpenCryptoPay place list.
 (function () {
   var host = location.hostname;
-  if (host !== "dev.opencryptopay.io" && host !== "www.dev.opencryptopay.io") {
+  var placesUrl = null;
+  if (host === "opencryptopay.io" || host === "www.opencryptopay.io") {
+    placesUrl = "https://api.opencryptopay.io/map/places";
+  } else if (host === "dev.opencryptopay.io" || host === "www.dev.opencryptopay.io") {
+    placesUrl = "https://dev-api.opencryptopay.io/map/places";
+  }
+  if (!placesUrl) {
     return;
   }
 
@@ -60,7 +66,7 @@
       });
       map.addControl(new maplibregl.NavigationControl(), "top-right");
 
-      return fetch("https://dev-api.opencryptopay.io/map/places", { credentials: "omit" })
+      return fetch(placesUrl, { credentials: "omit" })
         .then(function (response) {
           if (!response.ok) throw new Error("status");
           return response.json();
