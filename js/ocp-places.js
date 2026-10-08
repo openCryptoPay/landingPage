@@ -82,27 +82,86 @@
     return names;
   }
 
-  function countryCodes(body) {
-    var list = body && Array.isArray(body.countries) ? body.countries : [];
+  function stringList(body, key) {
+    var list = body && Array.isArray(body[key]) ? body[key] : [];
     var seen = {};
-    var codes = [];
+    var values = [];
     list.forEach(function (value) {
       if (typeof value !== "string") return;
-      var code = value.trim();
-      if (!code || seen[code]) return;
-      seen[code] = true;
-      codes.push(code);
+      var token = value.trim();
+      if (!token || seen[token]) return;
+      seen[token] = true;
+      values.push(token);
     });
-    return codes;
+    return values;
+  }
+
+  function countryCodes(body) {
+    return stringList(body, "countries");
+  }
+
+  function shopNameOptions(body) {
+    var names = stringList(body, "shopNames");
+    if (!names.length) names = ["SPAR", "others"];
+    return names.map(function (name) {
+      return { value: name, label: name === "others" ? "Others" : name };
+    });
+  }
+
+  function providerSpec(body, name) {
+    var list = body && Array.isArray(body.techProviders) ? body.techProviders : [];
+    for (var i = 0; i < list.length; i += 1) {
+      if (list[i] && list[i].name === name) return list[i];
+    }
+    return null;
+  }
+
+  function specTokens(spec, key) {
+    if (!spec || !Array.isArray(spec[key])) return [];
+    var seen = {};
+    var values = [];
+    spec[key].forEach(function (value) {
+      if (typeof value !== "string") return;
+      var token = value.trim();
+      if (!token || seen[token]) return;
+      seen[token] = true;
+      values.push(token);
+    });
+    return values;
+  }
+
+  function assetsFor(spec, blockchain) {
+    if (!spec) return [];
+    if (!blockchain || !Array.isArray(spec.pairs)) return specTokens(spec, "assets");
+    var seen = {};
+    var values = [];
+    spec.pairs.forEach(function (pair) {
+      if (!pair || pair.blockchain !== blockchain || typeof pair.asset !== "string") return;
+      var token = pair.asset.trim();
+      if (!token || seen[token]) return;
+      seen[token] = true;
+      values.push(token);
+    });
+    values.sort(function (a, b) {
+      if (a < b) return -1;
+      if (a > b) return 1;
+      return 0;
+    });
+    return values;
   }
 
   function filtersUrl() {
     return placesUrl.replace(/\/places$/, "/filters");
   }
 
-  function placesRequestUrl(country) {
-    if (!country) return placesUrl;
-    return placesUrl + "?country=" + encodeURIComponent(country);
+  function placesRequestUrl(query) {
+    var params = [];
+    if (query.country) params.push("country=" + encodeURIComponent(query.country));
+    if (query.shopName) params.push("shopName=" + encodeURIComponent(query.shopName));
+    if (query.blockchain) params.push("blockchain=" + encodeURIComponent(query.blockchain));
+    if (query.asset) params.push("asset=" + encodeURIComponent(query.asset));
+    if (!params.length) return placesUrl;
+    return placesUrl + "?" + params.join("&");
   }
 
   function fillSelect(select, values) {
@@ -123,6 +182,24 @@
     select.value = keep ? previous : "";
   }
 
+  function fillNamedSelect(select, options) {
+    var previous = select.value;
+    while (select.firstChild) select.removeChild(select.firstChild);
+    var allOption = document.createElement("option");
+    allOption.value = "";
+    allOption.textContent = "All";
+    select.appendChild(allOption);
+    var keep = previous === "";
+    options.forEach(function (item) {
+      var option = document.createElement("option");
+      option.value = item.value;
+      option.textContent = item.label;
+      if (item.value === previous) keep = true;
+      select.appendChild(option);
+    });
+    select.value = keep ? previous : "";
+  }
+
   function makeSelect(captionText) {
     var label = document.createElement("label");
     label.className = "ocp-tech-provider";
@@ -136,11 +213,12 @@
     return { label: label, select: select };
   }
 
-  function mountFilters(countrySelect, techSelect) {
+  function mountFilters(controls) {
     var row = document.createElement("div");
     row.className = "ocp-map-filters";
-    row.appendChild(countrySelect.label);
-    row.appendChild(techSelect.label);
+    controls.forEach(function (control) {
+      row.appendChild(control.label);
+    });
     var header = document.querySelector(".home-map_header-wrapper");
     if (header) {
       header.appendChild(row);
@@ -170,13 +248,51 @@
           return response.json();
         })
         .then(function (filters) {
-          var countryControl = makeSelect("Country");
+          var filtersBody = filters;
           var techControl = makeSelect("Tech Provider");
-          fillSelect(countryControl.select, countryCodes(filters));
-          mountFilters(countryControl, techControl);
+          var countryControl = makeSelect("Country");
+          var nameControl = makeSelect("Name");
+          var chainControl = makeSelect("Blockchain");
+          var assetControl = makeSelect("Asset");
+          fillSelect(countryControl.select, countryCodes(filtersBody));
+          fillNamedSelect(nameControl.select, shopNameOptions(filtersBody));
+          mountFilters([techControl, countryControl, nameControl, chainControl, assetControl]);
 
           var entries = [];
           var placesTask = null;
+
+          function currentQuery() {
+            return {
+              country: countryControl.select.value,
+              shopName: nameControl.select.value,
+              blockchain: chainControl.select.value,
+              asset: assetControl.select.value
+            };
+          }
+
+          function queryKey(query) {
+            return query.country + "\n" + query.shopName + "\n" + query.blockchain + "\n" + query.asset;
+          }
+
+          function offerForTech() {
+            if (techControl.select.value === "21.gifts") {
+              var gifts = providerSpec(filtersBody, "21.gifts");
+              if (gifts) return gifts;
+            }
+            var dfx = providerSpec(filtersBody, "DFX.swiss");
+            if (dfx) return dfx;
+            return {
+              blockchains: stringList(filtersBody, "blockchains"),
+              assets: stringList(filtersBody, "assets"),
+              pairs: null
+            };
+          }
+
+          function syncPaymentOptions() {
+            var spec = offerForTech();
+            fillSelect(chainControl.select, specTokens(spec, "blockchains"));
+            fillSelect(assetControl.select, assetsFor(spec, chainControl.select.value));
+          }
 
           function applyFilter() {
             var selected = techControl.select.value;
@@ -205,6 +321,8 @@
           }
 
           function showPlaces(places) {
+            var techBefore = techControl.select.value;
+            var queryBefore = queryKey(currentQuery());
             entries.forEach(function (entry) {
               entry.marker.remove();
             });
@@ -230,19 +348,26 @@
               entries.push({ marker: marker, provider: techProviderOf(place) });
             });
             fillSelect(techControl.select, uniqueProviders(places));
+            if (techControl.select.value !== techBefore) syncPaymentOptions();
             applyFilter();
             if (entries.length === 0) {
               setNote("No locations published yet.");
-              return;
+            } else {
+              hideNote();
             }
-            hideNote();
+            if (queryKey(currentQuery()) !== queryBefore) {
+              loadPlaces().catch(function (error) {
+                if (error && error.name === "AbortError") return;
+                setNote("The place list could not be loaded.");
+              });
+            }
           }
 
-          function loadPlaces(country) {
+          function loadPlaces() {
             if (placesTask) placesTask.abort();
             var controller = new AbortController();
             placesTask = controller;
-            return fetch(placesRequestUrl(country), {
+            return fetch(placesRequestUrl(currentQuery()), {
               credentials: "omit",
               signal: controller.signal
             }).then(function (response) {
@@ -255,14 +380,28 @@
             });
           }
 
-          techControl.select.addEventListener("change", applyFilter);
-          countryControl.select.addEventListener("change", function () {
-            loadPlaces(countryControl.select.value).catch(function (error) {
+          function reloadPlaces() {
+            loadPlaces().catch(function (error) {
               if (error && error.name === "AbortError") return;
               setNote("The place list could not be loaded.");
             });
+          }
+
+          techControl.select.addEventListener("change", function () {
+            var before = queryKey(currentQuery());
+            syncPaymentOptions();
+            applyFilter();
+            if (queryKey(currentQuery()) !== before) reloadPlaces();
           });
-          return loadPlaces("");
+          countryControl.select.addEventListener("change", reloadPlaces);
+          nameControl.select.addEventListener("change", reloadPlaces);
+          chainControl.select.addEventListener("change", function () {
+            syncPaymentOptions();
+            reloadPlaces();
+          });
+          assetControl.select.addEventListener("change", reloadPlaces);
+          syncPaymentOptions();
+          return loadPlaces();
         });
     })
     .catch(function (error) {
