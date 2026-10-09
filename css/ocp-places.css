@@ -1,3 +1,13 @@
+/* 80ch is the paragraph measure. The 48px heading does not fit in that column. */
+.home-map_header-wrapper {
+  max-width: none;
+}
+
+.home-map_header-wrapper > .paragraph,
+.home-map_header-wrapper > .home-map_legend {
+  max-width: 80ch;
+}
+
 .map-wrapper {
   position: relative;
 }
@@ -22,6 +32,13 @@
   border-radius: 50%;
   background: #d23b3b;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+}
+
+.ocp-map-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
 }
 
 .ocp-tech-provider {
