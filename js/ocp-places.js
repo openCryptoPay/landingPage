@@ -102,7 +102,6 @@
 
   function shopNameOptions(body) {
     var names = stringList(body, "shopNames");
-    if (!names.length) names = ["SPAR", "others"];
     return names.map(function (name) {
       return { value: name, label: name === "others" ? "Others" : name };
     });
@@ -320,17 +319,60 @@
             map.fitBounds(bounds, { padding: 48, maxZoom: 12 });
           }
 
+          function pairMatches(item, blockchain, asset) {
+            if (!item || typeof item !== "object") return false;
+            if (blockchain && item.blockchain !== blockchain) return false;
+            if (asset && item.asset !== asset) return false;
+            return true;
+          }
+
+          // Pins with no stored payment rows follow the catalog the filter
+          // response published for that provider. A missing catalog is not a match.
+          function unstatedPaymentMatches(place, blockchain, asset) {
+            var gifts = place.origin === "21gifts" || techProviderOf(place) === "21.gifts";
+            var spec = providerSpec(filtersBody, gifts ? "21.gifts" : "DFX.swiss");
+            var pairs = spec && Array.isArray(spec.pairs) ? spec.pairs : null;
+            if (!pairs) return false;
+            for (var i = 0; i < pairs.length; i += 1) {
+              if (pairMatches(pairs[i], blockchain, asset)) return true;
+            }
+            return false;
+          }
+
+          // The place service may ignore a filter until a newer image is published.
+          // A pin is drawn only when its own fields match the selection. A missing
+          // country is not that country, and a missing shop name is not SPAR.
+          function placeMatchesQuery(place, query) {
+            if (!place || !finiteCoord(place.lat, -90, 90) || !finiteCoord(place.lon, -180, 180)) {
+              return false;
+            }
+            if (query.country && place.country !== query.country) return false;
+            if (query.shopName === "SPAR" && place.shopName !== "SPAR") return false;
+            if (query.shopName === "others" && place.shopName === "SPAR") return false;
+            if (!query.blockchain && !query.asset) return true;
+            var supports = place.supports;
+            if (Array.isArray(supports) && supports.length > 0) {
+              for (var i = 0; i < supports.length; i += 1) {
+                if (pairMatches(supports[i], query.blockchain, query.asset)) return true;
+              }
+              return false;
+            }
+            if (supports != null && !Array.isArray(supports)) return false;
+            return unstatedPaymentMatches(place, query.blockchain, query.asset);
+          }
+
           function showPlaces(places) {
             var techBefore = techControl.select.value;
-            var queryBefore = queryKey(currentQuery());
+            var query = currentQuery();
+            var queryBefore = queryKey(query);
             entries.forEach(function (entry) {
               entry.marker.remove();
             });
             entries = [];
+            var kept = [];
             places.forEach(function (place) {
-              if (!place || !finiteCoord(place.lat, -90, 90) || !finiteCoord(place.lon, -180, 180)) {
-                return;
-              }
+              if (!placeMatchesQuery(place, query)) return;
+              kept.push(place);
               var markerEl = document.createElement("div");
               markerEl.className = "ocp-place-marker";
               var popupNode = document.createElement("div");
@@ -347,7 +389,7 @@
                 .setPopup(new maplibregl.Popup({ offset: 16 }).setDOMContent(popupNode));
               entries.push({ marker: marker, provider: techProviderOf(place) });
             });
-            fillSelect(techControl.select, uniqueProviders(places));
+            fillSelect(techControl.select, uniqueProviders(kept));
             if (techControl.select.value !== techBefore) syncPaymentOptions();
             applyFilter();
             if (entries.length === 0) {
