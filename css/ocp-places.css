@@ -146,6 +146,34 @@
   padding-bottom: 4rem;
 }
 
+.ocp-stores-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.ocp-stores-csv {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid #e5e6eb;
+  border-radius: 0.75rem;
+  background: #fff;
+  color: #272b38;
+  font-family: Barlow, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  cursor: pointer;
+}
+
+.ocp-stores-csv[hidden] {
+  display: none;
+}
+
 .ocp-places-note.is-static {
   position: static;
   margin: 1rem 0 0;

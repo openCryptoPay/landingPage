@@ -20,6 +20,10 @@
   var blurb = document.getElementById("ocp-map-blurb");
   var note = document.getElementById("ocp-places-note");
   var tableWrap = document.getElementById("ocp-place-table-wrap");
+  var csvButton = document.getElementById("ocp-stores-csv");
+  if (csvButton) {
+    csvButton.addEventListener("click", exportStoresCsv);
+  }
   if (own) {
     if (google) google.remove();
     if (googleLegend) googleLegend.remove();
@@ -249,16 +253,61 @@
     row.appendChild(cell);
   }
 
+  function csvField(value) {
+    var text = String(value);
+    var first = text.charAt(0);
+    if (first === "=" || first === "+" || first === "-" || first === "@" || first === "\t" || first === "\r") {
+      text = "'" + text;
+    }
+    if (text.indexOf(",") !== -1 || text.indexOf('"') !== -1 || text.indexOf("\r") !== -1 || text.indexOf("\n") !== -1) {
+      return '"' + text.replace(/"/g, '""') + '"';
+    }
+    return text;
+  }
+
+  function exportStoresCsv() {
+    var csvTable = document.getElementById("ocp-place-table");
+    if (!csvTable) return;
+    var tbody = csvTable.querySelector("tbody");
+    if (!tbody) return;
+    var bodyRows = tbody.querySelectorAll("tr");
+    if (!bodyRows.length) return;
+    var lines = [];
+    var headerFields = [];
+    csvTable.querySelectorAll("thead th").forEach(function (cell) {
+      headerFields.push(csvField(cell.textContent));
+    });
+    lines.push(headerFields.join(","));
+    bodyRows.forEach(function (row) {
+      var fields = [];
+      row.querySelectorAll("td").forEach(function (cell) {
+        fields.push(csvField(cell.textContent));
+      });
+      lines.push(fields.join(","));
+    });
+    var blob = new Blob(["\uFEFF" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
+    var objectUrl = URL.createObjectURL(blob);
+    var link = document.createElement("a");
+    link.href = objectUrl;
+    link.download = "stores.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(objectUrl);
+  }
+
   function renderRows(places) {
     var tbody = table.querySelector("tbody");
     while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
     if (places.length === 0) {
       tableWrap.hidden = true;
+      if (csvButton) csvButton.hidden = true;
       setNote("No locations published yet.");
       return;
     }
     hideNote();
     tableWrap.hidden = false;
+    if (csvButton) csvButton.hidden = false;
     places.forEach(function (place) {
       var row = document.createElement("tr");
       addCell(row, displayedName(place));

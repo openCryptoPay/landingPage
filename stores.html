@@ -64,7 +64,17 @@
     <div class="padding-global padding-section-map ocp-stores-page">
       <div class="container-main">
         <div class="home-map_header-wrapper">
-          <h2 id="ocp-stores-title" class="large-title left">All stores</h2>
+          <div class="ocp-stores-title-row">
+            <h2 id="ocp-stores-title" class="large-title left">All stores</h2>
+            <button type="button" id="ocp-stores-csv" class="ocp-stores-csv" hidden aria-label="Export CSV">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true" focusable="false">
+                <path d="M9 2.25v8.25" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+                <path d="M5.75 7.75L9 11l3.25-3.25" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M3.25 12.25v1.5A1.25 1.25 0 0 0 4.5 15h9a1.25 1.25 0 0 0 1.25-1.25v-1.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+              </svg>
+              <span>CSV</span>
+            </button>
+          </div>
           <p id="ocp-map-blurb" class="paragraph gray">Locations published in the OpenCryptoPay place list.</p>
         </div>
         <p id="ocp-places-note" class="ocp-places-note is-static" hidden></p>
