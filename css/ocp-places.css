@@ -199,3 +199,33 @@
 .ocp-place-table-wrap td:not(:first-child) {
   white-space: nowrap;
 }
+
+.ocp-places-api {
+  margin-top: 1rem;
+  color: #5c6370;
+  font-family: Barlow, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.ocp-places-api p {
+  margin: 0 0 0.35rem;
+}
+
+.ocp-places-api p:last-child {
+  margin-bottom: 0;
+}
+
+.ocp-places-api a {
+  color: #5c6370;
+  text-decoration: underline;
+}
+
+.ocp-places-api code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+
+.ocp-places-api[hidden] {
+  display: none;
+}

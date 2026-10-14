@@ -502,6 +502,20 @@
     setNote("The place list could not be loaded.");
   }
 
+  if (table) {
+    var apiNote = document.getElementById("ocp-places-api");
+    if (apiNote) {
+      apiNote.hidden = false;
+      var listLink = document.getElementById("ocp-places-api-list");
+      listLink.href = placesUrl;
+      listLink.textContent = "GET " + placesUrl;
+      var filtersLink = document.getElementById("ocp-places-api-filters");
+      var apiFiltersUrl = filtersUrl();
+      filtersLink.href = apiFiltersUrl;
+      filtersLink.textContent = "GET " + apiFiltersUrl;
+    }
+  }
+
   if (own) {
     loadCss("css/maplibre-gl.css");
     loadCss("css/ocp-places.css");
