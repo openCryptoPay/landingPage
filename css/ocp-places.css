@@ -130,3 +130,130 @@
     min-width: 0;
   }
 }
+
+.ocp-stores-link {
+  display: flex;
+  justify-content: center;
+  margin-top: 2.75rem;
+  margin-bottom: 2.75rem;
+}
+
+.ocp-stores-link[hidden] {
+  display: none;
+}
+
+.padding-global.padding-section-map.ocp-stores-page {
+  padding-bottom: 4rem;
+}
+
+.ocp-stores-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.ocp-stores-csv {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid #e5e6eb;
+  border-radius: 0.75rem;
+  background: #fff;
+  color: #272b38;
+  font-family: Barlow, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  cursor: pointer;
+}
+
+.ocp-stores-csv[hidden] {
+  display: none;
+}
+
+.ocp-places-note.is-static {
+  position: static;
+  margin: 1rem 0 0;
+}
+
+.ocp-place-table-wrap {
+  display: block;
+  margin-top: 2.75rem;
+  overflow-x: auto;
+  border: 1px solid #e5e6eb;
+  border-radius: 1.25rem;
+  background: #fff;
+}
+
+.ocp-place-table-wrap[hidden] {
+  display: none;
+}
+
+.ocp-place-table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #272b38;
+  font-family: Barlow, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.ocp-place-table-wrap th,
+.ocp-place-table-wrap td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e5e6eb;
+  text-align: left;
+  vertical-align: top;
+}
+
+.ocp-place-table-wrap tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.ocp-place-table-wrap th {
+  background: #f7f8fa;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ocp-place-table-wrap td:first-child {
+  min-width: 16rem;
+  white-space: normal;
+}
+
+.ocp-place-table-wrap td:not(:first-child) {
+  white-space: nowrap;
+}
+
+.ocp-places-api {
+  margin-top: 1rem;
+  color: #5c6370;
+  font-family: Barlow, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.ocp-places-api p {
+  margin: 0 0 0.35rem;
+}
+
+.ocp-places-api p:last-child {
+  margin-bottom: 0;
+}
+
+.ocp-places-api a {
+  color: #5c6370;
+  text-decoration: underline;
+}
+
+.ocp-places-api code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+
+.ocp-places-api[hidden] {
+  display: none;
+}
