@@ -247,6 +247,21 @@
     return name ? name : "Location";
   }
 
+  function joinedNonEmpty(parts, separator) {
+    var out = [];
+    parts.forEach(function (part) {
+      if (part) out.push(part);
+    });
+    return out.join(separator);
+  }
+
+  function displayedLocation(place) {
+    return joinedNonEmpty([
+      joinedNonEmpty([trimmedField(place.street), trimmedField(place.houseNumber)], " "),
+      joinedNonEmpty([trimmedField(place.postalCode), trimmedField(place.city)], " ")
+    ], ", ");
+  }
+
   function addCell(row, text) {
     var cell = document.createElement("td");
     cell.textContent = text;
@@ -311,7 +326,7 @@
     places.forEach(function (place) {
       var row = document.createElement("tr");
       addCell(row, displayedName(place));
-      addCell(row, trimmedField(place.category));
+      addCell(row, displayedLocation(place));
       addCell(row, trimmedField(place.country));
       var shop = trimmedField(place.shopName);
       addCell(row, shop ? shop : "Others");
