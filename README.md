@@ -552,6 +552,6 @@ A refund is due when the provider received funds for a quote but cannot complete
 
 If the provider lists `refund` in its `payerData` record and the wallet sent `refund` for this quote, the provider MUST return the funds to that address on the same blockchain and in the same asset (network fees MAY be deducted). A `refund` sent for a quote also applies when the wallet reports the same transfer under a newer quote of the same payment (see [Spark](#spark)).
 
-If the provider does not list `refund` in its `payerData` record, or the wallet did not send `refund` for this quote, the provider MUST NOT assume the on-chain sender is the payer (it can be an exchange wallet shared by many users). It handles the case under its own terms.
+Otherwise, the provider MUST NOT assume the on-chain sender is the payer (it can be an exchange wallet shared by many users). It handles the case under its own terms.
 
 For Lightning, a payment that does not complete returns to the payer through the Lightning network itself. `refund` matters only after a Lightning payment has settled.
