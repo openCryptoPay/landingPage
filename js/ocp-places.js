@@ -256,10 +256,16 @@
   }
 
   function displayedLocation(place) {
-    return joinedNonEmpty([
+    // Street, number, postal code, and city when present. Otherwise the place
+    // name, which is the only address some shops publish.
+    var structured = joinedNonEmpty([
       joinedNonEmpty([trimmedField(place.street), trimmedField(place.houseNumber)], " "),
       joinedNonEmpty([trimmedField(place.postalCode), trimmedField(place.city)], " ")
     ], ", ");
+    if (structured) {
+      return structured;
+    }
+    return trimmedField(place.name);
   }
 
   function addCell(row, text) {
