@@ -400,7 +400,7 @@ In our example a payment in USDT on Ethereum with `{"refund":"0x1111111111111111
 
 The wallet sends only kinds listed in the `payerData` record. If a kind is `"mandatory": true` and the wallet cannot send it, the wallet MUST NOT proceed with this payment; this does not apply to `refund` on a method where `refund` does not apply. A wallet SHOULD send `refund` when it is listed and applies to the selected method. A wallet MUST NOT send as `refund` an address it does not control, in particular not an exchange deposit address.
 
-A provider MUST NOT treat a missing `refund` as an error unless `refund` is `"mandatory": true` and applies to the selected method, so wallets without support keep working. When a mandatory kind is missing or a value is malformed, the provider answers HTTP 400 with a message that names the missing or malformed kind.
+A provider MUST NOT treat a missing `refund` as an error unless `refund` is `"mandatory": true` and applies to the selected method, so wallets without support keep working. When a mandatory kind is missing or a value is malformed, the provider answers HTTP 400 with a message that names the missing or malformed kind; on a method where `refund` does not apply, a missing `refund` is neither.
 
 Payer data is supplied by the wallet and is not verified. A provider uses `refund` only to return funds of this payment.
 
@@ -552,6 +552,6 @@ A refund is due when the provider received funds for a quote but cannot complete
 
 If the provider lists `refund` in its `payerData` record and the wallet sent `refund` for this quote, the provider MUST return the funds to that address on the same blockchain and in the same asset (network fees MAY be deducted). A `refund` sent for a quote also applies when the wallet reports the same transfer under a newer quote of the same payment (see [Spark](#spark)).
 
-If no `refund` was sent, the provider MUST NOT assume the on-chain sender is the payer (it can be an exchange wallet shared by many users). It handles the case under its own terms.
+If the provider does not list `refund` in its `payerData` record, or the wallet did not send `refund` for this quote, the provider MUST NOT assume the on-chain sender is the payer (it can be an exchange wallet shared by many users). It handles the case under its own terms.
 
 For Lightning, a payment that does not complete returns to the payer through the Lightning network itself. `refund` matters only after a Lightning payment has settled.
