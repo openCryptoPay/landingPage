@@ -343,7 +343,7 @@ OpenCryptoPay defines one additional kind, `refund`. The record entry is `{ "man
 - `InternetComputer`: a Principal ID; the refund goes to the default account (no subaccount) of that Principal.
 - `BinancePay` and `TaprootAsset`: `refund` does not apply.
 
-In every case the payer controls the address and it can receive the selected `asset`. For a method where `refund` does not apply, the wallet does not send it and the provider does not require it, even when the record marks it mandatory.
+In every case the payer controls the address and it can receive the selected `asset`. For a method where `refund` does not apply, the wallet MUST NOT send it and the provider MUST NOT require it, even when the record marks it mandatory.
 
 The other LUD-18 kinds (`name`, `pubkey`, `identifier`, `email`, `auth`) keep their LUD-18 meaning.
 
@@ -398,9 +398,9 @@ When the response from [step 2](#2-payment-details) contains a `payerData` recor
 
 In our example a payment in USDT on Ethereum with `{"refund":"0x1111111111111111111111111111111111111111"}` would use https://api.dfx.swiss/v1/lnurlp/cb/pl_beeddb41cd4b6d9e?quote=plq_9af8927afe14f2d0&method=Ethereum&asset=USDT&payerdata=%7B%22refund%22%3A%220x1111111111111111111111111111111111111111%22%7D.
 
-The wallet sends only kinds listed in the `payerData` record. If a kind is `"mandatory": true` and the wallet cannot send it, the wallet MUST NOT proceed with this payment. A wallet SHOULD send `refund` when it is listed. A wallet MUST NOT send as `refund` an address it does not control, in particular not an exchange deposit address.
+The wallet sends only kinds listed in the `payerData` record. If a kind is `"mandatory": true` and the wallet cannot send it, the wallet MUST NOT proceed with this payment; this does not apply to `refund` on a method where `refund` does not apply. A wallet SHOULD send `refund` when it is listed and applies to the selected method. A wallet MUST NOT send as `refund` an address it does not control, in particular not an exchange deposit address.
 
-A provider MUST NOT treat a missing `refund` as an error unless `refund` is `"mandatory": true`, so wallets without support keep working. When a mandatory kind is missing or a value is malformed, the provider answers HTTP 400 with a message that names the missing or malformed kind.
+A provider MUST NOT treat a missing `refund` as an error unless `refund` is `"mandatory": true` and applies to the selected method, so wallets without support keep working. When a mandatory kind is missing or a value is malformed, the provider answers HTTP 400 with a message that names the missing or malformed kind.
 
 Payer data is supplied by the wallet and is not verified. A provider uses `refund` only to return funds of this payment.
 
@@ -544,13 +544,13 @@ To simplify the process, steps 2 and 3 can be done with a single HTTP call by ad
 
 In our example the URL would be https://api.dfx.swiss/v1/lnurlp/pl_beeddb41cd4b6d9e?method=Ethereum&asset=ETH or https://api.dfx.swiss/pl/?lightning=LNURL1DP68GURN8GHJ7CTSDYHXGENC9EEHW6TNWVHHVVF0D3H82UNVWQHHQMZLVFJK2ERYVG6RZCMYX33RVEPEV5YEJ9WT&method=Ethereum&asset=ETH.
 
-In the simplified flow the wallet has not seen a `payerData` record yet. It MAY still attach `payerdata` with only `refund`. A provider that did not ask for it ignores it. If the provider requires a kind that is missing, it answers HTTP 400 as in [step 3](#3-transaction-details), and the wallet falls back to [step 2](#2-payment-details) and [step 3](#3-transaction-details).
+In the simplified flow the wallet has not seen a `payerData` record yet. It MAY still attach `payerdata` with only `refund` when `refund` applies to the selected method. A provider that does not list `refund` in its `payerData` record ignores it. If the provider requires a kind that is missing, it answers HTTP 400 as in [step 3](#3-transaction-details), and the wallet falls back to [step 2](#2-payment-details) and [step 3](#3-transaction-details).
 
 ## Refunds
 
 A refund is due when the provider received funds for a quote but cannot complete the payment with them, for example a different amount, an expired quote, a wrong asset, a payment that is already settled, or a failed swap or bridge route.
 
-If the wallet sent `refund` for this quote, the provider MUST return the funds to that address on the same blockchain and in the same asset (network fees MAY be deducted). A `refund` sent for a quote also applies when the wallet reports the same transfer under a newer quote of the same payment (see [Spark](#spark)).
+If the provider lists `refund` in its `payerData` record and the wallet sent `refund` for this quote, the provider MUST return the funds to that address on the same blockchain and in the same asset (network fees MAY be deducted). A `refund` sent for a quote also applies when the wallet reports the same transfer under a newer quote of the same payment (see [Spark](#spark)).
 
 If no `refund` was sent, the provider MUST NOT assume the on-chain sender is the payer (it can be an exchange wallet shared by many users). It handles the case under its own terms.
 
