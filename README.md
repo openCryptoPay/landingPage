@@ -322,6 +322,23 @@ The `recipient` object includes additional fields describing the merchant:
 - `goodsType`: Type of goods (`Tangible`, `Intangible`)
 - `goodsCategory`: Category of goods being sold
 
+#### Payer Data
+
+A payment provider MAY add a `payerData` record to this response as defined in [LUD-18](https://github.com/lnurl/luds/blob/luds/18.md).
+
+```JSON
+{
+  "payerData": {
+    "refund": { "mandatory": false },
+    "name": { "mandatory": false }
+  }
+}
+```
+
+OpenCryptoPay defines one additional kind, `refund`. The record entry is `{ "mandatory": boolean }`. The value the wallet sends is a string. It is an address on the blockchain of the selected `method` that the payer controls and that can receive the selected `asset` there. For `method` `Lightning` it is a Lightning Address ([LUD-16](https://github.com/lnurl/luds/blob/luds/16.md) internet identifier).
+
+The other LUD-18 kinds (`name`, `pubkey`, `identifier`, `email`, `auth`) keep their LUD-18 meaning.
+
 Please note that the offer has an expiry date after which it can no longer be used. If a quote has expired, the wallet should fetch a new one (as explained above) to get the latest exchange rates.
 
 #### Exceptions
@@ -368,6 +385,16 @@ If there is still no payment pending after the waiting time has elapsed, an HTTP
 Based on the JSON received, the wallet should now select a transfer method and an asset (e.g. pay with 0.0006582 ETH on Ethereum). It also needs to extract the quote ID (`quote.id` field). These three values are used as query parameters with the callback URL (`callback` field) to fetch the relevant transaction details (`{callbackUrl}?quote={quote-id}&method={selected-method}&asset={selected-asset}`).
 
 In our example the URL to fetch the transaction details for a payment in ETH on Ethereum blockchain would be https://api.dfx.swiss/v1/lnurlp/cb/pl_beeddb41cd4b6d9e?quote=plq_9af8927afe14f2d0&method=Ethereum&asset=ETH.
+
+When the response from [step 2](#2-payment-details) contains a `payerData` record, the wallet attaches a `payerdata` query parameter to this call. The value is a URL-encoded JSON object as defined in [LUD-18](https://github.com/lnurl/luds/blob/luds/18.md) (`{callbackUrl}?quote={quote-id}&method={selected-method}&asset={selected-asset}&payerdata={urlencoded-json}`).
+
+In our example a payment in USDT on Ethereum with `{"refund":"0x1111111111111111111111111111111111111111"}` would use https://api.dfx.swiss/v1/lnurlp/cb/pl_beeddb41cd4b6d9e?quote=plq_9af8927afe14f2d0&method=Ethereum&asset=USDT&payerdata=%7B%22refund%22%3A%220x1111111111111111111111111111111111111111%22%7D.
+
+The wallet sends only kinds listed in the `payerData` record. If a kind is `"mandatory": true` and the wallet cannot send it, the wallet MUST NOT proceed with this payment. A wallet SHOULD send `refund` when it is listed. A wallet MUST NOT send as `refund` an address it does not control, in particular not an exchange deposit address.
+
+A provider that marks `refund` as not mandatory MUST still return transaction details when `payerdata` or `refund` is missing, so wallets without support keep working. When a mandatory kind is missing or a value is malformed, the provider answers HTTP 400 with a message that names the missing or malformed kind.
+
+Payer data is supplied by the wallet and is not verified. A provider uses `refund` only to return funds of this payment.
 
 A GET HTTP call to this endpoint will return a JSON with the following structure.
 
@@ -508,3 +535,15 @@ Use the deep link from the `uri` field from [step 3](#3-transaction-details) to 
 To simplify the process, steps 2 and 3 can be done with a single HTTP call by adding the `method` and `asset` query parameters to the API URL used to fetch the payment details (in [step 2](#2-payment-details)). This call will return the transaction details as shown in [step 3](#3-transaction-details) or an error code, if the selected method and asset are not available with the payment provider. The simplified flow can be used with both approaches described in [step 2](#2-payment-details).
 
 In our example the URL would be https://api.dfx.swiss/v1/lnurlp/pl_beeddb41cd4b6d9e?method=Ethereum&asset=ETH or https://api.dfx.swiss/pl/?lightning=LNURL1DP68GURN8GHJ7CTSDYHXGENC9EEHW6TNWVHHVVF0D3H82UNVWQHHQMZLVFJK2ERYVG6RZCMYX33RVEPEV5YEJ9WT&method=Ethereum&asset=ETH.
+
+In the simplified flow the wallet has not seen a `payerData` record yet. It MAY still attach `payerdata` with only `refund`. A provider that did not ask for it ignores it. If the provider requires a kind that is missing, it answers HTTP 400 as in [step 3](#3-transaction-details), and the wallet falls back to [step 2](#2-payment-details) and [step 3](#3-transaction-details).
+
+## Refunds
+
+A refund is due when the provider received funds for a quote but cannot complete the payment with them, for example a different amount, an expired quote, a wrong asset, a payment that is already settled, or a failed swap or bridge route.
+
+If the wallet sent `refund` for this quote, the provider returns the funds to that address on the same blockchain and in the same asset (network fees may be deducted).
+
+If no `refund` was sent, the provider MUST NOT assume the on-chain sender is the payer (it can be an exchange wallet shared by many users). It handles the case under its own terms.
+
+For Lightning, a payment that does not complete returns to the payer through the Lightning network itself. `refund` matters only after a Lightning payment has settled.
