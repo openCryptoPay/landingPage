@@ -410,7 +410,7 @@ Except in the [simplified flow](#simplified-flow), the wallet sends only kinds l
 
 A provider MUST NOT treat a missing `refund` as an error unless `refund` is `"mandatory": true` and applies to the selected method, so wallets without support keep working. When a listed mandatory kind is missing or a listed kind has a malformed value, the provider MUST answer HTTP 400 with a message that names the missing or malformed kind; on a method where `refund` does not apply, a missing `refund` is neither. A kind the provider does not list MUST be ignored without validation. A `refund` sent for a method where `refund` does not apply MUST be ignored without validation as well.
 
-The `refund` value is supplied by the wallet and is not verified. A provider uses `refund` only to return funds as described in [Refunds](#refunds).
+The `refund` value is supplied by the wallet; the provider validates its format as described above but cannot verify that the payer controls the address. A provider uses `refund` only to return funds as described in [Refunds](#refunds).
 
 A GET HTTP call to this endpoint will return a JSON with the following structure.
 
@@ -530,7 +530,7 @@ The Internet Computer supports two payment flows:
 
 In our example the URL would be https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote={quote-id}&method=InternetComputer&asset=ICP&sender={principal-id}.
 
-The payment provider will then execute `icrc2_transfer_from` with `amount` set to the required payment amount; as defined in ICRC-2, the ledger takes the transfer fee in addition, from both the allowance and the payer's balance, which is why the approval covers the amount plus the transfer fee. If the call returns a success HTTP code, the payment has been successfully completed.
+The payment provider will then execute `icrc2_transfer_from` with `amount` set to the required payment amount; as defined in ICRC-2, the ledger takes the transfer fee in addition, from both the allowance and the payer's balance, which is why the approval covers the amount plus the transfer fee. The `icrc2_approve` call itself also charges a fee, so before the approval the payer's balance must cover the amount, the transfer fee and the approval fee. If the call returns a success HTTP code, the payment has been successfully completed.
 
 **Option B: Direct Transfer (TxId)**
 
