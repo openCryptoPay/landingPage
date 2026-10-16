@@ -550,8 +550,8 @@ In the simplified flow the wallet has not seen a `payerData` record yet. It MAY 
 
 A refund is due when the provider received funds for a quote but cannot complete the payment with them, for example a different amount, an expired quote, a wrong asset, a payment that is already settled, or a failed swap or bridge route.
 
-If the provider lists `refund` in its `payerData` record and the wallet sent `refund` for this quote, the provider MUST return the funds to that address on the same blockchain and in the same asset (network fees MAY be deducted). A `refund` sent for a quote also applies when the wallet reports the same transfer under a newer quote of the same payment (see [Spark](#spark)).
+If the provider lists `refund` in its `payerData` record and the wallet sent `refund` for this quote, or for an earlier quote of the same payment under which it then reported the same transfer (see [Spark](#spark)), the provider MUST return the funds to that address with the same method and in the same asset (network fees MAY be deducted). If more than one of these quotes carries `refund`, the value sent for the newest of them applies.
 
 Otherwise, the provider MUST NOT assume the on-chain sender is the payer (it can be an exchange wallet shared by many users). It handles the case under its own terms.
 
-For Lightning, a payment that does not complete returns to the payer through the Lightning network itself. `refund` matters only after a Lightning payment has settled.
+For Lightning, a payment that does not complete returns to the payer through the Lightning network itself. A refund for a settled Lightning payment is paid over Lightning to the Lightning Address sent as `refund`.
