@@ -110,10 +110,15 @@
     return stringList(body, "countries");
   }
 
-  function shopNameOptions(body) {
-    var names = stringList(body, "shopNames");
-    return names.map(function (name) {
-      return { value: name, label: name === "others" ? "Others" : name };
+  function shopTypeOptions(body) {
+    var types = stringList(body, "shopTypes");
+    if (!types.length) {
+      types = stringList(body, "shopNames").map(function (name) {
+        return name === "others" ? "Others" : name;
+      });
+    }
+    return types.map(function (type) {
+      return { value: type, label: type };
     });
   }
 
@@ -166,7 +171,7 @@
   function placesRequestUrl(query) {
     var params = [];
     if (query.country) params.push("country=" + encodeURIComponent(query.country));
-    if (query.shopName) params.push("shopName=" + encodeURIComponent(query.shopName));
+    if (query.shopType) params.push("shopType=" + encodeURIComponent(query.shopType));
     if (query.blockchain) params.push("blockchain=" + encodeURIComponent(query.blockchain));
     if (query.asset) params.push("asset=" + encodeURIComponent(query.asset));
     if (!params.length) return placesUrl;
@@ -245,6 +250,12 @@
   function displayedName(place) {
     var name = trimmedField(place.name);
     return name ? name : "Location";
+  }
+
+  function shopTypeOf(place) {
+    var type = trimmedField(place.shopType);
+    if (type) return type;
+    return place.shopName === "SPAR" ? "SPAR" : "Others";
   }
 
   function joinedNonEmpty(parts, separator) {
@@ -328,8 +339,7 @@
       addCell(row, displayedName(place));
       addCell(row, displayedLocation(place));
       addCell(row, trimmedField(place.country));
-      var shop = trimmedField(place.shopName);
-      addCell(row, shop ? shop : "Others");
+      addCell(row, shopTypeOf(place));
       addCell(row, techProviderOf(place));
       tbody.appendChild(row);
     });
@@ -345,12 +355,12 @@
         var filtersBody = filters;
         var techControl = makeSelect("Tech Provider");
         var countryControl = makeSelect("Country");
-        var nameControl = makeSelect("Name");
+        var shopTypeControl = makeSelect("Shop type");
         var chainControl = makeSelect("Blockchain");
         var assetControl = makeSelect("Asset");
         fillSelect(countryControl.select, countryCodes(filtersBody));
-        fillNamedSelect(nameControl.select, shopNameOptions(filtersBody));
-        mountFilters([techControl, countryControl, nameControl, chainControl, assetControl]);
+        fillNamedSelect(shopTypeControl.select, shopTypeOptions(filtersBody));
+        mountFilters([techControl, countryControl, shopTypeControl, chainControl, assetControl]);
 
         var entries = [];
         var matched = [];
@@ -359,14 +369,14 @@
         function currentQuery() {
           return {
             country: countryControl.select.value,
-            shopName: nameControl.select.value,
+            shopType: shopTypeControl.select.value,
             blockchain: chainControl.select.value,
             asset: assetControl.select.value
           };
         }
 
         function queryKey(query) {
-          return query.country + "\n" + query.shopName + "\n" + query.blockchain + "\n" + query.asset;
+          return query.country + "\n" + query.shopType + "\n" + query.blockchain + "\n" + query.asset;
         }
 
         function offerForTech() {
@@ -450,12 +460,12 @@
 
         // The place service may ignore a filter until a newer image is published.
         // A pin is drawn only when its own fields match the selection. A missing
-        // country is not that country, and a missing shop name is not SPAR.
+        // country is not that country. A place without shopType and without the
+        // legacy SPAR shopName counts as Others.
         function placeMatchesQuery(place, query) {
           if (!place) return false;
           if (query.country && place.country !== query.country) return false;
-          if (query.shopName === "SPAR" && place.shopName !== "SPAR") return false;
-          if (query.shopName === "others" && place.shopName === "SPAR") return false;
+          if (query.shopType && shopTypeOf(place) !== query.shopType) return false;
           if (!query.blockchain && !query.asset) return true;
           var supports = place.supports;
           if (Array.isArray(supports) && supports.length > 0) {
@@ -494,6 +504,18 @@
               var category = document.createElement("div");
               category.textContent = place.category;
               popupNode.appendChild(category);
+            }
+            var addressText = displayedLocation(place);
+            if (addressText) {
+              var address = document.createElement("div");
+              address.textContent = addressText;
+              popupNode.appendChild(address);
+            }
+            var descriptionText = trimmedField(place.description);
+            if (descriptionText) {
+              var description = document.createElement("div");
+              description.textContent = descriptionText;
+              popupNode.appendChild(description);
             }
             var marker = new maplibregl.Marker({ element: markerEl })
               .setLngLat([place.lon, place.lat])
@@ -550,7 +572,7 @@
           if (queryKey(currentQuery()) !== before) reloadPlaces();
         });
         countryControl.select.addEventListener("change", reloadPlaces);
-        nameControl.select.addEventListener("change", reloadPlaces);
+        shopTypeControl.select.addEventListener("change", reloadPlaces);
         chainControl.select.addEventListener("change", function () {
           syncPaymentOptions();
           reloadPlaces();
