@@ -334,15 +334,24 @@ A payment provider MAY add a `payerData` record to this response as defined in [
 }
 ```
 
-OpenCryptoPay defines one additional kind, `refund`. The record entry is `{ "mandatory": boolean }`. The value the wallet sends is a string.
-- EVM methods (`Ethereum`, `Arbitrum`, `Optimism`, `Polygon`, `Base`, `BinanceSmartChain`): a `0x` address.
-- `Bitcoin`, `Firo`, `Monero`, `Zano`, `Solana`, `Tron`, `Cardano`: an address on that blockchain.
-- `Lightning`: a Lightning Address ([LUD-16](https://github.com/lnurl/luds/blob/luds/16.md) internet identifier).
-- `Spark`: a Spark address.
-- `InternetComputer`: a Principal ID; the refund goes to the default account (no subaccount) of that Principal.
-- `BinancePay` and `TaprootAsset`: `refund` does not apply.
+OpenCryptoPay defines one additional kind, `refund`. The record entry is `{ "mandatory": boolean }`. The value the wallet sends is a string: the bare address for the selected `method`, without a URI scheme (such as `ethereum:`, `bitcoin:` or `lightning:`), amount or other parameters.
 
-In every case the payer controls the address and it can receive the selected `asset`. For a method where `refund` does not apply, the wallet MUST NOT send it and the provider MUST NOT require it, even when the record marks it mandatory.
+| Method | `refund` value |
+| --- | --- |
+| `Ethereum`, `Arbitrum`, `Optimism`, `Polygon`, `Base`, `BinanceSmartChain` | The account address: `0x` followed by 40 hexadecimal characters (EIP-55 checksum casing MAY be used). The same address receives the native coin and every token. |
+| `Bitcoin` | A mainnet address of any standard type (P2PKH, P2SH, P2WPKH, P2WSH or P2TR). |
+| `Firo` | A transparent Firo mainnet address. |
+| `Monero` | A Monero mainnet standard address or subaddress. |
+| `Zano` | A Zano mainnet standard address. |
+| `Solana` | The base58 address of the payer's wallet account. For tokens it is the same owner address, not a token account; the provider sends to the associated token account of that owner. |
+| `Tron` | The base58check address starting with `T`. The same address receives TRX and TRC-20 tokens. |
+| `Cardano` | A Shelley mainnet payment address in bech32 form starting with `addr1`. |
+| `Lightning` | A Lightning Address `name@domain` ([LUD-16](https://github.com/lnurl/luds/blob/luds/16.md)). |
+| `Spark` | The Spark address of the payer's Spark wallet, as that wallet displays it. |
+| `InternetComputer` | The textual Principal ID. ICP and ICRC-1 tokens go to the default account (no subaccount) of that Principal. |
+| `BinancePay`, `TaprootAsset` | `refund` does not apply. |
+
+For a method that is not in this table, `refund` does not apply. In every case the payer controls the address and it can receive the selected `asset`. The address belongs to the selected `method`; if the wallet changes the method, it sends the address for the new method. For a method where `refund` does not apply, the wallet MUST NOT send it and the provider MUST NOT require it, even when the record marks it mandatory.
 
 Please note that the offer has an expiry date after which it can no longer be used. If a quote has expired, the wallet should fetch a new one (as explained above) to get the latest exchange rates.
 
@@ -394,6 +403,8 @@ In our example the URL to fetch the transaction details for a payment in ETH on 
 When the response from [step 2](#2-payment-details) contains a `payerData` record, the wallet attaches a `payerdata` query parameter to this call. The value is a URL-encoded JSON object as defined in [LUD-18](https://github.com/lnurl/luds/blob/luds/18.md) (`{callbackUrl}?quote={quote-id}&method={selected-method}&asset={selected-asset}&payerdata={urlencoded-json}`).
 
 In our example a payment in USDT on Ethereum with `{"refund":"0x1111111111111111111111111111111111111111"}` would use https://api.dfx.swiss/v1/lnurlp/cb/pl_beeddb41cd4b6d9e?quote=plq_9af8927afe14f2d0&method=Ethereum&asset=USDT&payerdata=%7B%22refund%22%3A%220x1111111111111111111111111111111111111111%22%7D.
+
+For a payment over Lightning the object would be `{"refund":"alice@example.com"}`, sent as `payerdata=%7B%22refund%22%3A%22alice%40example.com%22%7D`.
 
 The wallet sends only kinds listed in the `payerData` record. If a kind is `"mandatory": true` and the wallet cannot send it, the wallet MUST NOT proceed with this payment; this does not apply to `refund` on a method where `refund` does not apply. A wallet SHOULD send `refund` when it is listed and applies to the selected method. A wallet MUST NOT send as `refund` an address it does not control, in particular not an exchange deposit address.
 
