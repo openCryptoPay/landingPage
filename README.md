@@ -347,7 +347,7 @@ OpenCryptoPay defines one additional kind, `refund`. The record entry is `{ "man
 | `Tron` | The base58check address starting with `T`. The same address receives TRX and TRC-20 tokens. |
 | `Cardano` | A Shelley mainnet payment address in bech32 form starting with `addr1`. |
 | `Lightning` | A Lightning Address `name@domain` ([LUD-16](https://github.com/lnurl/luds/blob/luds/16.md)). |
-| `Spark` | The Spark address of the payer's Spark wallet, as that wallet displays it. |
+| `Spark` | A Spark mainnet address of the payer's Spark wallet. |
 | `InternetComputer` | The textual Principal ID. ICP and ICRC-1 tokens go to the default account (no subaccount) of that Principal. |
 | `BinancePay`, `TaprootAsset` | `refund` does not apply. |
 
@@ -400,7 +400,7 @@ Based on the JSON received, the wallet should now select a transfer method and a
 
 In our example the URL to fetch the transaction details for a payment in ETH on Ethereum blockchain would be https://api.dfx.swiss/v1/lnurlp/cb/pl_beeddb41cd4b6d9e?quote=plq_9af8927afe14f2d0&method=Ethereum&asset=ETH.
 
-When the response from [step 2](#2-payment-details) contains a `payerData` record, the wallet attaches a `payerdata` query parameter to this call. The value is a URL-encoded JSON object as defined in [LUD-18](https://github.com/lnurl/luds/blob/luds/18.md) (`{callbackUrl}?quote={quote-id}&method={selected-method}&asset={selected-asset}&payerdata={urlencoded-json}`).
+When the response from [step 2](#2-payment-details) contains a `payerData` record and the wallet sends at least one listed kind, it attaches a `payerdata` query parameter to this call. The value is a URL-encoded JSON object as defined in [LUD-18](https://github.com/lnurl/luds/blob/luds/18.md) (`{callbackUrl}?quote={quote-id}&method={selected-method}&asset={selected-asset}&payerdata={urlencoded-json}`).
 
 In our example a payment in USDT on Ethereum with `{"refund":"0x1111111111111111111111111111111111111111"}` would use https://api.dfx.swiss/v1/lnurlp/cb/pl_beeddb41cd4b6d9e?quote=plq_9af8927afe14f2d0&method=Ethereum&asset=USDT&payerdata=%7B%22refund%22%3A%220x1111111111111111111111111111111111111111%22%7D.
 
@@ -410,7 +410,7 @@ Except in the [simplified flow](#simplified-flow), the wallet sends only kinds l
 
 A provider MUST NOT treat a missing `refund` as an error unless `refund` is `"mandatory": true` and applies to the selected method, so wallets without support keep working. When a listed mandatory kind is missing or a listed kind has a malformed value, the provider MUST answer HTTP 400 with a message that names the missing or malformed kind; on a method where `refund` does not apply, a missing `refund` is neither. A kind the provider does not list MUST be ignored without validation.
 
-The `refund` value is supplied by the wallet and is not verified. A provider uses `refund` only to return funds of this payment.
+The `refund` value is supplied by the wallet and is not verified. A provider uses `refund` only to return funds as described in [Refunds](#refunds).
 
 A GET HTTP call to this endpoint will return a JSON with the following structure.
 
@@ -552,13 +552,13 @@ To simplify the process, steps 2 and 3 can be done with a single HTTP call by ad
 
 In our example the URL would be https://api.dfx.swiss/v1/lnurlp/pl_beeddb41cd4b6d9e?method=Ethereum&asset=ETH or https://api.dfx.swiss/pl/?lightning=LNURL1DP68GURN8GHJ7CTSDYHXGENC9EEHW6TNWVHHVVF0D3H82UNVWQHHQMZLVFJK2ERYVG6RZCMYX33RVEPEV5YEJ9WT&method=Ethereum&asset=ETH.
 
-In the simplified flow the wallet has not seen a `payerData` record yet. It MAY still attach `payerdata` with only `refund` when `refund` applies to the selected method. A provider that does not list `refund` in its `payerData` record SHOULD ignore it. If the provider answers such a request with an error, the wallet retries without `payerdata` or falls back to [step 2](#2-payment-details) and [step 3](#3-transaction-details). If the provider requires a kind that is missing, it answers HTTP 400 as in [step 3](#3-transaction-details), and the wallet falls back to [step 2](#2-payment-details) and [step 3](#3-transaction-details).
+In the simplified flow the wallet has not seen a `payerData` record yet. It MAY still attach `payerdata` with only `refund` when `refund` applies to the selected method. A provider that does not list `refund` in its `payerData` record MUST ignore it, as in [step 3](#3-transaction-details). If the provider answers such a request with an error, the wallet retries without `payerdata` or falls back to [step 2](#2-payment-details) and [step 3](#3-transaction-details). If the provider requires a kind that is missing, it answers HTTP 400 as in [step 3](#3-transaction-details), and the wallet falls back to [step 2](#2-payment-details) and [step 3](#3-transaction-details).
 
 ## Refunds
 
 A refund is due when the provider received funds for a quote but cannot complete the payment with them, for example a different amount, an expired quote, a wrong asset, a payment that is already settled, or a failed swap or bridge route.
 
-If the provider lists `refund` in its `payerData` record, a `refund` applies to funds only if at least one set of transaction details the provider has issued matches them, every request for which a matching set was returned carried the same `refund` value, and no funds for a matching set have been booked or refunded. For Lightning, funds match the set whose invoice they pay; for Spark, a transfer matches every set of Spark transaction details with its exact amount, for any payment and whatever quote the transfer is later reported under (see [Spark](#spark)); for other methods, funds match every set with their deposit address and exact amount. In all cases a set counts only if it was issued before the funds arrived (for Spark, before the transfer was created), whether or not it has since expired, been booked or been refunded. The provider SHOULD return details for a request carrying `refund` that differ from every other set of transaction details it has issued in the deposit address, the exact amount or the invoice. The provider MUST return such funds to that `refund` address with the same method and in the asset received (network fees MAY be deducted), unless it cannot return that asset to that address.
+If the provider lists `refund` in its `payerData` record, a `refund` applies to funds only if at least one set of transaction details the provider has issued matches them, every request for which a matching set was returned carried the same `refund` value, and no funds for a matching set have been booked or refunded. For Lightning, funds match the set whose invoice they pay; for Spark, a transfer matches every set of Spark transaction details with its exact amount, for any payment and whatever quote the transfer is later reported under (see [Spark](#spark)); for other methods, funds match every set with their deposit address and exact amount. In all cases a set counts only if it was issued before the funds arrived (for Spark, before the transfer was created), whether or not it has since expired, been booked or been refunded. The provider SHOULD return details for a request carrying `refund` that differ from every other set of transaction details it has issued in the deposit address, the exact amount or the invoice. The provider MUST return such funds to that `refund` address with the same method and in the asset received (network fees MAY be deducted), unless it cannot return that asset to that address. For `InternetComputer` funds that the provider pulled with `icrc2_transfer_from`, `refund` does not apply: the provider MUST return them to the account they were pulled from.
 
 For all other funds, including funds whose amount matches no set or that arrive for a set whose funds were already booked, and for an asset the provider cannot return to that address, the provider MUST NOT assume the on-chain sender is the payer (it can be an exchange wallet shared by many users). It handles the case under its own terms.
 
