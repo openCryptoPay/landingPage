@@ -329,8 +329,7 @@ A payment provider MAY add a `payerData` record to this response as defined in [
 ```JSON
 {
   "payerData": {
-    "refund": { "mandatory": false },
-    "name": { "mandatory": false }
+    "refund": { "mandatory": false }
   }
 }
 ```
@@ -344,8 +343,6 @@ OpenCryptoPay defines one additional kind, `refund`. The record entry is `{ "man
 - `BinancePay` and `TaprootAsset`: `refund` does not apply.
 
 In every case the payer controls the address and it can receive the selected `asset`. For a method where `refund` does not apply, the wallet MUST NOT send it and the provider MUST NOT require it, even when the record marks it mandatory.
-
-The other LUD-18 kinds (`name`, `pubkey`, `identifier`, `email`, `auth`) keep their LUD-18 meaning.
 
 Please note that the offer has an expiry date after which it can no longer be used. If a quote has expired, the wallet should fetch a new one (as explained above) to get the latest exchange rates.
 
