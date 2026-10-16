@@ -322,6 +322,8 @@ The `recipient` object includes additional fields describing the merchant:
 - `goodsType`: Type of goods (`Tangible`, `Intangible`)
 - `goodsCategory`: Category of goods being sold
 
+Please note that the offer has an expiry date after which it can no longer be used. If a quote has expired, the wallet should fetch a new one (as explained above) to get the latest exchange rates.
+
 #### Payer Data
 
 A payment provider MAY add a `payerData` record to this response as defined in [LUD-18](https://github.com/lnurl/luds/blob/luds/18.md).
@@ -352,8 +354,6 @@ OpenCryptoPay defines one additional kind, `refund`. The record entry is `{ "man
 | `BinancePay`, `TaprootAsset` | `refund` does not apply. |
 
 For a method that is not in this table, `refund` does not apply. In every case the payer controls the address and it can receive the selected `asset`. The address belongs to the selected `method`; if the wallet changes the method, it sends the address for the new method. For a method where `refund` does not apply, the wallet MUST NOT send it and the provider MUST NOT require it, even when the record marks it mandatory.
-
-Please note that the offer has an expiry date after which it can no longer be used. If a quote has expired, the wallet should fetch a new one (as explained above) to get the latest exchange rates.
 
 #### Exceptions
 
@@ -530,7 +530,7 @@ The Internet Computer supports two payment flows:
 
 In our example the URL would be https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote={quote-id}&method=InternetComputer&asset=ICP&sender={principal-id}.
 
-The payment provider will then execute `icrc2_transfer_from` to pull the approved amount. If the call returns a success HTTP code, the payment has been successfully completed.
+The payment provider will then execute `icrc2_transfer_from` with `amount` set to the required payment amount; the transfer fee is debited on top and is covered by the additional allowance from step 2. If the call returns a success HTTP code, the payment has been successfully completed.
 
 **Option B: Direct Transfer (TxId)**
 
@@ -556,9 +556,11 @@ In the simplified flow the wallet has not seen a `payerData` record yet. It MAY 
 
 ## Refunds
 
-A refund is due when the provider received funds for a quote but cannot complete the payment with them, for example a different amount, an expired quote, a wrong asset, a payment that is already settled, or a failed swap or bridge route.
+A refund is due when the provider received funds for a quote but cannot complete the payment with them, for example a different amount, an expired quote, a wrong asset, a payment that is already settled, or a failed swap or bridge route. The following paragraphs define where the provider returns such funds.
 
-If the provider lists `refund` in its `payerData` record, a `refund` applies to funds only if at least one set of transaction details the provider has issued matches them, every request for which a matching set was returned carried the same `refund` value, and no funds for a matching set have been booked or refunded. For Lightning, funds match the set whose invoice they pay; for Spark, a transfer matches every set of Spark transaction details with its exact amount, for any payment and whatever quote the transfer is later reported under (see [Spark](#spark)); for other methods, funds match every set with their deposit address and exact amount. In all cases a set counts only if it was issued before the funds arrived (for Spark, before the transfer was created), whether or not it has since expired, been booked or been refunded. The provider SHOULD return details for a request carrying `refund` that differ from every other set of transaction details it has issued in the deposit address, the exact amount or the invoice. The provider MUST return such funds to that `refund` address with the same method and in the asset received (network fees MAY be deducted), unless it cannot return that asset to that address. For `InternetComputer` funds that the provider pulled with `icrc2_transfer_from`, `refund` does not apply: the provider MUST return them to the account they were pulled from.
+If the provider lists `refund` in its `payerData` record, a `refund` applies to funds only if at least one set of transaction details the provider has issued matches them, every request for which a matching set was returned carried the same `refund` value (a request without `refund` counts as a different value), and no funds for a matching set have been booked or refunded. For Lightning, funds match the set whose invoice they pay; for Spark, a transfer matches every set of Spark transaction details with its exact amount, for any payment and whatever quote the transfer is later reported under (see [Spark](#spark)); for other methods, funds match every set with their deposit address and exact amount. In all cases a set counts only if it was issued before the funds arrived (for Spark, before the transfer was created), whether or not it has since expired, been booked or been refunded. The provider SHOULD return details for a request carrying `refund` that differ from every other set of transaction details it has issued in the deposit address, the exact amount or the invoice. The provider MUST return such funds to that `refund` address with the same method and in the asset received (network fees MAY be deducted), unless it cannot return that asset to that address.
+
+For `InternetComputer` funds that the provider pulled with `icrc2_transfer_from`, `refund` does not apply, whether or not the provider lists it: the provider MUST return them to the account they were pulled from.
 
 For all other funds, including funds whose amount matches no set or that arrive for a set whose funds were already booked, and for an asset the provider cannot return to that address, the provider MUST NOT assume the on-chain sender is the payer (it can be an exchange wallet shared by many users). It handles the case under its own terms.
 
