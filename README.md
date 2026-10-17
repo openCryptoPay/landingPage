@@ -324,6 +324,37 @@ The `recipient` object includes additional fields describing the merchant:
 
 Please note that the offer has an expiry date after which it can no longer be used. If a quote has expired, the wallet should fetch a new one (as explained above) to get the latest exchange rates.
 
+#### Payer Data
+
+A payment provider MAY add a `payerData` record to this response as defined in [LUD-18](https://github.com/lnurl/luds/blob/luds/18.md).
+
+```JSON
+{
+  "payerData": {
+    "refund": { "mandatory": false }
+  }
+}
+```
+
+OpenCryptoPay defines one additional kind, `refund`. The record entry is `{ "mandatory": boolean }`. The value the wallet sends is a string: the bare address for the selected `method`, without a URI scheme (such as `ethereum:`, `bitcoin:` or `lightning:`), amount or other parameters.
+
+| Method | `refund` value |
+| --- | --- |
+| `Ethereum`, `Arbitrum`, `Optimism`, `Polygon`, `Base`, `BinanceSmartChain` | The account address: `0x` followed by 40 hexadecimal characters (EIP-55 checksum casing MAY be used). The same address receives the native coin and every token. |
+| `Bitcoin` | A mainnet address of any standard type (P2PKH, P2SH, P2WPKH, P2WSH or P2TR). |
+| `Firo` | A transparent Firo mainnet address. |
+| `Monero` | A Monero mainnet standard address or subaddress. |
+| `Zano` | A Zano mainnet standard address. |
+| `Solana` | The base58 address of the payer's wallet account. For tokens it is the same owner address, not a token account; the provider sends to the associated token account of that owner. |
+| `Tron` | The base58check address starting with `T`. The same address receives TRX and TRC-20 tokens. |
+| `Cardano` | A Shelley mainnet payment address in bech32 form starting with `addr1`. |
+| `Lightning` | A Lightning Address `name@domain` ([LUD-16](https://github.com/lnurl/luds/blob/luds/16.md)). |
+| `Spark` | A Spark mainnet address of the payer's Spark wallet. |
+| `InternetComputer` | The textual Principal ID. ICP and ICRC-1 tokens go to the default account (no subaccount) of that Principal. |
+| `BinancePay`, `TaprootAsset` | `refund` does not apply. |
+
+For a method that is not in this table, `refund` does not apply. When the wallet sends `refund`, it MUST send an address that the payer controls and at which the payer can receive the selected `asset` (for Solana tokens through the associated token account of that address, for Internet Computer through the default account of that Principal). The address belongs to the selected `method`; if the wallet changes the method, it sends the address for the new method. For a method where `refund` does not apply, the wallet MUST NOT send it and the provider MUST NOT require it, even when the record marks it mandatory.
+
 #### Exceptions
 
 If no payment is currently pending at the involved cash register, the above HTTP call waits for a payment for 10 seconds by default. This timeout can be customized with the `timeout` query parameter (in seconds). E.g. use https://api.dfx.swiss/v1/lnurlp/pl_beeddb41cd4b6d9e?timeout=0 for an instant response.
@@ -368,6 +399,18 @@ If there is still no payment pending after the waiting time has elapsed, an HTTP
 Based on the JSON received, the wallet should now select a transfer method and an asset (e.g. pay with 0.0006582 ETH on Ethereum). It also needs to extract the quote ID (`quote.id` field). These three values are used as query parameters with the callback URL (`callback` field) to fetch the relevant transaction details (`{callbackUrl}?quote={quote-id}&method={selected-method}&asset={selected-asset}`).
 
 In our example the URL to fetch the transaction details for a payment in ETH on Ethereum blockchain would be https://api.dfx.swiss/v1/lnurlp/cb/pl_beeddb41cd4b6d9e?quote=plq_9af8927afe14f2d0&method=Ethereum&asset=ETH.
+
+When the response from [step 2](#2-payment-details) contains a `payerData` record and the wallet sends at least one listed kind, it attaches a `payerdata` query parameter to this call. The value is a URL-encoded JSON object as defined in [LUD-18](https://github.com/lnurl/luds/blob/luds/18.md) (`{callbackUrl}?quote={quote-id}&method={selected-method}&asset={selected-asset}&payerdata={urlencoded-json}`).
+
+In our example a payment in USDT on Ethereum with `{"refund":"0x1111111111111111111111111111111111111111"}` would use https://api.dfx.swiss/v1/lnurlp/cb/pl_beeddb41cd4b6d9e?quote=plq_9af8927afe14f2d0&method=Ethereum&asset=USDT&payerdata=%7B%22refund%22%3A%220x1111111111111111111111111111111111111111%22%7D.
+
+For a payment over Lightning the object would be `{"refund":"alice@example.com"}`, sent as `payerdata=%7B%22refund%22%3A%22alice%40example.com%22%7D`.
+
+Except in the [simplified flow](#simplified-flow), the wallet sends only kinds listed in the `payerData` record. If a kind is `"mandatory": true`, the wallet MUST send it or not proceed with this payment; this does not apply to `refund` on a method where `refund` does not apply. A wallet SHOULD send `refund` when it is listed and applies to the selected method. A wallet MUST NOT send as `refund` an address it does not control, in particular not an exchange deposit address.
+
+A provider MUST NOT treat a missing `refund` as an error unless `refund` is `"mandatory": true` and applies to the selected method, so wallets without support keep working. When a listed mandatory kind is missing or a listed kind that applies to the selected method has a malformed value, the provider MUST answer HTTP 400 with a message that names the missing or malformed kind; on a method where `refund` does not apply, a missing `refund` is neither. A kind the provider does not list MUST be ignored without validation. A `refund` sent for a method where `refund` does not apply MUST be ignored without validation as well.
+
+The `refund` value is supplied by the wallet; the provider validates its format as described above but cannot verify that the payer controls the address. A provider uses `refund` only to return funds as described in [Refunds](#refunds).
 
 A GET HTTP call to this endpoint will return a JSON with the following structure.
 
@@ -487,7 +530,7 @@ The Internet Computer supports two payment flows:
 
 In our example the URL would be https://api.dfx.swiss/v1/lnurlp/tx/plp_f1ba466e2f1c0a4e?quote={quote-id}&method=InternetComputer&asset=ICP&sender={principal-id}.
 
-The payment provider will then execute `icrc2_transfer_from` to pull the approved amount. If the call returns a success HTTP code, the payment has been successfully completed.
+The payment provider will then execute `icrc2_transfer_from` with `amount` set to the required payment amount; as defined in ICRC-2, the ledger takes the transfer fee in addition, from both the allowance and the payer's balance, which is why the approval covers the amount plus the transfer fee. The `icrc2_approve` call itself also charges a fee, so before the approval the payer's balance must cover the amount, the transfer fee and the approval fee. If the call returns a success HTTP code, the payment has been successfully completed.
 
 **Option B: Direct Transfer (TxId)**
 
@@ -508,3 +551,17 @@ Use the deep link from the `uri` field from [step 3](#3-transaction-details) to 
 To simplify the process, steps 2 and 3 can be done with a single HTTP call by adding the `method` and `asset` query parameters to the API URL used to fetch the payment details (in [step 2](#2-payment-details)). This call will return the transaction details as shown in [step 3](#3-transaction-details) or an error code, if the selected method and asset are not available with the payment provider. The simplified flow can be used with both approaches described in [step 2](#2-payment-details).
 
 In our example the URL would be https://api.dfx.swiss/v1/lnurlp/pl_beeddb41cd4b6d9e?method=Ethereum&asset=ETH or https://api.dfx.swiss/pl/?lightning=LNURL1DP68GURN8GHJ7CTSDYHXGENC9EEHW6TNWVHHVVF0D3H82UNVWQHHQMZLVFJK2ERYVG6RZCMYX33RVEPEV5YEJ9WT&method=Ethereum&asset=ETH.
+
+In the simplified flow the wallet has not seen a `payerData` record yet. It MAY still attach `payerdata` with only `refund` when `refund` applies to the selected method. The provider applies all rules of [step 3](#3-transaction-details) for its own `payerData` record to this call, as if the wallet had seen that record. If the provider answers such a request with an error, the wallet falls back to [step 2](#2-payment-details) and [step 3](#3-transaction-details).
+
+## Refunds
+
+A refund is due when the provider received funds for a quote but cannot complete the payment with them, for example a different amount, an expired quote, a wrong asset, a payment that is already booked, or a failed swap or bridge route. The following paragraphs define where the provider returns such funds.
+
+Except for the funds described in the next paragraph, if the provider lists `refund` in its `payerData` record, a `refund` applies to funds only if at least one set of transaction details the provider has issued matches them, every request for which a matching set was returned carried `refund` and all these values denote the same address (EVM addresses, bech32 addresses and the domain of a Lightning Address compare case-insensitively), and no funds for a matching set have been booked (applied by the provider to complete a payment) or refunded. For Lightning, funds match the set whose invoice they pay; for Spark, a transfer matches every set of Spark transaction details with its exact amount, for any payment and whatever quote the transfer is later reported under (see [Spark](#spark)); for other methods, funds match every set of the same method with their deposit address, asset and exact amount. In all cases a set counts only if it was issued before the funds arrived (for Spark, before the transfer was created), whether or not it has since expired, been booked or been refunded. The provider SHOULD return details for a request carrying `refund` that differ from every other set of transaction details it has issued in the deposit address, the exact amount or the invoice. The provider MUST return such funds to that `refund` address with the same method and in the asset received (network fees MAY be deducted), unless it cannot return that asset to that address.
+
+For `InternetComputer` funds that the provider pulled with `icrc2_transfer_from`, the provider MUST return the amount it received to the account it was pulled from (the ledger fee of the return transfer MAY be deducted), unless it cannot return that asset to that account, whether or not it lists `refund`; the rule of the previous paragraph does not apply to them. The wallet still sends `refund` under the rules of [step 3](#3-transaction-details), because at that point the provider cannot know whether the wallet will approve or transfer.
+
+For all other funds, including funds whose asset or amount matches no set or that arrive for a set whose funds were already booked, and for an asset the provider cannot return to that address, the provider MUST NOT assume the on-chain sender is the payer (it can be an exchange wallet shared by many users). It handles the case under its own terms.
+
+For Lightning, a payment whose invoice does not settle returns to the payer through the Lightning network itself. When `refund` applies to a settled Lightning payment under the rule above, the provider pays the refund over Lightning to that Lightning Address; otherwise the paragraph above applies.
