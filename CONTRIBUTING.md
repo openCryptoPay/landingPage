@@ -20,7 +20,7 @@ A new public page adds its baseline in the same change. A change to a page's mar
 
 Places loaded from the map API can differ from the image. That difference alone does not require a new baseline.
 
-The shop page is rendered against the fixed sample shop in `baselines/shop-sample/`, so live data never changes its baseline. That folder also holds the steps to render it again.
+The shop page is rendered against the fixed sample shop in `baselines/shop-sample/`, so live shop data never changes its baseline. Its map loads live tiles, which can differ from the image; that difference alone does not require a new baseline. That folder also holds the steps to render it again.
 
 `401.html` is the password gate. It is not a public page and has no baseline.
 

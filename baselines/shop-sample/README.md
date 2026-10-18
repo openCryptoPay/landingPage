@@ -1,7 +1,8 @@
 # Shop page sample
 
 `baselines/website-shop.png` is `shop.php` rendered against this fixed sample
-shop, so live data never changes it. The shop's name, description, address and
+shop, so live shop data never changes it. The map loads live tiles, which can
+differ from the image; that alone does not require a new baseline. The shop's name, description, address and
 first caption contain quotes, tags and `</script>`; the image shows them as
 text.
 

@@ -86,6 +86,16 @@
   });
   document.addEventListener("keydown", function (event) {
     if (viewer.hidden) return;
+    if (event.key === "Tab") {
+      var buttons = Array.prototype.filter.call(viewer.querySelectorAll("button"), function (button) {
+        return !button.hidden;
+      });
+      var at = buttons.indexOf(document.activeElement);
+      var next = event.shiftKey ? at - 1 : at + 1;
+      buttons[(next + buttons.length) % buttons.length].focus();
+      event.preventDefault();
+      return;
+    }
     if (event.key === "Escape") close();
     if (event.key === "ArrowLeft") show(current - 1);
     if (event.key === "ArrowRight") show(current + 1);

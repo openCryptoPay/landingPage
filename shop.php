@@ -60,12 +60,38 @@ function apiBase(): string
 }
 
 /**
- * GET /map/places/{id} without following redirects.
+ * GET /map/places/{id} without following redirects, within 3 seconds in total
+ * (connect, DNS and transfer).
  *
  * @return array{status:int, location:string, body:string}|null null on a network error or timeout
  */
 function fetchPlace(string $id): ?array
 {
+    $url = apiBase() . '/map/places/' . rawurlencode($id);
+    if (function_exists('curl_init')) {
+        $location = '';
+        $curl = curl_init($url);
+        curl_setopt_array($curl, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => false,
+            CURLOPT_TIMEOUT_MS => API_TIMEOUT_SECONDS * 1000,
+            CURLOPT_CONNECTTIMEOUT_MS => API_TIMEOUT_SECONDS * 1000,
+            CURLOPT_HTTPHEADER => ['Accept: application/json'],
+            CURLOPT_HEADERFUNCTION => static function ($handle, string $line) use (&$location): int {
+                if (stripos($line, 'Location:') === 0) {
+                    $location = trim(substr($line, strlen('Location:')));
+                }
+                return strlen($line);
+            },
+        ]);
+        $body = curl_exec($curl);
+        $status = (int) curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
+        if (PHP_VERSION_ID < 80000) {
+            curl_close($curl);
+        }
+        return is_string($body) && $status > 0 ? ['status' => $status, 'location' => $location, 'body' => $body] : null;
+    }
+    $deadline = microtime(true) + API_TIMEOUT_SECONDS;
     $context = stream_context_create([
         'http' => [
             'method' => 'GET',
@@ -76,13 +102,34 @@ function fetchPlace(string $id): ?array
             'header' => "Accept: application/json\r\n",
         ],
     ]);
-    $body = @file_get_contents(apiBase() . '/map/places/' . rawurlencode($id), false, $context);
-    if ($body === false || !isset($http_response_header) || !is_array($http_response_header)) {
+    $stream = @fopen($url, 'rb', false, $context);
+    if ($stream === false) {
         return null;
     }
+    $body = '';
+    while (!feof($stream)) {
+        $left = $deadline - microtime(true);
+        if ($left <= 0) {
+            fclose($stream);
+            return null;
+        }
+        stream_set_timeout($stream, (int) ceil($left));
+        $chunk = fread($stream, 8192);
+        if ($chunk === false) {
+            fclose($stream);
+            return null;
+        }
+        $body .= $chunk;
+    }
+    $meta = stream_get_meta_data($stream);
+    fclose($stream);
+    $headers = isset($meta['wrapper_data']) && is_array($meta['wrapper_data']) ? $meta['wrapper_data'] : [];
     $status = 0;
     $location = '';
-    foreach ($http_response_header as $line) {
+    foreach ($headers as $line) {
+        if (!is_string($line)) {
+            continue;
+        }
         if (preg_match('#^HTTP/\S+\s+(\d{3})#', $line, $match) === 1) {
             $status = (int) $match[1];
             $location = '';
@@ -90,7 +137,7 @@ function fetchPlace(string $id): ?array
             $location = trim(substr($line, strlen('Location:')));
         }
     }
-    return ['status' => $status, 'location' => $location, 'body' => $body];
+    return $status > 0 ? ['status' => $status, 'location' => $location, 'body' => $body] : null;
 }
 
 /** Activity in words. */
@@ -414,7 +461,7 @@ pageStart(
 <?php } ?>
           </div>
         </article>
-        <div class="ocp-shop-viewer" id="ocp-shop-viewer" hidden>
+        <div class="ocp-shop-viewer" id="ocp-shop-viewer" role="dialog" aria-modal="true" aria-label="Photos" hidden>
           <button type="button" class="ocp-shop-viewer-close" aria-label="Close">×</button>
           <button type="button" class="ocp-shop-viewer-prev" aria-label="Previous photo">‹</button>
           <figure>
