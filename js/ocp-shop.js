@@ -1,0 +1,103 @@
+// Shop page (shop.php): copy button, map with one pin, and a full-screen photo viewer.
+// Every value is read from the server-rendered DOM; nothing is inserted as HTML.
+(function () {
+  document.querySelectorAll(".ocp-shop-copy").forEach(function (button) {
+    button.addEventListener("click", function () {
+      var text = button.getAttribute("data-copy") || "";
+      if (!navigator.clipboard) return;
+      navigator.clipboard.writeText(text).then(function () {
+        var label = button.textContent;
+        button.textContent = "Copied";
+        setTimeout(function () {
+          button.textContent = label;
+        }, 1500);
+      });
+    });
+  });
+
+  var mapNode = document.getElementById("ocp-shop-map");
+  if (mapNode && window.maplibregl) {
+    var lat = Number(mapNode.getAttribute("data-lat"));
+    var lon = Number(mapNode.getAttribute("data-lon"));
+    if (isFinite(lat) && isFinite(lon)) {
+      var map = new maplibregl.Map({
+        container: mapNode,
+        style: "https://tiles.openfreemap.org/styles/liberty",
+        center: [lon, lat],
+        zoom: 15
+      });
+      map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+      var pin = document.createElement("div");
+      pin.className = "ocp-place-marker";
+      new maplibregl.Marker({ element: pin }).setLngLat([lon, lat]).addTo(map);
+    }
+  }
+
+  var viewer = document.getElementById("ocp-shop-viewer");
+  var photos = Array.prototype.slice.call(document.querySelectorAll(".ocp-shop-photo"));
+  if (!viewer || photos.length === 0) return;
+  var image = viewer.querySelector("img");
+  var caption = viewer.querySelector("figcaption");
+  var current = 0;
+  var opener = null;
+  var touchStartX = null;
+
+  function show(index) {
+    current = (index + photos.length) % photos.length;
+    var photo = photos[current];
+    image.src = photo.getAttribute("data-full") || "";
+    var text = photo.getAttribute("data-caption") || "";
+    image.alt = text;
+    caption.textContent = text;
+    caption.hidden = text === "";
+  }
+
+  function open(index) {
+    opener = document.activeElement;
+    show(index);
+    viewer.hidden = false;
+    document.body.classList.add("ocp-shop-viewer-open");
+    viewer.querySelector(".ocp-shop-viewer-close").focus();
+  }
+
+  function close() {
+    viewer.hidden = true;
+    document.body.classList.remove("ocp-shop-viewer-open");
+    if (opener && opener.focus) opener.focus();
+  }
+
+  photos.forEach(function (photo, index) {
+    photo.addEventListener("click", function () {
+      open(index);
+    });
+  });
+  var single = photos.length === 1;
+  viewer.querySelector(".ocp-shop-viewer-prev").hidden = single;
+  viewer.querySelector(".ocp-shop-viewer-next").hidden = single;
+  viewer.querySelector(".ocp-shop-viewer-close").addEventListener("click", close);
+  viewer.querySelector(".ocp-shop-viewer-prev").addEventListener("click", function () {
+    show(current - 1);
+  });
+  viewer.querySelector(".ocp-shop-viewer-next").addEventListener("click", function () {
+    show(current + 1);
+  });
+  viewer.addEventListener("click", function (event) {
+    if (event.target === viewer) close();
+  });
+  document.addEventListener("keydown", function (event) {
+    if (viewer.hidden) return;
+    if (event.key === "Escape") close();
+    if (event.key === "ArrowLeft") show(current - 1);
+    if (event.key === "ArrowRight") show(current + 1);
+  });
+  viewer.addEventListener("touchstart", function (event) {
+    touchStartX = event.touches.length === 1 ? event.touches[0].clientX : null;
+  }, { passive: true });
+  viewer.addEventListener("touchend", function (event) {
+    if (touchStartX === null || event.changedTouches.length !== 1) return;
+    var dx = event.changedTouches[0].clientX - touchStartX;
+    touchStartX = null;
+    if (Math.abs(dx) < 40) return;
+    show(dx < 0 ? current + 1 : current - 1);
+  });
+})();

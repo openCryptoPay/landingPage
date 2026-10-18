@@ -1,0 +1,189 @@
+/* Shop page (shop.php). Uses the site's fonts and colors from opencryptopay.webflow.css. */
+
+.ocp-shop {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.ocp-shop-gallery {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: 180px;
+  gap: 8px;
+}
+
+.ocp-shop-gallery[data-count="1"] {
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-rows: 360px;
+}
+
+.ocp-shop-photo:first-child {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+.ocp-shop-gallery[data-count="1"] .ocp-shop-photo:first-child {
+  grid-column: auto;
+  grid-row: auto;
+}
+
+.ocp-shop-photo {
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: zoom-in;
+  background: #eef0f3;
+}
+
+.ocp-shop-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ocp-shop-body {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 32px;
+  align-items: start;
+}
+
+.ocp-shop-name {
+  margin-bottom: 4px;
+  overflow-wrap: anywhere;
+}
+
+.ocp-shop-category {
+  margin: 0 0 16px;
+  color: #6b7280;
+  text-transform: capitalize;
+}
+
+.ocp-shop-description {
+  overflow-wrap: anywhere;
+}
+
+.ocp-shop-facts {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 10px 24px;
+  margin: 24px 0;
+}
+
+.ocp-shop-facts dt {
+  font-weight: 600;
+}
+
+.ocp-shop-facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.ocp-shop-npub code {
+  font-size: 13px;
+  word-break: break-all;
+}
+
+.ocp-shop-copy {
+  margin: 0 8px;
+  padding: 2px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.ocp-shop-map {
+  width: 100%;
+  height: 320px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.ocp-shop-message {
+  padding: 48px 0;
+}
+
+.ocp-shop-button,
+.ocp-shop-link {
+  font-weight: 600;
+}
+
+.ocp-shop-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 12, 16, 0.92);
+}
+
+.ocp-shop-viewer[hidden] {
+  display: none;
+}
+
+.ocp-shop-viewer figure {
+  margin: 0;
+  max-width: 88vw;
+  max-height: 88vh;
+  text-align: center;
+}
+
+.ocp-shop-viewer img {
+  max-width: 88vw;
+  max-height: 80vh;
+  object-fit: contain;
+}
+
+.ocp-shop-viewer figcaption {
+  margin-top: 12px;
+  color: #fff;
+}
+
+.ocp-shop-viewer button {
+  position: absolute;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-size: 40px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 16px;
+}
+
+.ocp-shop-viewer-close {
+  top: 8px;
+  right: 8px;
+}
+
+.ocp-shop-viewer-prev {
+  left: 8px;
+}
+
+.ocp-shop-viewer-next {
+  right: 8px;
+}
+
+.ocp-shop-viewer-open {
+  overflow: hidden;
+}
+
+@media (max-width: 767px) {
+  .ocp-shop-gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: 140px;
+  }
+
+  .ocp-shop-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ocp-shop-map {
+    height: 240px;
+  }
+}

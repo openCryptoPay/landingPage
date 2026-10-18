@@ -256,6 +256,13 @@
     return out.join(separator);
   }
 
+  var NPUB = /^npub1[02-9ac-hj-np-z]{58}$/;
+
+  // The shop page path, or null when the place has no valid npub id.
+  function shopPath(place) {
+    return typeof place.id === "string" && NPUB.test(place.id) ? "/" + place.id : null;
+  }
+
   function displayedLocation(place) {
     return joinedNonEmpty([
       joinedNonEmpty([trimmedField(place.street), trimmedField(place.houseNumber)], " "),
@@ -354,12 +361,15 @@
       var label = cell.querySelector(".ocp-col-label");
       headerFields.push(csvField(label ? label.textContent : cell.textContent));
     });
+    headerFields.push(csvField("URL"));
     lines.push(headerFields.join(","));
     bodyRows.forEach(function (row) {
       var fields = [];
       row.querySelectorAll("td").forEach(function (cell) {
         fields.push(csvField(cell.textContent));
       });
+      var path = row.getAttribute("data-shop-path");
+      fields.push(csvField(path ? "https://opencryptopay.io" + path : ""));
       lines.push(fields.join(","));
     });
     var blob = new Blob(["\uFEFF" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
@@ -387,7 +397,18 @@
     if (csvButton) csvButton.hidden = false;
     places.forEach(function (place) {
       var row = document.createElement("tr");
-      addCell(row, displayedName(place));
+      var path = shopPath(place);
+      if (path) {
+        row.setAttribute("data-shop-path", path);
+        var nameCell = document.createElement("td");
+        var link = document.createElement("a");
+        link.href = path;
+        link.textContent = displayedName(place);
+        nameCell.appendChild(link);
+        row.appendChild(nameCell);
+      } else {
+        addCell(row, displayedName(place));
+      }
       addCell(row, displayedLocation(place));
       addCell(row, trimmedField(place.country));
       var shop = trimmedField(place.shopName);
@@ -578,6 +599,15 @@
             var markerEl = document.createElement("div");
             markerEl.className = "ocp-place-marker";
             var popupNode = document.createElement("div");
+            popupNode.className = "ocp-place-popup";
+            var cover = place.coverPhoto;
+            if (cover && typeof cover.url === "string" && /^https:\/\//.test(cover.url)) {
+              var coverImage = document.createElement("img");
+              coverImage.src = cover.url;
+              coverImage.alt = "";
+              coverImage.loading = "lazy";
+              popupNode.appendChild(coverImage);
+            }
             var name = document.createElement("strong");
             name.textContent = typeof place.name === "string" && place.name ? place.name : "Location";
             popupNode.appendChild(name);
@@ -585,6 +615,14 @@
               var category = document.createElement("div");
               category.textContent = place.category;
               popupNode.appendChild(category);
+            }
+            var detailsPath = shopPath(place);
+            if (detailsPath) {
+              var details = document.createElement("a");
+              details.href = detailsPath;
+              details.textContent = "Details →";
+              details.className = "ocp-place-popup-details";
+              popupNode.appendChild(details);
             }
             var marker = new maplibregl.Marker({ element: markerEl })
               .setLngLat([place.lon, place.lat])
