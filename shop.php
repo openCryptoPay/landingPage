@@ -60,8 +60,10 @@ function apiBase(): string
 }
 
 /**
- * GET /map/places/{id} without following redirects, within 3 seconds in total
- * (connect, DNS and transfer).
+ * GET /map/places/{id} without following redirects. With curl, the whole call
+ * (DNS, connect and transfer) is limited to 3 seconds. Without curl, the stream
+ * fallback limits the connect and each header read to 3 seconds and stops the
+ * body read at a 3-second deadline; the DNS lookup is not bounded there.
  *
  * @return array{status:int, location:string, body:string}|null null on a network error or timeout
  */
@@ -113,7 +115,7 @@ function fetchPlace(string $id): ?array
             fclose($stream);
             return null;
         }
-        stream_set_timeout($stream, (int) ceil($left));
+        stream_set_timeout($stream, (int) $left, (int) (($left - (int) $left) * 1000000));
         $chunk = fread($stream, 8192);
         if ($chunk === false) {
             fclose($stream);
