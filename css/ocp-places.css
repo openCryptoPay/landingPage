@@ -228,6 +228,11 @@
   white-space: nowrap;
 }
 
+.ocp-place-table-wrap td:nth-child(2),
+.ocp-place-table-wrap td:last-child {
+  white-space: normal;
+}
+
 .ocp-places-api {
   margin-top: 1rem;
   color: #5c6370;
