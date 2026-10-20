@@ -3,12 +3,21 @@
 (function () {
   document.querySelectorAll(".ocp-shop-copy").forEach(function (button) {
     var label = button.textContent;
+    // The visible text flashes for sighted users; the status element next to
+    // the button tells screen readers the result.
+    var status = button.parentNode.querySelector("[role=status]");
     var timer = null;
     function flash(text) {
       button.textContent = text;
+      if (status) {
+        status.textContent = text === "Copied" ? "NOSTR ID copied" : text;
+      }
       clearTimeout(timer);
       timer = setTimeout(function () {
         button.textContent = label;
+        if (status) {
+          status.textContent = "";
+        }
       }, 1500);
     }
     button.addEventListener("click", function () {

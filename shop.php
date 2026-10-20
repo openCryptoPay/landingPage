@@ -487,6 +487,7 @@ pageStart(
                 <dd class="ocp-shop-npub">
                   <code><?= h($npub) ?></code>
                   <button type="button" class="ocp-shop-copy" data-copy="<?= h($npub) ?>">Copy</button>
+                  <span class="ocp-shop-live" role="status" aria-atomic="true"></span>
                   <a class="ocp-shop-link" href="<?= h('https://njump.me/' . $npub) ?>" target="_blank" rel="noopener">Open in NOSTR</a>
                 </dd>
               </dl>
