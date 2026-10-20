@@ -24,6 +24,7 @@
   if (csvButton) {
     csvButton.addEventListener("click", exportStoresCsv);
   }
+  bindActivityHelp();
   if (own) {
     if (google) google.remove();
     if (googleLegend) googleLegend.remove();
@@ -295,6 +296,37 @@
     return text;
   }
 
+  function bindActivityHelp() {
+    var button = document.getElementById("ocp-activity-help-button");
+    var panel = document.getElementById("ocp-activity-help");
+    if (!button || !panel || typeof panel.showPopover !== "function") return;
+
+    function place() {
+      if (!panel.matches(":popover-open")) return;
+      var rect = button.getBoundingClientRect();
+      var margin = 8;
+      panel.style.left = "0px";
+      panel.style.top = "0px";
+      var width = panel.offsetWidth;
+      var height = panel.offsetHeight;
+      var left = rect.left;
+      if (left + width > window.innerWidth - margin) left = window.innerWidth - margin - width;
+      if (left < margin) left = margin;
+      var top = rect.bottom + margin;
+      if (top + height > window.innerHeight - margin && rect.top - margin - height >= margin) {
+        top = rect.top - margin - height;
+      }
+      panel.style.left = Math.round(left) + "px";
+      panel.style.top = Math.round(top) + "px";
+    }
+
+    panel.addEventListener("toggle", function (event) {
+      if (event.newState === "open") place();
+    });
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);
+  }
+
   function exportStoresCsv() {
     var csvTable = document.getElementById("ocp-place-table");
     if (!csvTable) return;
@@ -305,7 +337,8 @@
     var lines = [];
     var headerFields = [];
     csvTable.querySelectorAll("thead th").forEach(function (cell) {
-      headerFields.push(csvField(cell.textContent));
+      var label = cell.querySelector(".ocp-col-label");
+      headerFields.push(csvField(label ? label.textContent : cell.textContent));
     });
     lines.push(headerFields.join(","));
     bodyRows.forEach(function (row) {
