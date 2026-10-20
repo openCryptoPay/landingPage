@@ -56,6 +56,7 @@
   if (!viewer || photos.length === 0) return;
   var image = viewer.querySelector("img");
   var caption = viewer.querySelector("figcaption");
+  var live = viewer.querySelector(".ocp-shop-live");
   var current = 0;
   var opener = null;
   var touchStartX = null;
@@ -68,6 +69,7 @@
     image.alt = text || photo.querySelector("img").alt;
     caption.textContent = text;
     caption.hidden = text === "";
+    live.textContent = "Photo " + (current + 1) + " of " + photos.length + (text === "" ? "" : ": " + text);
   }
 
   function open(index) {

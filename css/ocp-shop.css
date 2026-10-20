@@ -1,6 +1,7 @@
 /* Shop page (shop.php). Uses the site's fonts and colors from opencryptopay.webflow.css. */
 
 .ocp-shop {
+  font-family: var(--font--body-l-desktop);
   display: flex;
   flex-direction: column;
   gap: 32px;
@@ -196,13 +197,32 @@
 
 .ocp-shop-viewer button {
   position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
   border: 0;
-  background: transparent;
+  border-radius: 50%;
+  background: rgba(10, 12, 16, 0.6);
   color: #fff;
-  font-size: 40px;
+  font-size: 36px;
   line-height: 1;
   cursor: pointer;
-  padding: 16px;
+  padding: 0;
+}
+
+.ocp-shop-viewer button[hidden] {
+  display: none;
+}
+
+.ocp-shop-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
 .ocp-shop-viewer-close {

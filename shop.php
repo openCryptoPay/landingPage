@@ -361,7 +361,8 @@ if ($status === 404) {
 
 $data = $status === 200 && $answer !== null ? json_decode($answer['body'], true) : null;
 $place = is_array($data) && isset($data['place']) && is_array($data['place']) ? $data['place'] : null;
-$npub = $place === null ? '' : field($place, 'id');
+// The raw id must equal the requested npub; nothing is trimmed before this check.
+$npub = $place !== null && isset($place['id']) && is_string($place['id']) ? $place['id'] : '';
 if ($place === null || $isHex || !hash_equals($id, $npub)) {
     messagePage(503, 'Shop unavailable', 'The shop could not be loaded right now. Please try again in a moment.', true);
     exit;
@@ -503,6 +504,7 @@ pageStart(
             <img alt="">
             <figcaption></figcaption>
           </figure>
+          <p class="ocp-shop-live" aria-live="polite" aria-atomic="true"></p>
           <button type="button" class="ocp-shop-viewer-next" aria-label="Next photo">›</button>
         </div>
 <?php

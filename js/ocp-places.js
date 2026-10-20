@@ -2,10 +2,12 @@
 (function () {
   var host = location.hostname;
   var placesUrl = null;
+  var siteOrigin = "https://opencryptopay.io";
   if (host === "opencryptopay.io" || host === "www.opencryptopay.io") {
     placesUrl = "https://api.opencryptopay.io/map/places";
   } else if (host === "dev.opencryptopay.io" || host === "www.dev.opencryptopay.io") {
     placesUrl = "https://dev-api.opencryptopay.io/map/places";
+    siteOrigin = "https://dev.opencryptopay.io";
   }
   if (!placesUrl) {
     return;
@@ -369,7 +371,7 @@
         fields.push(csvField(cell.textContent));
       });
       var path = row.getAttribute("data-shop-path");
-      fields.push(csvField(path ? "https://opencryptopay.io" + path : ""));
+      fields.push(csvField(path ? siteOrigin + path : ""));
       lines.push(fields.join(","));
     });
     var blob = new Blob(["\uFEFF" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
