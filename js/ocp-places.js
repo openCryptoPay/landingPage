@@ -411,17 +411,23 @@
         var nameControl = makeSelect("Name");
         var chainControl = makeSelect("Blockchain");
         var assetControl = makeSelect("Asset");
-        var activityControl = makeSelect("Activity");
+        // Activity belongs to the stores table. The home map uses this
+        // function and keeps the filters its page already shows.
+        var activityControl = table ? makeSelect("Activity") : null;
         fillSelect(countryControl.select, countryCodes(filtersBody));
         fillNamedSelect(nameControl.select, shopNameOptions(filtersBody));
-        fillNamedSelect(activityControl.select, [
-          { value: "daily", label: "Daily" },
-          { value: "within7Days", label: "Week" },
-          { value: "within30Days", label: "Month" },
-          { value: "olderThan30Days", label: "Idle" },
-          { value: "none", label: "None" }
-        ]);
-        mountFilters([techControl, countryControl, nameControl, chainControl, assetControl, activityControl]);
+        if (activityControl) {
+          fillNamedSelect(activityControl.select, [
+            { value: "daily", label: "Daily" },
+            { value: "within7Days", label: "Week" },
+            { value: "within30Days", label: "Month" },
+            { value: "olderThan30Days", label: "Idle" },
+            { value: "none", label: "None" }
+          ]);
+        }
+        var filterControls = [techControl, countryControl, nameControl, chainControl, assetControl];
+        if (activityControl) filterControls.push(activityControl);
+        mountFilters(filterControls);
 
         var entries = [];
         var matched = [];
@@ -433,7 +439,7 @@
             shopName: nameControl.select.value,
             blockchain: chainControl.select.value,
             asset: assetControl.select.value,
-            activity: activityControl.select.value
+            activity: activityControl ? activityControl.select.value : ""
           };
         }
 
@@ -629,7 +635,7 @@
           reloadPlaces();
         });
         assetControl.select.addEventListener("change", reloadPlaces);
-        activityControl.select.addEventListener("change", reloadPlaces);
+        if (activityControl) activityControl.select.addEventListener("change", reloadPlaces);
         syncPaymentOptions();
         return loadPlaces();
       });
