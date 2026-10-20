@@ -268,9 +268,9 @@
       case "daily":
         return "Daily";
       case "within7Days":
-        return "Week";
+        return "Weekly";
       case "within30Days":
-        return "Month";
+        return "Monthly";
       case "olderThan30Days":
         return "Idle";
       default:
@@ -278,7 +278,7 @@
     }
   }
 
-  // A chosen activity is a minimum. Month keeps Week and Daily.
+  // A chosen activity is a minimum. Monthly keeps Weekly and Daily.
   // Idle and None stay exact.
   function activityMeets(place, selected) {
     if (!selected) return true;
@@ -419,8 +419,8 @@
         if (activityControl) {
           fillNamedSelect(activityControl.select, [
             { value: "daily", label: "Daily" },
-            { value: "within7Days", label: "Week" },
-            { value: "within30Days", label: "Month" },
+            { value: "within7Days", label: "Weekly" },
+            { value: "within30Days", label: "Monthly" },
             { value: "olderThan30Days", label: "Idle" },
             { value: "none", label: "None" }
           ]);
