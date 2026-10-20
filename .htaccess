@@ -3,7 +3,12 @@
 RewriteEngine On
 
 # One canonical URL per shop: a trailing slash redirects to the path without it.
-RewriteRule ^(npub1[02-9ac-hj-np-z]{58}|[0-9a-f]{64})/$ /$1 [R=301,L]
+RewriteRule ^(npub1[02-9ac-hj-np-z]{58}|[0-9a-f]{64})/$ /$1 [R=301,L,E=OCP_SHOP_SLASH:1]
+
+# The redirect is cached like the shop page's own answers.
+<IfModule mod_headers.c>
+  Header always set Cache-Control "public, max-age=60" env=OCP_SHOP_SLASH
+</IfModule>
 
 # The npub, or the 64 hex characters of the key, are rendered by shop.php.
 RewriteRule ^(npub1[02-9ac-hj-np-z]{58}|[0-9a-f]{64})$ /shop.php?id=$1 [L]

@@ -22,6 +22,10 @@ Places loaded from the map API can differ from the image. That difference alone 
 
 The shop page is rendered against the fixed sample shop in `baselines/shop-sample/`, so live shop data never changes its baseline. Its map loads live tiles, which can differ from the image; that difference alone does not require a new baseline. That folder also holds the steps to render it again.
 
+## Shop page hosting
+
+`/{npub}` is served by `shop.php` through the rewrite rules in `.htaccess`. The host needs PHP 8 with the curl extension and Apache with `mod_rewrite` and `mod_headers`. Without curl every shop page answers 503, because only curl bounds the whole API call, DNS lookup included, to 3 seconds.
+
 `401.html` is the password gate. It is not a public page and has no baseline.
 
 The deploy workflows exclude `baselines/**` and `**/baselines/**` from the site upload. Leave that exclusion in place.

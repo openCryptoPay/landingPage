@@ -60,86 +60,40 @@ function apiBase(): string
 }
 
 /**
- * GET /map/places/{id} without following redirects. With curl, the whole call
- * (DNS, connect and transfer) is limited to 3 seconds. Without curl, the stream
- * fallback limits the connect and each header read to 3 seconds and stops the
- * body read at a 3-second deadline; the DNS lookup is not bounded there.
+ * GET /map/places/{id} with curl, without following redirects. The whole call
+ * (DNS, connect and transfer) is limited to 3 seconds. The page needs the PHP
+ * curl extension; without it every call fails and the page answers 503,
+ * because no other PHP HTTP client bounds the DNS lookup.
  *
  * @return array{status:int, location:string, body:string}|null null on a network error or timeout
  */
 function fetchPlace(string $id): ?array
 {
     $url = apiBase() . '/map/places/' . rawurlencode($id);
-    if (function_exists('curl_init')) {
-        $location = '';
-        $curl = curl_init($url);
-        curl_setopt_array($curl, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FOLLOWLOCATION => false,
-            CURLOPT_TIMEOUT_MS => API_TIMEOUT_SECONDS * 1000,
-            CURLOPT_CONNECTTIMEOUT_MS => API_TIMEOUT_SECONDS * 1000,
-            CURLOPT_HTTPHEADER => ['Accept: application/json'],
-            CURLOPT_HEADERFUNCTION => static function ($handle, string $line) use (&$location): int {
-                if (stripos($line, 'Location:') === 0) {
-                    $location = trim(substr($line, strlen('Location:')));
-                }
-                return strlen($line);
-            },
-        ]);
-        $body = curl_exec($curl);
-        $status = (int) curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
-        if (PHP_VERSION_ID < 80000) {
-            curl_close($curl);
-        }
-        return is_string($body) && $status > 0 ? ['status' => $status, 'location' => $location, 'body' => $body] : null;
-    }
-    $deadline = microtime(true) + API_TIMEOUT_SECONDS;
-    $context = stream_context_create([
-        'http' => [
-            'method' => 'GET',
-            'timeout' => API_TIMEOUT_SECONDS,
-            'follow_location' => 0,
-            'max_redirects' => 0,
-            'ignore_errors' => true,
-            'header' => "Accept: application/json\r\n",
-        ],
-    ]);
-    $stream = @fopen($url, 'rb', false, $context);
-    if ($stream === false) {
+    if (!function_exists('curl_init')) {
         return null;
     }
-    $body = '';
-    while (!feof($stream)) {
-        $left = $deadline - microtime(true);
-        if ($left <= 0) {
-            fclose($stream);
-            return null;
-        }
-        stream_set_timeout($stream, (int) $left, (int) (($left - (int) $left) * 1000000));
-        $chunk = fread($stream, 8192);
-        if ($chunk === false) {
-            fclose($stream);
-            return null;
-        }
-        $body .= $chunk;
-    }
-    $meta = stream_get_meta_data($stream);
-    fclose($stream);
-    $headers = isset($meta['wrapper_data']) && is_array($meta['wrapper_data']) ? $meta['wrapper_data'] : [];
-    $status = 0;
     $location = '';
-    foreach ($headers as $line) {
-        if (!is_string($line)) {
-            continue;
-        }
-        if (preg_match('#^HTTP/\S+\s+(\d{3})#', $line, $match) === 1) {
-            $status = (int) $match[1];
-            $location = '';
-        } elseif (stripos($line, 'Location:') === 0) {
-            $location = trim(substr($line, strlen('Location:')));
-        }
+    $curl = curl_init($url);
+    curl_setopt_array($curl, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => false,
+        CURLOPT_TIMEOUT_MS => API_TIMEOUT_SECONDS * 1000,
+        CURLOPT_CONNECTTIMEOUT_MS => API_TIMEOUT_SECONDS * 1000,
+        CURLOPT_HTTPHEADER => ['Accept: application/json'],
+        CURLOPT_HEADERFUNCTION => static function ($handle, string $line) use (&$location): int {
+            if (stripos($line, 'Location:') === 0) {
+                $location = trim(substr($line, strlen('Location:')));
+            }
+            return strlen($line);
+        },
+    ]);
+    $body = curl_exec($curl);
+    $status = (int) curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
+    if (PHP_VERSION_ID < 80000) {
+        curl_close($curl);
     }
-    return $status > 0 ? ['status' => $status, 'location' => $location, 'body' => $body] : null;
+    return is_string($body) && $status > 0 ? ['status' => $status, 'location' => $location, 'body' => $body] : null;
 }
 
 /** Activity in words. */
