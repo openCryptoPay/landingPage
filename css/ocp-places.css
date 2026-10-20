@@ -229,25 +229,26 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.15rem;
-  height: 1.15rem;
+  width: 16px;
+  height: 16px;
   margin: 0;
   padding: 0;
-  border: 1px solid #2231ef;
-  border-radius: 50%;
-  background: #fff;
-  color: #2231ef;
-  font-family: Barlow, sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1;
+  border: 0;
+  background: transparent;
+  color: #272b38;
+  line-height: 0;
   cursor: pointer;
 }
 
 .ocp-activity-help:hover,
 .ocp-activity-help:focus-visible {
-  background: #2231ef;
-  color: #fff;
+  color: #2231ef;
+}
+
+.ocp-activity-help:focus-visible {
+  outline: 2px solid #2231ef;
+  outline-offset: 2px;
+  border-radius: 50%;
 }
 
 .ocp-activity-help-panel {
