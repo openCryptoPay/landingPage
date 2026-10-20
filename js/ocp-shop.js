@@ -5,7 +5,7 @@
     var label = button.textContent;
     // The visible text flashes for sighted users; the status element next to
     // the button tells screen readers the result.
-    var status = button.parentNode.querySelector("[role=status]");
+    var status = button.parentNode.querySelector(".ocp-shop-live");
     var timer = null;
     function flash(text) {
       button.textContent = text;
