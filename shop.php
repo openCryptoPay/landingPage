@@ -358,8 +358,8 @@ $activity = activityText(field($place, 'activity'));
 $canonical = SITE_ORIGIN . '/' . $npub;
 $cover = $photos[0]['url'] ?? SITE_OG_IMAGE;
 $summary = $description !== '' ? $description : ($address !== '' ? $address : 'A shop that accepts OpenCryptoPay.');
-if (function_exists('mb_strlen') && mb_strlen($summary) > 300) {
-    $summary = mb_substr($summary, 0, 297) . '…';
+if (cut($summary, 301) !== cut($summary, 300)) {
+    $summary = cut($summary, 297) . '…';
 }
 $directions = $hasPosition
     ? 'https://www.openstreetmap.org/directions?route=' . rawurlencode(';' . $lat . ',' . $lon)
