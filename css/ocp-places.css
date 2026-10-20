@@ -281,6 +281,10 @@
   margin-bottom: 0;
 }
 
+.ocp-activity-help-panel p {
+  margin: 0.75rem 0 0;
+}
+
 .ocp-place-table-wrap td:first-child {
   min-width: 16rem;
   white-space: normal;

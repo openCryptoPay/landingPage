@@ -278,6 +278,20 @@
     }
   }
 
+  // A chosen activity is a minimum. Month keeps Week and Daily.
+  // Idle and None stay exact.
+  function activityMeets(place, selected) {
+    if (!selected) return true;
+    var activity = place.activity;
+    if (selected === "olderThan30Days") return activity === "olderThan30Days";
+    if (selected === "none") {
+      return activity !== "daily" && activity !== "within7Days" && activity !== "within30Days" && activity !== "olderThan30Days";
+    }
+    var need = selected === "daily" ? 3 : selected === "within7Days" ? 2 : selected === "within30Days" ? 1 : 0;
+    var have = activity === "daily" ? 3 : activity === "within7Days" ? 2 : activity === "within30Days" ? 1 : 0;
+    return need > 0 && have >= need;
+  }
+
   function addCell(row, text) {
     var cell = document.createElement("td");
     cell.textContent = text;
@@ -397,9 +411,17 @@
         var nameControl = makeSelect("Name");
         var chainControl = makeSelect("Blockchain");
         var assetControl = makeSelect("Asset");
+        var activityControl = makeSelect("Activity");
         fillSelect(countryControl.select, countryCodes(filtersBody));
         fillNamedSelect(nameControl.select, shopNameOptions(filtersBody));
-        mountFilters([techControl, countryControl, nameControl, chainControl, assetControl]);
+        fillNamedSelect(activityControl.select, [
+          { value: "daily", label: "Daily" },
+          { value: "within7Days", label: "Week" },
+          { value: "within30Days", label: "Month" },
+          { value: "olderThan30Days", label: "Idle" },
+          { value: "none", label: "None" }
+        ]);
+        mountFilters([techControl, countryControl, nameControl, chainControl, assetControl, activityControl]);
 
         var entries = [];
         var matched = [];
@@ -410,12 +432,13 @@
             country: countryControl.select.value,
             shopName: nameControl.select.value,
             blockchain: chainControl.select.value,
-            asset: assetControl.select.value
+            asset: assetControl.select.value,
+            activity: activityControl.select.value
           };
         }
 
         function queryKey(query) {
-          return query.country + "\n" + query.shopName + "\n" + query.blockchain + "\n" + query.asset;
+          return query.country + "\n" + query.shopName + "\n" + query.blockchain + "\n" + query.asset + "\n" + query.activity;
         }
 
         function offerForTech() {
@@ -505,6 +528,7 @@
           if (query.country && place.country !== query.country) return false;
           if (query.shopName === "SPAR" && place.shopName !== "SPAR") return false;
           if (query.shopName === "others" && place.shopName === "SPAR") return false;
+          if (!activityMeets(place, query.activity)) return false;
           if (!query.blockchain && !query.asset) return true;
           var supports = place.supports;
           if (Array.isArray(supports) && supports.length > 0) {
@@ -605,6 +629,7 @@
           reloadPlaces();
         });
         assetControl.select.addEventListener("change", reloadPlaces);
+        activityControl.select.addEventListener("change", reloadPlaces);
         syncPaymentOptions();
         return loadPlaces();
       });
