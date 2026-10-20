@@ -68,7 +68,8 @@ function apiBase(): string
  * curl extension; without it every call fails and the page answers 503,
  * because no other PHP HTTP client bounds the DNS lookup.
  *
- * @return array{status:int, location:string, body:string}|null null on a network error or timeout
+ * @return array{status:int, location:string, body:string}|null null on a network error, a timeout,
+ *     an answer above API_MAX_BYTES, or without curl
  */
 function fetchPlace(string $id): ?array
 {
