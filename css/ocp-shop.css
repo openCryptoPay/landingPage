@@ -233,6 +233,11 @@
     grid-auto-rows: 240px;
   }
 
+  /* Three photos: the first across the full width, the other two below it. */
+  .ocp-shop-gallery[data-count="3"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .ocp-shop-body {
     grid-template-columns: minmax(0, 1fr);
   }

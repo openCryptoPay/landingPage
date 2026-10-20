@@ -23,6 +23,46 @@ const TEXT_MAX = 1000;
 /** Grid cells of the gallery; further photos open in the viewer from the last cell. */
 const GALLERY_CELLS = 5;
 
+/** NIP-19 npub (bech32) of a 64-character hex key, to check that a redirect names the requested key. */
+function npubOf(string $hex): string
+{
+    $charset = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
+    $words = [];
+    $acc = 0;
+    $bits = 0;
+    foreach (str_split((string) hex2bin($hex)) as $char) {
+        $acc = ($acc << 8) | ord($char);
+        $bits += 8;
+        while ($bits >= 5) {
+            $bits -= 5;
+            $words[] = ($acc >> $bits) & 31;
+        }
+    }
+    if ($bits > 0) {
+        $words[] = ($acc << (5 - $bits)) & 31;
+    }
+    $values = [3, 3, 3, 3, 0, 14, 16, 21, 2];
+    $polymod = 1;
+    foreach (array_merge($values, $words, [0, 0, 0, 0, 0, 0]) as $value) {
+        $top = $polymod >> 25;
+        $polymod = (($polymod & 0x1ffffff) << 5) ^ $value;
+        foreach ([0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3] as $i => $gen) {
+            if ((($top >> $i) & 1) === 1) {
+                $polymod ^= $gen;
+            }
+        }
+    }
+    $polymod ^= 1;
+    $out = 'npub1';
+    foreach ($words as $word) {
+        $out .= $charset[$word];
+    }
+    for ($i = 0; $i < 6; $i++) {
+        $out .= $charset[($polymod >> (5 * (5 - $i))) & 31];
+    }
+    return $out;
+}
+
 /** Text and attribute values. */
 function h(string $value): string
 {
@@ -306,7 +346,7 @@ $status = $answer === null ? 0 : $answer['status'];
 $isHex = preg_match(HEX_PATTERN, $id) === 1;
 if ($status === 301 && $answer !== null && $isHex) {
     $target = basename((string) parse_url($answer['location'], PHP_URL_PATH));
-    if (preg_match(NPUB_PATTERN, $target) === 1) {
+    if (preg_match(NPUB_PATTERN, $target) === 1 && hash_equals(npubOf($id), $target)) {
         header('Cache-Control: public, max-age=60');
         header('Location: /' . $target, true, 301);
         exit;
