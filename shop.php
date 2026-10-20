@@ -90,9 +90,6 @@ function fetchPlace(string $id): ?array
     ]);
     $body = curl_exec($curl);
     $status = (int) curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
-    if (PHP_VERSION_ID < 80000) {
-        curl_close($curl);
-    }
     return is_string($body) && $status > 0 ? ['status' => $status, 'location' => $location, 'body' => $body] : null;
 }
 
@@ -413,7 +410,7 @@ pageStart(
               <p><a class="ocp-shop-link" href="/stores.html">All stores</a></p>
             </div>
 <?php if ($hasPosition) { ?>
-            <div class="ocp-shop-map" id="ocp-shop-map" data-lat="<?= h((string) $lat) ?>" data-lon="<?= h((string) $lon) ?>" aria-label="Map"></div>
+            <div class="ocp-shop-map" id="ocp-shop-map" data-lat="<?= h((string) $lat) ?>" data-lon="<?= h((string) $lon) ?>" role="region" aria-label="Map"></div>
 <?php } ?>
           </div>
         </article>

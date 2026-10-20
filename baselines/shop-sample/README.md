@@ -6,7 +6,7 @@ differ from the image; that alone does not require a new baseline. The shop's na
 first caption contain quotes, tags and `</script>`; the image shows them as
 text.
 
-Render it locally (PHP 8):
+Render it locally (PHP 8 with the curl extension):
 
 ```sh
 php -S 127.0.0.1:8462 baselines/shop-sample/sample-api.php &
