@@ -2,8 +2,11 @@
 # with npub1 or is 64 hex characters long.
 RewriteEngine On
 
-# One canonical URL per shop: a trailing slash redirects to the path without it.
-RewriteRule ^(npub1[02-9ac-hj-np-z]{58}|[0-9a-f]{64})/$ /$1 [R=301,L,E=OCP_SHOP_SLASH:1]
+# One canonical URL per shop: a trailing slash redirects to the path without it,
+# on the fixed site origin, so the request's Host header never reaches the target.
+RewriteCond %{HTTP_HOST} ^(www\.)?dev\.opencryptopay\.io(:\d+)?$ [NC]
+RewriteRule ^(npub1[02-9ac-hj-np-z]{58}|[0-9a-f]{64})/$ https://dev.opencryptopay.io/$1 [R=301,L,E=OCP_SHOP_SLASH:1]
+RewriteRule ^(npub1[02-9ac-hj-np-z]{58}|[0-9a-f]{64})/$ https://opencryptopay.io/$1 [R=301,L,E=OCP_SHOP_SLASH:1]
 
 # The redirect is cached like the shop page's own answers.
 <IfModule mod_headers.c>

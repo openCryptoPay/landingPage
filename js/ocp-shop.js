@@ -47,7 +47,7 @@
     var photo = photos[current];
     image.src = photo.getAttribute("data-full") || "";
     var text = photo.getAttribute("data-caption") || "";
-    image.alt = text;
+    image.alt = text || photo.querySelector("img").alt;
     caption.textContent = text;
     caption.hidden = text === "";
   }

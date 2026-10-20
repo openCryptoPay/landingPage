@@ -14,6 +14,8 @@ const HEX_PATTERN = '/^[0-9a-f]{64}$/';
 const SITE_ORIGIN = 'https://opencryptopay.io';
 const SITE_OG_IMAGE = 'https://cdn.prod.website-files.com/670cd765309520b679461de0/67c0616aa3943106098c3e7b_og_image.png';
 const API_TIMEOUT_SECONDS = 3;
+/** Largest API answer the page reads; a shop answer is a few kilobytes. */
+const API_MAX_BYTES = 1048576;
 
 /** Text and attribute values. */
 function h(string $value): string
@@ -61,7 +63,8 @@ function apiBase(): string
 
 /**
  * GET /map/places/{id} with curl, without following redirects. The whole call
- * (DNS, connect and transfer) is limited to 3 seconds. The page needs the PHP
+ * (DNS, connect and transfer) is limited to 3 seconds, and an answer above
+ * API_MAX_BYTES is cut off and treated as an error. The page needs the PHP
  * curl extension; without it every call fails and the page answers 503,
  * because no other PHP HTTP client bounds the DNS lookup.
  *
@@ -74,9 +77,16 @@ function fetchPlace(string $id): ?array
         return null;
     }
     $location = '';
+    $body = '';
     $curl = curl_init($url);
     curl_setopt_array($curl, [
-        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_WRITEFUNCTION => static function ($handle, string $chunk) use (&$body): int {
+            if (strlen($body) + strlen($chunk) > API_MAX_BYTES) {
+                return 0;
+            }
+            $body .= $chunk;
+            return strlen($chunk);
+        },
         CURLOPT_FOLLOWLOCATION => false,
         CURLOPT_TIMEOUT_MS => API_TIMEOUT_SECONDS * 1000,
         CURLOPT_CONNECTTIMEOUT_MS => API_TIMEOUT_SECONDS * 1000,
@@ -88,9 +98,9 @@ function fetchPlace(string $id): ?array
             return strlen($line);
         },
     ]);
-    $body = curl_exec($curl);
+    $done = curl_exec($curl);
     $status = (int) curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
-    return is_string($body) && $status > 0 ? ['status' => $status, 'location' => $location, 'body' => $body] : null;
+    return $done === true && $status > 0 ? ['status' => $status, 'location' => $location, 'body' => $body] : null;
 }
 
 /** Activity in words. */
