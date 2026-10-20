@@ -265,15 +265,15 @@
   function displayedActivity(place) {
     switch (place.activity) {
       case "daily":
-        return "Payments almost every day";
+        return "Daily";
       case "within7Days":
-        return "Payments in the last 7 days";
+        return "Week";
       case "within30Days":
-        return "Payments in the last 30 days";
+        return "Month";
       case "olderThan30Days":
-        return "No payments in the last 30 days";
+        return "Idle";
       default:
-        return "No payments recorded yet";
+        return "None";
     }
   }
 
