@@ -4,7 +4,7 @@
 
 Every public page has one full-page baseline image.
 
-CI runs `scripts/check-baselines.sh`. It checks that each public page in the table has its baseline, that `401.html` has none, and that both deploy workflows still exclude `baselines/**`.
+CI runs `scripts/check-baselines.sh`. It checks that each public page in the table has its baseline, that `401.html` has none, and that both deploy workflows still exclude `baselines/**` and `**/baselines/**` as their own lines.
 
 The image is 1440 CSS pixels wide and shows the page from the top of the header through the bottom of the footer. It lives at `baselines/website-<page>.png`.
 

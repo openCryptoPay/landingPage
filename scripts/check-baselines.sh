@@ -12,6 +12,23 @@ require_file() {
   fi
 }
 
+require_exact_line() {
+  file=$1
+  pattern=$2
+  if ! awk -v pat="$pattern" '
+    {
+      line = $0
+      sub(/^[[:space:]]+/, "", line)
+      sub(/[[:space:]]+$/, "", line)
+      if (line == pat) found = 1
+    }
+    END { exit found ? 0 : 1 }
+  ' "$file"; then
+    printf '%s must exclude %s\n' "$file" "$pattern" >&2
+    exit 1
+  fi
+}
+
 require_file index.html
 require_file baselines/website-home.png
 require_file what-is-open-cryptopay.html
@@ -29,8 +46,6 @@ fi
 
 for workflow in .github/workflows/dev.yaml .github/workflows/prd.yaml; do
   require_file "$workflow"
-  if ! grep -q 'baselines/\*\*' "$workflow"; then
-    printf '%s must exclude baselines/**\n' "$workflow" >&2
-    exit 1
-  fi
+  require_exact_line "$workflow" 'baselines/**'
+  require_exact_line "$workflow" '**/baselines/**'
 done
