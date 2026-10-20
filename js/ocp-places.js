@@ -24,6 +24,7 @@
   if (csvButton) {
     csvButton.addEventListener("click", exportStoresCsv);
   }
+  bindActivityHelp();
   if (own) {
     if (google) google.remove();
     if (googleLegend) googleLegend.remove();
@@ -265,16 +266,30 @@
   function displayedActivity(place) {
     switch (place.activity) {
       case "daily":
-        return "Payments almost every day";
+        return "Daily";
       case "within7Days":
-        return "Payments in the last 7 days";
+        return "Weekly";
       case "within30Days":
-        return "Payments in the last 30 days";
+        return "Monthly";
       case "olderThan30Days":
-        return "No payments in the last 30 days";
+        return "Idle";
       default:
-        return "No payments recorded yet";
+        return "None";
     }
+  }
+
+  // A chosen activity is a minimum. Monthly keeps Weekly and Daily.
+  // Idle and None stay exact.
+  function activityMeets(place, selected) {
+    if (!selected) return true;
+    var activity = place.activity;
+    if (selected === "olderThan30Days") return activity === "olderThan30Days";
+    if (selected === "none") {
+      return activity !== "daily" && activity !== "within7Days" && activity !== "within30Days" && activity !== "olderThan30Days";
+    }
+    var need = selected === "daily" ? 3 : selected === "within7Days" ? 2 : selected === "within30Days" ? 1 : 0;
+    var have = activity === "daily" ? 3 : activity === "within7Days" ? 2 : activity === "within30Days" ? 1 : 0;
+    return need > 0 && have >= need;
   }
 
   function addCell(row, text) {
@@ -295,6 +310,37 @@
     return text;
   }
 
+  function bindActivityHelp() {
+    var button = document.getElementById("ocp-activity-help-button");
+    var panel = document.getElementById("ocp-activity-help");
+    if (!button || !panel || typeof panel.showPopover !== "function") return;
+
+    function place() {
+      if (!panel.matches(":popover-open")) return;
+      var rect = button.getBoundingClientRect();
+      var margin = 8;
+      panel.style.left = "0px";
+      panel.style.top = "0px";
+      var width = panel.offsetWidth;
+      var height = panel.offsetHeight;
+      var left = rect.left;
+      if (left + width > window.innerWidth - margin) left = window.innerWidth - margin - width;
+      if (left < margin) left = margin;
+      var top = rect.bottom + margin;
+      if (top + height > window.innerHeight - margin && rect.top - margin - height >= margin) {
+        top = rect.top - margin - height;
+      }
+      panel.style.left = Math.round(left) + "px";
+      panel.style.top = Math.round(top) + "px";
+    }
+
+    panel.addEventListener("toggle", function (event) {
+      if (event.newState === "open") place();
+    });
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);
+  }
+
   function exportStoresCsv() {
     var csvTable = document.getElementById("ocp-place-table");
     if (!csvTable) return;
@@ -305,7 +351,8 @@
     var lines = [];
     var headerFields = [];
     csvTable.querySelectorAll("thead th").forEach(function (cell) {
-      headerFields.push(csvField(cell.textContent));
+      var label = cell.querySelector(".ocp-col-label");
+      headerFields.push(csvField(label ? label.textContent : cell.textContent));
     });
     lines.push(headerFields.join(","));
     bodyRows.forEach(function (row) {
@@ -364,9 +411,23 @@
         var nameControl = makeSelect("Name");
         var chainControl = makeSelect("Blockchain");
         var assetControl = makeSelect("Asset");
+        // Activity belongs to the stores table. The home map uses this
+        // function and keeps the filters its page already shows.
+        var activityControl = table ? makeSelect("Activity") : null;
         fillSelect(countryControl.select, countryCodes(filtersBody));
         fillNamedSelect(nameControl.select, shopNameOptions(filtersBody));
-        mountFilters([techControl, countryControl, nameControl, chainControl, assetControl]);
+        if (activityControl) {
+          fillNamedSelect(activityControl.select, [
+            { value: "daily", label: "Daily" },
+            { value: "within7Days", label: "Weekly" },
+            { value: "within30Days", label: "Monthly" },
+            { value: "olderThan30Days", label: "Idle" },
+            { value: "none", label: "None" }
+          ]);
+        }
+        var filterControls = [techControl, countryControl, nameControl, chainControl, assetControl];
+        if (activityControl) filterControls.push(activityControl);
+        mountFilters(filterControls);
 
         var entries = [];
         var matched = [];
@@ -377,12 +438,13 @@
             country: countryControl.select.value,
             shopName: nameControl.select.value,
             blockchain: chainControl.select.value,
-            asset: assetControl.select.value
+            asset: assetControl.select.value,
+            activity: activityControl ? activityControl.select.value : ""
           };
         }
 
         function queryKey(query) {
-          return query.country + "\n" + query.shopName + "\n" + query.blockchain + "\n" + query.asset;
+          return query.country + "\n" + query.shopName + "\n" + query.blockchain + "\n" + query.asset + "\n" + query.activity;
         }
 
         function offerForTech() {
@@ -472,6 +534,7 @@
           if (query.country && place.country !== query.country) return false;
           if (query.shopName === "SPAR" && place.shopName !== "SPAR") return false;
           if (query.shopName === "others" && place.shopName === "SPAR") return false;
+          if (!activityMeets(place, query.activity)) return false;
           if (!query.blockchain && !query.asset) return true;
           var supports = place.supports;
           if (Array.isArray(supports) && supports.length > 0) {
@@ -493,11 +556,23 @@
           });
           entries = [];
           var kept = [];
+          var providerRows = [];
+          // Activity narrows the rows. The provider list stays on the other
+          // filters, so a provider with no match does not fall back to All.
+          var providerQuery = {
+            country: query.country,
+            shopName: query.shopName,
+            blockchain: query.blockchain,
+            asset: query.asset,
+            activity: ""
+          };
           places.forEach(function (place) {
-            if (!placeMatchesQuery(place, query)) return;
+            if (!placeMatchesQuery(place, providerQuery)) return;
             if (map && (!finiteCoord(place.lat, -90, 90) || !finiteCoord(place.lon, -180, 180))) {
               return;
             }
+            providerRows.push(place);
+            if (!activityMeets(place, query.activity)) return;
             kept.push(place);
             if (!map) return;
             var markerEl = document.createElement("div");
@@ -517,7 +592,7 @@
             entries.push({ marker: marker, provider: techProviderOf(place) });
           });
           matched = kept;
-          fillSelect(techControl.select, uniqueProviders(kept));
+          fillSelect(techControl.select, uniqueProviders(providerRows));
           if (techControl.select.value !== techBefore) syncPaymentOptions();
           applyFilter();
           if (map) {
@@ -572,6 +647,7 @@
           reloadPlaces();
         });
         assetControl.select.addEventListener("change", reloadPlaces);
+        if (activityControl) activityControl.select.addEventListener("change", reloadPlaces);
         syncPaymentOptions();
         return loadPlaces();
       });
