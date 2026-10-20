@@ -28,7 +28,7 @@ The deploy workflows exclude `baselines/**` and `**/baselines/**` from the site 
 
 ## Shop page hosting
 
-`/{npub}` is served by `shop.php` through the rewrite rules in `.htaccess`. The host needs PHP 8 with the curl extension and Apache with `mod_rewrite` and `mod_headers`. Without curl every shop page answers 503, because only curl bounds the whole API call, DNS lookup included, to 3 seconds.
+`/{npub}` is served by `shop.php` through the rewrite rules in `.htaccess`. The host needs PHP 8 with the curl extension and Apache with `mod_rewrite` and `mod_headers`, with `AllowOverride FileInfo` (or `All`) for the document root so `.htaccess` applies. Without curl every shop page answers 503, because only curl bounds the whole API call, DNS lookup included, to 3 seconds.
 
 ## A38
 

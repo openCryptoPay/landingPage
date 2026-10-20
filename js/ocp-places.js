@@ -603,9 +603,10 @@
             var cover = place.coverPhoto;
             if (cover && typeof cover.url === "string" && /^https:\/\//.test(cover.url)) {
               var coverImage = document.createElement("img");
-              coverImage.src = cover.url;
-              coverImage.alt = "";
               coverImage.loading = "lazy";
+              coverImage.referrerPolicy = "no-referrer";
+              coverImage.alt = "";
+              coverImage.src = cover.url;
               popupNode.appendChild(coverImage);
             }
             var name = document.createElement("strong");

@@ -18,6 +18,10 @@ Then open `http://127.0.0.1:8461/npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6
 at 1440 CSS pixels wide and capture the full page. `OCP_SHOP_API` is read only
 by PHP's built-in server; Apache uses the fixed production and dev API URLs.
 
+The baseline uses the default of three photos. Start the sample API with
+`OCP_SAMPLE_PHOTOS=1` to `10` to look at the other gallery layouts; those
+views are not baselines.
+
 The same sample serves the other answers: the hex key
 `3bf0c63f…459d` answers 301, an unknown npub 404, and
 `npub1qqqq…qqqq` a broken answer, which the page shows as 503.

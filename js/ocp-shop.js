@@ -2,16 +2,29 @@
 // Every value is read from the server-rendered DOM; nothing is inserted as HTML.
 (function () {
   document.querySelectorAll(".ocp-shop-copy").forEach(function (button) {
+    var label = button.textContent;
+    var timer = null;
+    function flash(text) {
+      button.textContent = text;
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        button.textContent = label;
+      }, 1500);
+    }
     button.addEventListener("click", function () {
       var text = button.getAttribute("data-copy") || "";
-      if (!navigator.clipboard) return;
-      navigator.clipboard.writeText(text).then(function () {
-        var label = button.textContent;
-        button.textContent = "Copied";
-        setTimeout(function () {
-          button.textContent = label;
-        }, 1500);
-      });
+      if (!navigator.clipboard) {
+        flash("Copy failed");
+        return;
+      }
+      navigator.clipboard.writeText(text).then(
+        function () {
+          flash("Copied");
+        },
+        function () {
+          flash("Copy failed");
+        }
+      );
     });
   });
 
@@ -46,7 +59,7 @@
     current = (index + photos.length) % photos.length;
     var photo = photos[current];
     image.src = photo.getAttribute("data-full") || "";
-    var text = photo.getAttribute("data-caption") || "";
+    var text = (photo.getAttribute("data-caption") || "").trim();
     image.alt = text || photo.querySelector("img").alt;
     caption.textContent = text;
     caption.hidden = text === "";

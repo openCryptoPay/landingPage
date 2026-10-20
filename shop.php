@@ -16,6 +16,12 @@ const SITE_OG_IMAGE = 'https://cdn.prod.website-files.com/670cd765309520b679461d
 const API_TIMEOUT_SECONDS = 3;
 /** Largest API answer the page reads; a shop answer is a few kilobytes. */
 const API_MAX_BYTES = 1048576;
+/** The page shows at most the API's 10 photos, 50 payment pairs and 1000 characters per text. */
+const PHOTOS_MAX = 10;
+const SUPPORTS_MAX = 50;
+const TEXT_MAX = 1000;
+/** Grid cells of the gallery; further photos open in the viewer from the last cell. */
+const GALLERY_CELLS = 5;
 
 /** Text and attribute values. */
 function h(string $value): string
@@ -32,10 +38,16 @@ function js($value): string
     );
 }
 
-/** A string field of the API answer, or ''. */
+/** The first $max characters of a string (bytes without mbstring; h() replaces a cut sequence). */
+function cut(string $value, int $max): string
+{
+    return function_exists('mb_substr') ? mb_substr($value, 0, $max) : substr($value, 0, $max);
+}
+
+/** A string field of the API answer, trimmed and cut to TEXT_MAX characters, or ''. */
 function field(array $data, string $key): string
 {
-    return isset($data[$key]) && is_string($data[$key]) ? trim($data[$key]) : '';
+    return isset($data[$key]) && is_string($data[$key]) ? cut(trim($data[$key]), TEXT_MAX) : '';
 }
 
 /**
@@ -135,7 +147,9 @@ function photoOf($photo): ?array
         'url' => $photo['url'],
         'width' => isset($photo['width']) && is_int($photo['width']) ? $photo['width'] : null,
         'height' => isset($photo['height']) && is_int($photo['height']) ? $photo['height'] : null,
-        'caption' => isset($photo['caption']) && is_string($photo['caption']) ? $photo['caption'] : '',
+        'caption' => isset($photo['caption']) && is_string($photo['caption'])
+            ? cut(trim($photo['caption']), 200)
+            : '',
     ];
 }
 
@@ -180,7 +194,7 @@ function pageStart(string $title, string $description, string $image, ?string $c
     <div class="container-large-3">
       <div class="nav-wrapper">
         <div class="nav-left">
-          <a href="/index.html" class="brand-3 w-nav-brand"><img src="/images/Open_CryptoPay_logo_full.svg" loading="lazy" alt="" class="image"></a>
+          <a href="/index.html" class="brand-3 w-nav-brand" aria-label="Open CryptoPay home"><img src="/images/Open_CryptoPay_logo_full.svg" loading="lazy" alt="" class="image"></a>
         </div>
         <nav role="navigation" class="nav-menu-2 w-nav-menu">
           <a href="/what-is-open-cryptopay.html" class="nav-link-2 w-nav-link">What is Open CryptoPay?</a>
@@ -317,13 +331,13 @@ $hasPosition = $lat !== null && $lon !== null && abs($lat) <= 90 && abs($lon) <=
 $photos = [];
 foreach (isset($place['photos']) && is_array($place['photos']) ? $place['photos'] : [] as $raw) {
     $photo = photoOf($raw);
-    if ($photo !== null) {
+    if ($photo !== null && count($photos) < PHOTOS_MAX) {
         $photos[] = $photo;
     }
 }
 $supports = [];
 foreach (isset($place['supports']) && is_array($place['supports']) ? $place['supports'] : [] as $pair) {
-    if (is_array($pair) && isset($pair['blockchain'], $pair['asset']) && is_string($pair['blockchain']) && is_string($pair['asset'])) {
+    if (count($supports) < SUPPORTS_MAX && is_array($pair) && isset($pair['blockchain'], $pair['asset']) && is_string($pair['blockchain']) && is_string($pair['asset'])) {
         $supports[] = $pair['blockchain'] . ' · ' . $pair['asset'];
     }
 }
@@ -377,10 +391,13 @@ pageStart(
 ?>
         <article class="ocp-shop">
 <?php if ($photos !== []) { ?>
-          <div class="ocp-shop-gallery" data-count="<?= h((string) count($photos)) ?>">
+          <div class="ocp-shop-gallery" data-count="<?= h((string) min(count($photos), GALLERY_CELLS)) ?>">
 <?php foreach ($photos as $index => $photo) { ?>
-            <button type="button" class="ocp-shop-photo" data-index="<?= h((string) $index) ?>" data-full="<?= h($photo['url']) ?>" data-caption="<?= h($photo['caption']) ?>" aria-label="<?= h('Open photo ' . ($index + 1) . ' of ' . count($photos)) ?>">
+            <button type="button" class="ocp-shop-photo"<?= $index >= GALLERY_CELLS ? ' hidden' : '' ?> data-index="<?= h((string) $index) ?>" data-full="<?= h($photo['url']) ?>" data-caption="<?= h($photo['caption']) ?>" aria-label="<?= h('Open photo ' . ($index + 1) . ' of ' . count($photos)) ?>">
               <img src="<?= h($photo['url']) ?>" alt="<?= h($photo['caption'] !== '' ? $photo['caption'] : $name) ?>"<?= $photo['width'] !== null ? ' width="' . h((string) $photo['width']) . '"' : '' ?><?= $photo['height'] !== null ? ' height="' . h((string) $photo['height']) . '"' : '' ?> loading="<?= $index === 0 ? 'eager' : 'lazy' ?>">
+<?php if ($index === GALLERY_CELLS - 1 && count($photos) > GALLERY_CELLS) { ?>
+              <span class="ocp-shop-more" aria-hidden="true">+<?= h((string) (count($photos) - GALLERY_CELLS)) ?></span>
+<?php } ?>
             </button>
 <?php } ?>
           </div>
@@ -397,7 +414,7 @@ pageStart(
               <dl class="ocp-shop-facts">
 <?php if ($address !== '') { ?>
                 <dt>Address</dt>
-                <dd><?= h($address) ?> · <a href="<?= h($directions) ?>" target="_blank" rel="noopener">Directions</a></dd>
+                <dd><?= h($address) ?> · <a class="ocp-shop-link" href="<?= h($directions) ?>" target="_blank" rel="noopener">Directions</a></dd>
 <?php } ?>
 <?php if ($shopType !== '') { ?>
                 <dt>Shop type</dt>
@@ -415,7 +432,7 @@ pageStart(
                 <dd class="ocp-shop-npub">
                   <code><?= h($npub) ?></code>
                   <button type="button" class="ocp-shop-copy" data-copy="<?= h($npub) ?>">Copy</button>
-                  <a href="<?= h('https://njump.me/' . $npub) ?>" target="_blank" rel="noopener">Open in NOSTR</a>
+                  <a class="ocp-shop-link" href="<?= h('https://njump.me/' . $npub) ?>" target="_blank" rel="noopener">Open in NOSTR</a>
                 </dd>
               </dl>
               <p><a class="ocp-shop-link" href="/stores.html">All stores</a></p>

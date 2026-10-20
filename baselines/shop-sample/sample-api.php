@@ -26,11 +26,17 @@ if (preg_match('#^/photos/([A-Za-z0-9._-]+)$#', $path, $m) === 1) {
 
 header('Content-Type: application/json');
 if ($path === "/map/places/{$npub}") {
-    $photos = [
+    $set = [
         $photo('og_image-p-1080.png', 1080, 567, "Front {$hostile}"),
         $photo('Logo-CTA-Background-p-800.png', 800, 256, null),
         $photo('Check-out-webshop-Compressify.io-p-800.webp', 800, 450, 'Checkout'),
     ];
+    // OCP_SAMPLE_PHOTOS (1 to 10, default 3) repeats the set to show another gallery layout.
+    $count = max(1, min(10, (int) (getenv('OCP_SAMPLE_PHOTOS') ?: 3)));
+    $photos = [];
+    for ($i = 0; $i < $count; $i++) {
+        $photos[] = $set[$i % 3];
+    }
     echo json_encode(['place' => [
         'id' => $npub,
         'origin' => 'sample',
