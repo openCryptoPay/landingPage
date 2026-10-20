@@ -262,6 +262,21 @@
     ], ", ");
   }
 
+  function displayedActivity(place) {
+    switch (place.activity) {
+      case "daily":
+        return "Payments almost every day";
+      case "within7Days":
+        return "Payments in the last 7 days";
+      case "within30Days":
+        return "Payments in the last 30 days";
+      case "olderThan30Days":
+        return "No payments in the last 30 days";
+      default:
+        return "No payments recorded yet";
+    }
+  }
+
   function addCell(row, text) {
     var cell = document.createElement("td");
     cell.textContent = text;
@@ -331,6 +346,7 @@
       var shop = trimmedField(place.shopName);
       addCell(row, shop ? shop : "Others");
       addCell(row, techProviderOf(place));
+      addCell(row, displayedActivity(place));
       tbody.appendChild(row);
     });
   }
