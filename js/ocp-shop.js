@@ -28,21 +28,26 @@
     });
   });
 
+  // A map that cannot start (no WebGL) must not stop the photo viewer below.
   var mapNode = document.getElementById("ocp-shop-map");
   if (mapNode && window.maplibregl) {
     var lat = Number(mapNode.getAttribute("data-lat"));
     var lon = Number(mapNode.getAttribute("data-lon"));
     if (isFinite(lat) && isFinite(lon)) {
-      var map = new maplibregl.Map({
-        container: mapNode,
-        style: "https://tiles.openfreemap.org/styles/liberty",
-        center: [lon, lat],
-        zoom: 15
-      });
-      map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
-      var pin = document.createElement("div");
-      pin.className = "ocp-place-marker";
-      new maplibregl.Marker({ element: pin }).setLngLat([lon, lat]).addTo(map);
+      try {
+        var map = new maplibregl.Map({
+          container: mapNode,
+          style: "https://tiles.openfreemap.org/styles/liberty",
+          center: [lon, lat],
+          zoom: 15
+        });
+        map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+        var pin = document.createElement("div");
+        pin.className = "ocp-place-marker";
+        new maplibregl.Marker({ element: pin }).setLngLat([lon, lat]).addTo(map);
+      } catch (error) {
+        mapNode.hidden = true;
+      }
     }
   }
 

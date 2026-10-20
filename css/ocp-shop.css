@@ -45,6 +45,7 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.ocp-shop-map[hidden],
 .ocp-shop-photo[hidden] {
   display: none;
 }
@@ -169,6 +170,9 @@
 }
 
 .ocp-shop-viewer figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin: 0;
   max-width: 88vw;
   max-height: 88vh;
@@ -176,6 +180,7 @@
 }
 
 .ocp-shop-viewer img {
+  min-height: 0;
   max-width: 88vw;
   max-height: 80vh;
   object-fit: contain;
@@ -183,6 +188,9 @@
 
 .ocp-shop-viewer figcaption {
   margin-top: 12px;
+  max-height: 4.5em;
+  overflow: auto;
+  overflow-wrap: anywhere;
   color: #fff;
 }
 

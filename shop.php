@@ -301,7 +301,10 @@ if (preg_match(NPUB_PATTERN, $id) !== 1 && preg_match(HEX_PATTERN, $id) !== 1) {
 $answer = fetchPlace($id);
 $status = $answer === null ? 0 : $answer['status'];
 
-if ($status === 301 && $answer !== null) {
+// The API answers a hex key with 301 to its npub and an npub with 200 for exactly that npub;
+// any other pairing is treated as a broken answer.
+$isHex = preg_match(HEX_PATTERN, $id) === 1;
+if ($status === 301 && $answer !== null && $isHex) {
     $target = basename((string) parse_url($answer['location'], PHP_URL_PATH));
     if (preg_match(NPUB_PATTERN, $target) === 1) {
         header('Cache-Control: public, max-age=60');
@@ -319,7 +322,7 @@ if ($status === 404) {
 $data = $status === 200 && $answer !== null ? json_decode($answer['body'], true) : null;
 $place = is_array($data) && isset($data['place']) && is_array($data['place']) ? $data['place'] : null;
 $npub = $place === null ? '' : field($place, 'id');
-if ($place === null || preg_match(NPUB_PATTERN, $npub) !== 1) {
+if ($place === null || $isHex || !hash_equals($id, $npub)) {
     messagePage(503, 'Shop unavailable', 'The shop could not be loaded right now. Please try again in a moment.', true);
     exit;
 }
@@ -356,7 +359,8 @@ $techProvider = field($place, 'techProvider');
 $category = field($place, 'category');
 $activity = activityText(field($place, 'activity'));
 $canonical = SITE_ORIGIN . '/' . $npub;
-$cover = $photos[0]['url'] ?? SITE_OG_IMAGE;
+$coverPhoto = isset($place['coverPhoto']) ? photoOf($place['coverPhoto']) : null;
+$cover = $coverPhoto['url'] ?? $photos[0]['url'] ?? SITE_OG_IMAGE;
 $summary = $description !== '' ? $description : ($address !== '' ? $address : 'A shop that accepts OpenCryptoPay.');
 if (cut($summary, 301) !== cut($summary, 300)) {
     $summary = cut($summary, 297) . '…';
