@@ -2,10 +2,11 @@
 
 `baselines/website-shop.png` is `shop.php` rendered against this fixed sample
 shop, so live shop data never changes it. The map loads live tiles, which can
-differ from the image; that alone does not require a new baseline. The shop's name, description and address
-contain quotes, tags and `</script>`; the image shows them as text. The first
-caption holds the same characters; it only appears in the page source
-(`data-caption`, `alt`) and in the photo viewer, where it is escaped too.
+differ from the image; that alone does not require a new baseline. The shop's
+name, description and address contain quotes, tags and `</script>`; the image
+shows them as text. The first caption holds the same characters; it only
+appears in the page source (`data-caption`, `alt`) and in the photo viewer,
+where it is escaped too.
 
 Render it locally (PHP 8 with the curl extension):
 

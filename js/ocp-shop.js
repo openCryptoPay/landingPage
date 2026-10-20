@@ -74,8 +74,9 @@
 
   function open(index) {
     opener = document.activeElement;
-    show(index);
+    // Shown before show() fills the live region, so screen readers announce the first photo.
     viewer.hidden = false;
+    show(index);
     document.body.classList.add("ocp-shop-viewer-open");
     viewer.querySelector(".ocp-shop-viewer-close").focus();
   }
