@@ -16,7 +16,7 @@ const SITE_OG_IMAGE = 'https://cdn.prod.website-files.com/670cd765309520b679461d
 const API_TIMEOUT_SECONDS = 3;
 /** Largest API answer the page reads; a shop answer is a few kilobytes. */
 const API_MAX_BYTES = 1048576;
-/** The page shows at most the API's 10 photos, 50 payment pairs and 1000 characters per text. */
+/** The page shows at most the API's 10 photos, 50 payment pairs (100 characters per name) and 1000 characters per text. */
 const PHOTOS_MAX = 10;
 const SUPPORTS_MAX = 50;
 const TEXT_MAX = 1000;
@@ -34,14 +34,20 @@ function js($value): string
 {
     return (string) json_encode(
         $value,
-        JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+        JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE
     );
 }
 
-/** The first $max characters of a string (bytes without mbstring; h() replaces a cut sequence). */
+/**
+ * The first $max characters of a string. Without mbstring a UTF-8 pattern cuts
+ * by character; only text that is not valid UTF-8 is cut by bytes.
+ */
 function cut(string $value, int $max): string
 {
-    return function_exists('mb_substr') ? mb_substr($value, 0, $max) : substr($value, 0, $max);
+    if (function_exists('mb_substr')) {
+        return mb_substr($value, 0, $max);
+    }
+    return preg_match('/^.{0,' . $max . '}/su', $value, $match) === 1 ? $match[0] : substr($value, 0, $max);
 }
 
 /** A string field of the API answer, trimmed and cut to TEXT_MAX characters, or ''. */
@@ -338,7 +344,11 @@ foreach (isset($place['photos']) && is_array($place['photos']) ? $place['photos'
 $supports = [];
 foreach (isset($place['supports']) && is_array($place['supports']) ? $place['supports'] : [] as $pair) {
     if (count($supports) < SUPPORTS_MAX && is_array($pair) && isset($pair['blockchain'], $pair['asset']) && is_string($pair['blockchain']) && is_string($pair['asset'])) {
-        $supports[] = $pair['blockchain'] . ' · ' . $pair['asset'];
+        $chain = cut(trim($pair['blockchain']), 100);
+        $asset = cut(trim($pair['asset']), 100);
+        if ($chain !== '' && $asset !== '') {
+            $supports[] = $chain . ' · ' . $asset;
+        }
     }
 }
 $shopType = field($place, 'shopType');
