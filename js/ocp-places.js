@@ -556,11 +556,23 @@
           });
           entries = [];
           var kept = [];
+          var providerRows = [];
+          // Activity narrows the rows. The provider list stays on the other
+          // filters, so a provider with no match does not fall back to All.
+          var providerQuery = {
+            country: query.country,
+            shopName: query.shopName,
+            blockchain: query.blockchain,
+            asset: query.asset,
+            activity: ""
+          };
           places.forEach(function (place) {
-            if (!placeMatchesQuery(place, query)) return;
+            if (!placeMatchesQuery(place, providerQuery)) return;
             if (map && (!finiteCoord(place.lat, -90, 90) || !finiteCoord(place.lon, -180, 180))) {
               return;
             }
+            providerRows.push(place);
+            if (!activityMeets(place, query.activity)) return;
             kept.push(place);
             if (!map) return;
             var markerEl = document.createElement("div");
@@ -580,7 +592,7 @@
             entries.push({ marker: marker, provider: techProviderOf(place) });
           });
           matched = kept;
-          fillSelect(techControl.select, uniqueProviders(kept));
+          fillSelect(techControl.select, uniqueProviders(providerRows));
           if (techControl.select.value !== techBefore) syncPaymentOptions();
           applyFilter();
           if (map) {
