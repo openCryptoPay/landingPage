@@ -25,13 +25,50 @@
   font-size: 0.9rem;
 }
 
+.ocp-place-marker,
+.ocp-activity-swatch {
+  background: #ffe3cc;
+}
+
+.ocp-place-marker.is-daily,
+.ocp-activity-swatch.is-daily {
+  background: #ff4d00;
+}
+
+.ocp-place-marker.is-weekly,
+.ocp-activity-swatch.is-weekly {
+  background: #ff7a29;
+}
+
+.ocp-place-marker.is-monthly,
+.ocp-activity-swatch.is-monthly {
+  background: #ffa05c;
+}
+
+.ocp-place-marker.is-idle,
+.ocp-activity-swatch.is-idle {
+  background: #ffc48f;
+}
+
+.ocp-place-marker.is-none,
+.ocp-activity-swatch.is-none {
+  background: #ffe3cc;
+}
+
 .ocp-place-marker {
   width: 14px;
   height: 14px;
   border: 2px solid #fff;
   border-radius: 50%;
-  background: #d23b3b;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+}
+
+.ocp-activity-swatch {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.28);
 }
 
 .ocp-map-filters {

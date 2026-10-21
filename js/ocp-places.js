@@ -19,6 +19,7 @@
 
   var google = document.getElementById("ocp-google");
   var googleLegend = document.getElementById("ocp-google-legend");
+  var activityLegend = document.getElementById("ocp-activity-legend");
   var blurb = document.getElementById("ocp-map-blurb");
   var note = document.getElementById("ocp-places-note");
   var tableWrap = document.getElementById("ocp-place-table-wrap");
@@ -30,6 +31,7 @@
   if (own) {
     if (google) google.remove();
     if (googleLegend) googleLegend.remove();
+    if (activityLegend) activityLegend.hidden = false;
     own.hidden = false;
     if (note) note.hidden = false;
     if (blurb) {
@@ -284,6 +286,21 @@
         return "Idle";
       default:
         return "None";
+    }
+  }
+
+  function activityMarkerClass(place) {
+    switch (place.activity) {
+      case "daily":
+        return "ocp-place-marker is-daily";
+      case "within7Days":
+        return "ocp-place-marker is-weekly";
+      case "within30Days":
+        return "ocp-place-marker is-monthly";
+      case "olderThan30Days":
+        return "ocp-place-marker is-idle";
+      default:
+        return "ocp-place-marker is-none";
     }
   }
 
@@ -599,7 +616,8 @@
             kept.push(place);
             if (!map) return;
             var markerEl = document.createElement("div");
-            markerEl.className = "ocp-place-marker";
+            markerEl.className = activityMarkerClass(place);
+            markerEl.title = displayedActivity(place);
             var popupNode = document.createElement("div");
             popupNode.className = "ocp-place-popup";
             var cover = place.coverPhoto;
