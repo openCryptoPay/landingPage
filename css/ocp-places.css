@@ -27,7 +27,6 @@
   font-size: 0.9rem;
 }
 
-.ocp-place-marker,
 .ocp-activity-swatch {
   background: #ffe3cc;
 }
@@ -62,6 +61,7 @@
   height: 14px;
   border: 2px solid #fff;
   border-radius: 50%;
+  background: #d23b3b;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
 }
 
