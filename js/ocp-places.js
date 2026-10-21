@@ -1040,7 +1040,7 @@
 
   if (own) {
     loadCss("css/maplibre-gl.css");
-    loadCss("css/ocp-places.css?v=a33bcea");
+    loadCss("css/ocp-places.css?v=02d050b");
 
     loadScript("js/maplibre-gl.js")
       .then(function () {
