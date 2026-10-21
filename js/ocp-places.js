@@ -19,7 +19,6 @@
 
   var google = document.getElementById("ocp-google");
   var googleLegend = document.getElementById("ocp-google-legend");
-  var activityLegend = document.getElementById("ocp-activity-legend");
   var blurb = document.getElementById("ocp-map-blurb");
   var note = document.getElementById("ocp-places-note");
   var tableWrap = document.getElementById("ocp-place-table-wrap");
@@ -31,7 +30,6 @@
   if (own) {
     if (google) google.remove();
     if (googleLegend) googleLegend.remove();
-    if (activityLegend) activityLegend.hidden = false;
     own.hidden = false;
     if (note) note.hidden = false;
     if (blurb) {
@@ -212,6 +210,324 @@
       select.appendChild(option);
     });
     select.value = keep ? previous : "";
+  }
+
+  var ACTIVITY_LABELS = {
+    daily: "Daily",
+    within7Days: "Weekly",
+    within30Days: "Monthly",
+    olderThan30Days: "Idle",
+    none: "None"
+  };
+
+  var ACTIVITY_SWATCHES = {
+    daily: "is-daily",
+    within7Days: "is-weekly",
+    within30Days: "is-monthly",
+    olderThan30Days: "is-idle",
+    none: "is-none"
+  };
+
+  var symbolSelects = [];
+  var symbolSelectSeq = 0;
+
+  function iconUrl(value) {
+    if (typeof value !== "string") return "";
+    var url = value.trim();
+    if (!/^https:\/\//.test(url)) return "";
+    return url;
+  }
+
+  function symbolMap(body, group) {
+    var symbols = body && body.symbols;
+    var map = symbols && symbols[group];
+    if (!map || typeof map !== "object" || Array.isArray(map)) return {};
+    return map;
+  }
+
+  function activityOptions(body) {
+    return stringList(body, "activities").map(function (value) {
+      var option = {
+        value: value,
+        label: ACTIVITY_LABELS[value] || value
+      };
+      if (ACTIVITY_SWATCHES[value]) option.swatch = ACTIVITY_SWATCHES[value];
+      return option;
+    });
+  }
+
+  function namedSymbolOptions(names, icons) {
+    return names.map(function (name) {
+      var option = { value: name, label: name };
+      var url = iconUrl(icons[name]);
+      if (url) option.icon = url;
+      return option;
+    });
+  }
+
+  function paintSymbolMark(node, item) {
+    while (node.firstChild) node.removeChild(node.firstChild);
+    if (!item || (!item.swatch && !item.icon)) {
+      node.hidden = true;
+      return;
+    }
+    node.hidden = false;
+    if (item.swatch) {
+      var swatch = document.createElement("span");
+      swatch.className = "ocp-activity-swatch " + item.swatch;
+      swatch.setAttribute("aria-hidden", "true");
+      node.appendChild(swatch);
+      return;
+    }
+    var image = document.createElement("img");
+    image.className = "ocp-symbol-filter-icon";
+    image.alt = "";
+    image.src = item.icon;
+    image.addEventListener("error", function () {
+      node.hidden = true;
+    });
+    node.appendChild(image);
+  }
+
+  function makeSymbolSelect(captionText) {
+    var root = document.createElement("div");
+    root.className = "ocp-tech-provider ocp-symbol-filter";
+    var caption = document.createElement("span");
+    caption.className = "ocp-tech-provider-label";
+    caption.appendChild(document.createTextNode(captionText));
+    root.appendChild(caption);
+
+    var button = document.createElement("button");
+    button.type = "button";
+    button.className = "ocp-symbol-filter-value";
+    button.setAttribute("aria-haspopup", "listbox");
+    button.setAttribute("aria-expanded", "false");
+    var valueMark = document.createElement("span");
+    valueMark.className = "ocp-symbol-filter-mark";
+    valueMark.hidden = true;
+    var valueText = document.createElement("span");
+    valueText.className = "ocp-symbol-filter-text";
+    valueText.appendChild(document.createTextNode("All"));
+    button.appendChild(valueMark);
+    button.appendChild(valueText);
+    root.appendChild(button);
+
+    var menu = document.createElement("div");
+    menu.className = "ocp-symbol-filter-menu";
+    menu.hidden = true;
+    menu.setAttribute("role", "listbox");
+    var controlId = "ocp-symbol-filter-" + symbolSelectSeq;
+    symbolSelectSeq += 1;
+    caption.id = controlId + "-label";
+    valueText.id = controlId + "-value";
+    button.id = controlId;
+    menu.id = controlId + "-menu";
+    button.setAttribute("aria-labelledby", caption.id + " " + valueText.id);
+    button.setAttribute("aria-controls", menu.id);
+    root.appendChild(menu);
+
+    var current = "";
+    var options = [];
+    var listeners = [];
+    var open = false;
+    var control = {
+      root: root,
+      close: function () {
+        open = false;
+        root.classList.remove("is-open");
+        menu.hidden = true;
+        button.setAttribute("aria-expanded", "false");
+      }
+    };
+
+    function selectedOption() {
+      for (var i = 0; i < options.length; i += 1) {
+        if (options[i].value === current) return options[i];
+      }
+      return null;
+    }
+
+    function paintValue() {
+      var match = selectedOption();
+      valueText.textContent = match ? match.label : "All";
+      paintSymbolMark(valueMark, match);
+      var nodes = menu.querySelectorAll("[role='option']");
+      for (var i = 0; i < nodes.length; i += 1) {
+        nodes[i].setAttribute("aria-selected", nodes[i].getAttribute("data-value") === current ? "true" : "false");
+      }
+    }
+
+    function choose(next) {
+      control.close();
+      button.focus();
+      if (next === current) return;
+      current = next;
+      paintValue();
+      listeners.forEach(function (fn) { fn(); });
+    }
+
+    function renderMenu() {
+      while (menu.firstChild) menu.removeChild(menu.firstChild);
+      function addOption(item) {
+        var option = document.createElement("button");
+        option.type = "button";
+        option.className = "ocp-symbol-filter-option";
+        option.setAttribute("role", "option");
+        option.tabIndex = -1;
+        option.setAttribute("data-value", item.value);
+        var mark = document.createElement("span");
+        mark.className = "ocp-symbol-filter-mark";
+        paintSymbolMark(mark, item);
+        var text = document.createElement("span");
+        text.appendChild(document.createTextNode(item.label));
+        option.appendChild(mark);
+        option.appendChild(text);
+        option.addEventListener("click", function () {
+          choose(item.value);
+        });
+        menu.appendChild(option);
+      }
+      addOption({ value: "", label: "All" });
+      options.forEach(addOption);
+      paintValue();
+    }
+
+    function optionNodes() {
+      return menu.querySelectorAll("[role='option']");
+    }
+
+    function focusOption(index) {
+      var nodes = optionNodes();
+      if (!nodes.length) return;
+      var next = index;
+      if (next < 0) next = nodes.length - 1;
+      if (next >= nodes.length) next = 0;
+      nodes[next].focus();
+    }
+
+    function openMenu() {
+      symbolSelects.forEach(function (other) {
+        if (other !== control) other.close();
+      });
+      open = true;
+      root.classList.add("is-open");
+      menu.hidden = false;
+      button.setAttribute("aria-expanded", "true");
+      var nodes = optionNodes();
+      var index = 0;
+      for (var i = 0; i < nodes.length; i += 1) {
+        if (nodes[i].getAttribute("data-value") === current) index = i;
+      }
+      if (nodes[index]) nodes[index].focus();
+    }
+
+    root.addEventListener("click", function (event) {
+      if (menu.contains(event.target)) return;
+      if (open) {
+        control.close();
+        button.focus();
+        return;
+      }
+      openMenu();
+    });
+
+    button.addEventListener("keydown", function (event) {
+      if (event.key === "ArrowDown" || event.key === "ArrowUp" || event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        if (!open) {
+          openMenu();
+          return;
+        }
+        if (event.key === "ArrowDown") focusOption(0);
+        if (event.key === "ArrowUp") focusOption(-1);
+        return;
+      }
+      if (event.key === "Escape" && open) {
+        event.preventDefault();
+        control.close();
+      }
+    });
+
+    menu.addEventListener("keydown", function (event) {
+      var nodes = optionNodes();
+      var index = -1;
+      for (var i = 0; i < nodes.length; i += 1) {
+        if (nodes[i] === document.activeElement) index = i;
+      }
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        focusOption(index + 1);
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault();
+        focusOption(index - 1);
+      } else if (event.key === "Home") {
+        event.preventDefault();
+        focusOption(0);
+      } else if (event.key === "End") {
+        event.preventDefault();
+        focusOption(nodes.length - 1);
+      } else if (event.key === "Escape") {
+        event.preventDefault();
+        control.close();
+        button.focus();
+      } else if (event.key === "Tab") {
+        control.close();
+      }
+    });
+
+    control.isOpen = function () { return open; };
+    control.focusButton = function () { button.focus(); };
+    symbolSelects.push(control);
+    if (symbolSelects.length === 1) {
+      document.addEventListener("click", function (event) {
+        symbolSelects.forEach(function (item) {
+          if (!item.root.contains(event.target)) item.close();
+        });
+      });
+      document.addEventListener("keydown", function (event) {
+        if (event.key !== "Escape") return;
+        var restore = null;
+        symbolSelects.forEach(function (item) {
+          if (item.isOpen()) restore = item;
+          item.close();
+        });
+        if (restore) restore.focusButton();
+      });
+    }
+    renderMenu();
+
+    return {
+      label: root,
+      fill: function (next) {
+        var previous = current;
+        options = [];
+        next.forEach(function (item) {
+          if (!item || typeof item.value !== "string" || !item.value || typeof item.label !== "string") return;
+          options.push(item);
+        });
+        var keep = previous === "";
+        options.forEach(function (item) {
+          if (item.value === previous) keep = true;
+        });
+        current = keep ? previous : "";
+        renderMenu();
+      },
+      select: {
+        get value() { return current; },
+        set value(next) {
+          var value = typeof next === "string" ? next : "";
+          var known = value === "";
+          for (var i = 0; i < options.length; i += 1) {
+            if (options[i].value === value) known = true;
+          }
+          current = known ? value : "";
+          paintValue();
+        },
+        addEventListener: function (type, fn) {
+          if (type === "change") listeners.push(fn);
+        }
+      }
+    };
   }
 
   function makeSelect(captionText) {
@@ -449,24 +765,15 @@
         var techControl = makeSelect("Tech Provider");
         var countryControl = makeSelect("Country");
         var nameControl = makeSelect("Name");
-        var chainControl = makeSelect("Blockchain");
-        var assetControl = makeSelect("Asset");
-        // Activity belongs to the stores table. The home map uses this
-        // function and keeps the filters its page already shows.
-        var activityControl = table ? makeSelect("Activity") : null;
+        var chainControl = makeSymbolSelect("Blockchain");
+        var assetControl = makeSymbolSelect("Asset");
+        var activityControl = makeSymbolSelect("Activity");
+        var blockchainIcons = symbolMap(filtersBody, "blockchains");
+        var assetIcons = symbolMap(filtersBody, "assets");
         fillSelect(countryControl.select, countryCodes(filtersBody));
         fillNamedSelect(nameControl.select, shopNameOptions(filtersBody));
-        if (activityControl) {
-          fillNamedSelect(activityControl.select, [
-            { value: "daily", label: "Daily" },
-            { value: "within7Days", label: "Weekly" },
-            { value: "within30Days", label: "Monthly" },
-            { value: "olderThan30Days", label: "Idle" },
-            { value: "none", label: "None" }
-          ]);
-        }
-        var filterControls = [techControl, countryControl, nameControl, chainControl, assetControl];
-        if (activityControl) filterControls.push(activityControl);
+        activityControl.fill(activityOptions(filtersBody));
+        var filterControls = [techControl, countryControl, nameControl, chainControl, assetControl, activityControl];
         mountFilters(filterControls);
 
         var entries = [];
@@ -479,7 +786,7 @@
             shopName: nameControl.select.value,
             blockchain: chainControl.select.value,
             asset: assetControl.select.value,
-            activity: activityControl ? activityControl.select.value : ""
+            activity: activityControl.select.value
           };
         }
 
@@ -503,8 +810,8 @@
 
         function syncPaymentOptions() {
           var spec = offerForTech();
-          fillSelect(chainControl.select, specTokens(spec, "blockchains"));
-          fillSelect(assetControl.select, assetsFor(spec, chainControl.select.value));
+          chainControl.fill(namedSymbolOptions(specTokens(spec, "blockchains"), blockchainIcons));
+          assetControl.fill(namedSymbolOptions(assetsFor(spec, chainControl.select.value), assetIcons));
         }
 
         function applyFilter() {
@@ -706,7 +1013,7 @@
           reloadPlaces();
         });
         assetControl.select.addEventListener("change", reloadPlaces);
-        if (activityControl) activityControl.select.addEventListener("change", reloadPlaces);
+        activityControl.select.addEventListener("change", reloadPlaces);
         syncPaymentOptions();
         return loadPlaces();
       });

@@ -31,12 +31,14 @@ require_exact_line() {
 
 require_file index.html
 require_file baselines/website-home.png
+require_file baselines/website-home-daily.png
 require_file what-is-open-cryptopay.html
 require_file baselines/website-what-is-open-cryptopay.png
 require_file ecosystem.html
 require_file baselines/website-ecosystem.png
 require_file stores.html
 require_file baselines/website-stores.png
+require_file baselines/website-stores-daily.png
 require_file shop.php
 require_file baselines/website-shop.png
 require_file 401.html
