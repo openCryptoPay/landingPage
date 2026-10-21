@@ -23,6 +23,9 @@
   var note = document.getElementById("ocp-places-note");
   var tableWrap = document.getElementById("ocp-place-table-wrap");
   var csvButton = document.getElementById("ocp-stores-csv");
+  var storesView = "table";
+  var rowsRendered = false;
+  var lastRowCount = 0;
   if (csvButton) {
     csvButton.addEventListener("click", exportStoresCsv);
   }
@@ -558,6 +561,7 @@
       var before = mapWrapper || own;
       before.parentNode.insertBefore(row, before);
     }
+    return row;
   }
 
   function trimmedField(value) {
@@ -719,18 +723,35 @@
     URL.revokeObjectURL(objectUrl);
   }
 
-  function renderRows(places) {
-    var tbody = table.querySelector("tbody");
-    while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
-    if (places.length === 0) {
+  function syncStoresChrome() {
+    var wrap = document.getElementById("ocp-stores-map-wrap");
+    if (storesView === "table" && lastRowCount === 0) {
+      if (wrap) wrap.hidden = true;
       tableWrap.hidden = true;
       if (csvButton) csvButton.hidden = true;
       setNote("No locations published yet.");
       return;
     }
+    if (storesView === "table") {
+      if (wrap) wrap.hidden = true;
+      tableWrap.hidden = false;
+      if (csvButton) csvButton.hidden = false;
+      hideNote();
+      return;
+    }
+    if (wrap) wrap.hidden = false;
+    tableWrap.hidden = true;
+    if (csvButton) csvButton.hidden = true;
+    if (lastRowCount === 0) {
+      setNote("No locations published yet.");
+      return;
+    }
     hideNote();
-    tableWrap.hidden = false;
-    if (csvButton) csvButton.hidden = false;
+  }
+
+  function renderRows(places) {
+    var tbody = table.querySelector("tbody");
+    while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
     places.forEach(function (place) {
       var row = document.createElement("tr");
       var path = shopPath(place);
@@ -753,6 +774,9 @@
       addCell(row, displayedActivity(place));
       tbody.appendChild(row);
     });
+    rowsRendered = true;
+    lastRowCount = places.length;
+    syncStoresChrome();
   }
 
   function loadPlacesUi(map) {
@@ -775,11 +799,12 @@
         fillNamedSelect(nameControl.select, shopNameOptions(filtersBody));
         activityControl.fill(activityOptions(filtersBody));
         var filterControls = [techControl, countryControl, nameControl, chainControl, assetControl, activityControl];
-        mountFilters(filterControls);
+        var filterRow = mountFilters(filterControls);
 
         var entries = [];
         var matched = [];
         var placesTask = null;
+        var visibleMarkers = [];
 
         function currentQuery() {
           return {
@@ -815,9 +840,26 @@
           assetControl.fill(namedSymbolOptions(assetsFor(spec, chainControl.select.value), assetIcons));
         }
 
+        function frameVisibleMarkers() {
+          if (!map) return;
+          var wrap = document.getElementById("ocp-stores-map-wrap");
+          if (wrap && wrap.hidden) return;
+          if (visibleMarkers.length === 0) return;
+          if (visibleMarkers.length === 1) {
+            map.setCenter(visibleMarkers[0].getLngLat());
+            map.setZoom(12);
+            return;
+          }
+          var bounds = new maplibregl.LngLatBounds();
+          visibleMarkers.forEach(function (marker) {
+            bounds.extend(marker.getLngLat());
+          });
+          map.fitBounds(bounds, { padding: 48, maxZoom: 12 });
+        }
+
         function applyFilter() {
           var selected = techControl.select.value;
-          if (!map) {
+          if (table) {
             var rows = [];
             matched.forEach(function (place) {
               if (!selected || techProviderOf(place) === selected) {
@@ -828,31 +870,76 @@
               return displayedName(a).localeCompare(displayedName(b));
             });
             renderRows(rows);
-            return;
           }
-          var visible = [];
+          if (!map) return;
+          visibleMarkers = [];
           entries.forEach(function (entry) {
             if (!selected || entry.provider === selected) {
               entry.marker.addTo(map);
-              visible.push(entry.marker);
+              visibleMarkers.push(entry.marker);
             } else {
               entry.marker.remove();
             }
           });
-          if (visible.length === 0) {
-            return;
-          }
-          if (visible.length === 1) {
-            map.setCenter(visible[0].getLngLat());
-            map.setZoom(12);
-            return;
-          }
-          var bounds = new maplibregl.LngLatBounds();
-          visible.forEach(function (marker) {
-            bounds.extend(marker.getLngLat());
-          });
-          map.fitBounds(bounds, { padding: 48, maxZoom: 12 });
+          frameVisibleMarkers();
         }
+
+        function mountStoresViewSwitch(row) {
+          if (!map || !table || !row) return;
+          var wrap = document.getElementById("ocp-stores-map-wrap");
+          if (!wrap) return;
+          var switchRoot = document.createElement("div");
+          switchRoot.className = "ocp-view-switch";
+          var pill = document.createElement("div");
+          pill.className = "ocp-view-switch-pill";
+          pill.setAttribute("role", "group");
+          pill.setAttribute("aria-label", "View");
+          var mapButton = document.createElement("button");
+          mapButton.type = "button";
+          mapButton.className = "ocp-view-switch-choice";
+          mapButton.setAttribute("aria-pressed", "false");
+          mapButton.appendChild(document.createTextNode("Map"));
+          var tableButton = document.createElement("button");
+          tableButton.type = "button";
+          tableButton.className = "ocp-view-switch-choice";
+          tableButton.setAttribute("aria-pressed", "true");
+          tableButton.appendChild(document.createTextNode("Table"));
+          pill.appendChild(mapButton);
+          pill.appendChild(tableButton);
+          switchRoot.appendChild(pill);
+          row.appendChild(switchRoot);
+
+          function resizeStoresMap() {
+            if (!map || wrap.hidden) return;
+            map.resize();
+            frameVisibleMarkers();
+          }
+
+          function chooseView(next) {
+            mapButton.setAttribute("aria-pressed", next === "map" ? "true" : "false");
+            tableButton.setAttribute("aria-pressed", next === "table" ? "true" : "false");
+            if (storesView === next) return;
+            storesView = next;
+            if (!rowsRendered) {
+              wrap.hidden = next !== "map";
+              tableWrap.hidden = true;
+              if (csvButton) csvButton.hidden = true;
+              if (next === "map") resizeStoresMap();
+              return;
+            }
+            syncStoresChrome();
+            if (next === "map") resizeStoresMap();
+          }
+
+          mapButton.addEventListener("click", function () {
+            chooseView("map");
+          });
+          tableButton.addEventListener("click", function () {
+            chooseView("table");
+          });
+        }
+
+        mountStoresViewSwitch(filterRow);
 
         function pairMatches(item, blockchain, asset) {
           if (!item || typeof item !== "object") return false;
@@ -916,13 +1003,14 @@
           };
           places.forEach(function (place) {
             if (!placeMatchesQuery(place, providerQuery)) return;
-            if (map && (!finiteCoord(place.lat, -90, 90) || !finiteCoord(place.lon, -180, 180))) {
+            if (map && !table && (!finiteCoord(place.lat, -90, 90) || !finiteCoord(place.lon, -180, 180))) {
               return;
             }
             providerRows.push(place);
             if (!activityMeets(place, query.activity)) return;
             kept.push(place);
             if (!map) return;
+            if (!finiteCoord(place.lat, -90, 90) || !finiteCoord(place.lon, -180, 180)) return;
             var markerEl = document.createElement("div");
             markerEl.className = activityMarkerClass(place);
             markerEl.title = displayedActivity(place);
@@ -962,7 +1050,7 @@
           fillSelect(techControl.select, uniqueProviders(providerRows));
           if (techControl.select.value !== techBefore) syncPaymentOptions();
           applyFilter();
-          if (map) {
+          if (map && !table) {
             if (entries.length === 0) {
               setNote("No locations published yet.");
             } else {
@@ -1056,6 +1144,29 @@
       })
       .catch(onPlacesFailure);
   } else {
-    loadPlacesUi(null).catch(onPlacesFailure);
+    var storesMap = document.getElementById("ocp-stores-map");
+    if (storesMap) {
+      loadCss("css/maplibre-gl.css");
+      loadScript("js/maplibre-gl.js")
+        .then(function () {
+          try {
+            var map = new maplibregl.Map({
+              container: storesMap,
+              style: "https://tiles.openfreemap.org/styles/liberty",
+              center: [8.23, 46.8],
+              zoom: 7
+            });
+            map.addControl(new maplibregl.NavigationControl(), "top-right");
+            return loadPlacesUi(map);
+          } catch (error) {
+            return loadPlacesUi(null).catch(onPlacesFailure);
+          }
+        })
+        .catch(function () {
+          return loadPlacesUi(null).catch(onPlacesFailure);
+        });
+    } else {
+      loadPlacesUi(null).catch(onPlacesFailure);
+    }
   }
 })();
