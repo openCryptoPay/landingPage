@@ -382,7 +382,8 @@
         text.appendChild(document.createTextNode(item.label));
         option.appendChild(mark);
         option.appendChild(text);
-        option.addEventListener("click", function () {
+        option.addEventListener("click", function (event) {
+          event.stopPropagation();
           choose(item.value);
         });
         menu.appendChild(option);
