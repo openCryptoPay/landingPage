@@ -14,14 +14,21 @@ The image is 1440 CSS pixels wide and shows the page from the top of the header 
 | `what-is-open-cryptopay.html` | `baselines/website-what-is-open-cryptopay.png` |
 | `ecosystem.html` | `baselines/website-ecosystem.png` |
 | `stores.html` | `baselines/website-stores.png` |
+| `shop.php` (`/{npub}`) | `baselines/website-shop.png` |
 
 A new public page adds its baseline in the same change. A change to a page's markup, style, or copy updates that page's baseline in the same change.
 
 Places loaded from the map API can differ from the image. That difference alone does not require a new baseline.
 
+The shop page is rendered against the fixed sample shop in `baselines/shop-sample/`, so live shop data never changes its baseline. Its map loads live tiles, which can differ from the image; that difference alone does not require a new baseline. That folder also holds the steps to render it again.
+
 `401.html` is the password gate. It is not a public page and has no baseline.
 
 The deploy workflows exclude `baselines/**` and `**/baselines/**` from the site upload. Leave that exclusion in place.
+
+## Shop page hosting
+
+`/{npub}` is served by `shop.php` through the rewrite rules in `.htaccess`. The host needs PHP 8 with the curl extension and Apache with `mod_rewrite` and `mod_headers`, with `AllowOverride FileInfo` (or `All`) for the document root so `.htaccess` applies. Without curl every shop page answers 503, because only curl bounds the whole API call, DNS lookup included, to 3 seconds.
 
 ## A38
 

@@ -17,5 +17,6 @@ Each baseline is one full page, 1440 CSS pixels wide, from the header through th
 | `what-is-open-cryptopay.html` | `baselines/website-what-is-open-cryptopay.png` |
 | `ecosystem.html` | `baselines/website-ecosystem.png` |
 | `stores.html` | `baselines/website-stores.png` |
+| `shop.php` (`/{npub}`) | `baselines/website-shop.png` |
 
 `401.html` is the password gate and has no baseline. Data loaded from the map API may differ from the image; that alone is not a reason to reject.

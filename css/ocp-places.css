@@ -329,3 +329,19 @@
 .ocp-places-api[hidden] {
   display: none;
 }
+
+.ocp-place-popup img {
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.ocp-place-popup-details {
+  display: inline-block;
+  margin-top: 6px;
+  font-weight: 600;
+}

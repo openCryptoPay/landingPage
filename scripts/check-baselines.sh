@@ -37,6 +37,8 @@ require_file ecosystem.html
 require_file baselines/website-ecosystem.png
 require_file stores.html
 require_file baselines/website-stores.png
+require_file shop.php
+require_file baselines/website-shop.png
 require_file 401.html
 
 if [ -e baselines/website-401.png ]; then

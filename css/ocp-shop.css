@@ -1,0 +1,268 @@
+/* Shop page (shop.php). Uses the site's fonts and colors from opencryptopay.webflow.css. */
+
+.ocp-shop {
+  font-family: var(--font--body-l-desktop);
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.ocp-shop-gallery {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: 180px;
+  gap: 8px;
+}
+
+.ocp-shop-gallery[data-count="1"] {
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-rows: 360px;
+}
+
+.ocp-shop-photo:first-child {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+.ocp-shop-gallery[data-count="1"] .ocp-shop-photo:first-child,
+.ocp-shop-gallery[data-count="2"] .ocp-shop-photo:first-child,
+.ocp-shop-gallery[data-count="4"] .ocp-shop-photo:first-child {
+  grid-column: auto;
+  grid-row: auto;
+}
+
+/* Every count fills its grid: 2 side by side, 3 as one large and two stacked,
+   4 as a 2 by 2 grid, 5 and more as one large and four small. */
+.ocp-shop-gallery[data-count="2"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: 360px;
+}
+
+.ocp-shop-gallery[data-count="3"] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ocp-shop-gallery[data-count="4"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ocp-shop-map[hidden],
+.ocp-shop-photo[hidden] {
+  display: none;
+}
+
+.ocp-shop-more {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 12, 16, 0.55);
+  color: #fff;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.ocp-shop-photo {
+  position: relative;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: zoom-in;
+  background: #eef0f3;
+}
+
+.ocp-shop-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ocp-shop-body {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 32px;
+  align-items: start;
+}
+
+.ocp-shop-name {
+  margin-bottom: 4px;
+  overflow-wrap: anywhere;
+}
+
+.ocp-shop-category {
+  margin: 0 0 16px;
+  color: #6b7280;
+  text-transform: capitalize;
+}
+
+.ocp-shop-description {
+  overflow-wrap: anywhere;
+}
+
+.ocp-shop-facts {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 10px 24px;
+  margin: 24px 0;
+}
+
+.ocp-shop-facts dt {
+  font-weight: 600;
+}
+
+.ocp-shop-facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.ocp-shop-npub code {
+  font-size: 13px;
+  word-break: break-all;
+}
+
+.ocp-shop-copy {
+  margin: 0 8px;
+  padding: 2px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.ocp-shop-map {
+  width: 100%;
+  height: 320px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.ocp-shop-message {
+  padding: 48px 0;
+}
+
+.ocp-shop-button,
+.ocp-shop-link {
+  font-weight: 600;
+  color: var(--brand-colors--opc-blue);
+  text-decoration: none;
+}
+
+.ocp-shop-button:hover,
+.ocp-shop-link:hover {
+  text-decoration: underline;
+}
+
+.ocp-shop-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 12, 16, 0.92);
+}
+
+.ocp-shop-viewer[hidden] {
+  display: none;
+}
+
+.ocp-shop-viewer figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  max-width: 88vw;
+  max-height: 88vh;
+  text-align: center;
+}
+
+.ocp-shop-viewer img {
+  min-height: 0;
+  max-width: 88vw;
+  max-height: 80vh;
+  object-fit: contain;
+}
+
+.ocp-shop-viewer figcaption {
+  margin-top: 12px;
+  max-height: 4.5em;
+  overflow: auto;
+  overflow-wrap: anywhere;
+  color: #fff;
+}
+
+.ocp-shop-viewer button {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(10, 12, 16, 0.6);
+  color: #fff;
+  font-size: 36px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+.ocp-shop-viewer button[hidden] {
+  display: none;
+}
+
+.ocp-shop-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.ocp-shop-viewer-close {
+  top: 8px;
+  right: 8px;
+}
+
+.ocp-shop-viewer-prev {
+  left: 8px;
+}
+
+.ocp-shop-viewer-next {
+  right: 8px;
+}
+
+.ocp-shop-viewer-open {
+  overflow: hidden;
+}
+
+@media (max-width: 767px) {
+  .ocp-shop-gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: 140px;
+  }
+
+  .ocp-shop-gallery[data-count="1"],
+  .ocp-shop-gallery[data-count="2"] {
+    grid-auto-rows: 240px;
+  }
+
+  /* Three photos: the first across the full width, the other two below it. */
+  .ocp-shop-gallery[data-count="3"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ocp-shop-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ocp-shop-map {
+    height: 240px;
+  }
+}
