@@ -2,7 +2,7 @@
 
 ## Page baselines
 
-Every public page has one full-page baseline of the page as it first loads. The home page and the stores page also have a full-page baseline with Daily selected in the activity filter.
+Every public page has one full-page baseline of the page as it first loads. The home page and the stores page also have a full-page baseline with the activity menu open, and a full-page baseline with Daily selected in the activity filter.
 
 CI runs `scripts/check-baselines.sh`. It checks that each file in the table exists, that `401.html` has none, and that both deploy workflows still exclude `baselines/**` and `**/baselines/**` as their own lines.
 
@@ -11,14 +11,16 @@ Each image is 1440 CSS pixels wide and shows the page from the top of the header
 | Page | Baseline |
 | --- | --- |
 | `index.html` | `baselines/website-home.png` |
+| `index.html`, activity menu open | `baselines/website-home-activity.png` |
 | `index.html`, Daily selected | `baselines/website-home-daily.png` |
 | `what-is-open-cryptopay.html` | `baselines/website-what-is-open-cryptopay.png` |
 | `ecosystem.html` | `baselines/website-ecosystem.png` |
 | `stores.html` | `baselines/website-stores.png` |
+| `stores.html`, activity menu open | `baselines/website-stores-activity.png` |
 | `stores.html`, Daily selected | `baselines/website-stores-daily.png` |
 | `shop.php` (`/{npub}`) | `baselines/website-shop.png` |
 
-A new public page adds its baseline in the same change. A change to a page's markup, style, or copy updates that page's baseline in the same change. A change to the activity filter also updates the Daily baseline of that page.
+A new public page adds its baseline in the same change. A change to a page's markup, style, or copy updates that page's baseline in the same change. A change to the activity filter also updates the open-menu baseline and the Daily baseline of that page. The open-menu image shows All, Daily, Weekly, Monthly, Idle, and None.
 
 Places loaded from the map API can differ from the image. That difference alone does not require a new baseline.
 
