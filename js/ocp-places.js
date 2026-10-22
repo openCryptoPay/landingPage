@@ -24,6 +24,7 @@
   var tableWrap = document.getElementById("ocp-place-table-wrap");
   var csvButton = document.getElementById("ocp-stores-csv");
   var storesView = "table";
+  var placesLoadFailed = false;
   var rowsRendered = false;
   var lastRowCount = 0;
   if (csvButton) {
@@ -729,24 +730,24 @@
       if (wrap) wrap.hidden = true;
       tableWrap.hidden = true;
       if (csvButton) csvButton.hidden = true;
-      setNote("No locations published yet.");
+      if (!placesLoadFailed) setNote("No locations published yet.");
       return;
     }
     if (storesView === "table") {
       if (wrap) wrap.hidden = true;
       tableWrap.hidden = false;
       if (csvButton) csvButton.hidden = false;
-      hideNote();
+      if (!placesLoadFailed) hideNote();
       return;
     }
     if (wrap) wrap.hidden = false;
     tableWrap.hidden = true;
     if (csvButton) csvButton.hidden = true;
     if (lastRowCount === 0) {
-      setNote("No locations published yet.");
+      if (!placesLoadFailed) setNote("No locations published yet.");
       return;
     }
-    hideNote();
+    if (!placesLoadFailed) hideNote();
   }
 
   function renderRows(places) {
@@ -983,6 +984,7 @@
         }
 
         function showPlaces(places) {
+          placesLoadFailed = false;
           var techBefore = techControl.select.value;
           var query = currentQuery();
           var queryBefore = queryKey(query);
@@ -1085,6 +1087,7 @@
         function reloadPlaces() {
           loadPlaces().catch(function (error) {
             if (error && error.name === "AbortError") return;
+            placesLoadFailed = true;
             setNote("The place list could not be loaded.");
           });
         }
@@ -1104,12 +1107,17 @@
         assetControl.select.addEventListener("change", reloadPlaces);
         activityControl.select.addEventListener("change", reloadPlaces);
         syncPaymentOptions();
-        return loadPlaces();
+        return loadPlaces().catch(function (error) {
+          if (error && error.name === "AbortError") return;
+          placesLoadFailed = true;
+          setNote("The place list could not be loaded.");
+        });
       });
   }
 
   function onPlacesFailure(error) {
     if (error && error.name === "AbortError") return;
+    placesLoadFailed = true;
     setNote("The place list could not be loaded.");
   }
 
