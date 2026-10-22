@@ -508,3 +508,63 @@
   margin-top: 6px;
   font-weight: 600;
 }
+
+#ocp-stores-map-wrap[hidden] {
+  display: none;
+}
+
+.ocp-view-switch {
+  flex-basis: 100%;
+}
+
+.ocp-view-switch-pill {
+  display: inline-flex;
+  box-sizing: border-box;
+  align-items: center;
+  height: 40px;
+  padding: 3px;
+  border: 1px solid #ced1da;
+  border-radius: 20px;
+  background: #fff;
+  color: #272b38;
+  font-family: Barlow, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  letter-spacing: -0.01em;
+}
+
+.ocp-view-switch-pill:focus-within {
+  outline: 2px solid #2231ef;
+  outline-offset: 2px;
+}
+
+.ocp-view-switch-choice {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  margin: 0;
+  padding: 0 0.9rem;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  color: #272b38;
+  font-family: Barlow, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.ocp-view-switch-choice:focus {
+  outline: none;
+}
+
+.ocp-view-switch-choice[aria-pressed="true"] {
+  background: #272b38;
+  color: #fff;
+}
