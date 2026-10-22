@@ -568,3 +568,14 @@
   background: #272b38;
   color: #fff;
 }
+
+/* Half of the shared map field (42.5rem, and 32rem below 767px). Stores and shop keep the full field. */
+.padding-global.padding-section-map:not(.ocp-stores-page) .map {
+  height: 21.25rem;
+}
+
+@media screen and (max-width: 767px) {
+  .padding-global.padding-section-map:not(.ocp-stores-page) .map {
+    height: 16rem;
+  }
+}

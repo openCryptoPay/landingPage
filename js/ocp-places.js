@@ -35,7 +35,6 @@
     if (google) google.remove();
     if (googleLegend) googleLegend.remove();
     own.hidden = false;
-    if (note) note.hidden = false;
     if (blurb) {
       blurb.textContent = "Locations published in the OpenCryptoPay place list.";
     }
@@ -1144,20 +1143,28 @@
 
   if (own) {
     loadCss("css/maplibre-gl.css");
-    loadCss("css/ocp-places.css?v=02d050b");
+    loadCss("css/ocp-places.css?v=20261022b");
 
     loadScript("js/maplibre-gl.js")
       .then(function () {
-        var map = new maplibregl.Map({
-          container: own,
-          style: "https://tiles.openfreemap.org/styles/liberty",
-          center: [8.23, 46.8],
-          zoom: 7
-        });
-        map.addControl(new maplibregl.NavigationControl(), "top-right");
-        return loadPlacesUi(map);
+        try {
+          var map = new maplibregl.Map({
+            container: own,
+            style: "https://tiles.openfreemap.org/styles/liberty",
+            center: [8.23, 46.8],
+            zoom: 7
+          });
+          map.addControl(new maplibregl.NavigationControl(), "top-right");
+          return loadPlacesUi(map).catch(onPlacesFailure);
+        } catch (error) {
+          showStoresTableBecauseMapDidNotStart();
+          return loadPlacesUi(null).catch(onPlacesFailure);
+        }
       })
-      .catch(onPlacesFailure);
+      .catch(function () {
+        showStoresTableBecauseMapDidNotStart();
+        return loadPlacesUi(null).catch(onPlacesFailure);
+      });
   } else {
     var storesMap = document.getElementById("ocp-stores-map");
     if (storesMap) {
