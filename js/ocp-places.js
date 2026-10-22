@@ -23,7 +23,7 @@
   var note = document.getElementById("ocp-places-note");
   var tableWrap = document.getElementById("ocp-place-table-wrap");
   var csvButton = document.getElementById("ocp-stores-csv");
-  var storesView = "table";
+  var storesView = "map";
   var placesLoadFailed = false;
   var rowsRendered = false;
   var lastRowCount = 0;
@@ -898,12 +898,12 @@
           var mapButton = document.createElement("button");
           mapButton.type = "button";
           mapButton.className = "ocp-view-switch-choice";
-          mapButton.setAttribute("aria-pressed", "false");
+          mapButton.setAttribute("aria-pressed", storesView === "map" ? "true" : "false");
           mapButton.appendChild(document.createTextNode("Map"));
           var tableButton = document.createElement("button");
           tableButton.type = "button";
           tableButton.className = "ocp-view-switch-choice";
-          tableButton.setAttribute("aria-pressed", "true");
+          tableButton.setAttribute("aria-pressed", storesView === "table" ? "true" : "false");
           tableButton.appendChild(document.createTextNode("Table"));
           pill.appendChild(mapButton);
           pill.appendChild(tableButton);
@@ -1122,6 +1122,12 @@
     setNote("The place list could not be loaded.");
   }
 
+  function showStoresTableBecauseMapDidNotStart() {
+    storesView = "table";
+    var wrap = document.getElementById("ocp-stores-map-wrap");
+    if (wrap) wrap.hidden = true;
+  }
+
   if (table) {
     var apiNote = document.getElementById("ocp-places-api");
     if (apiNote) {
@@ -1168,13 +1174,16 @@
             map.addControl(new maplibregl.NavigationControl(), "top-right");
             return loadPlacesUi(map);
           } catch (error) {
+            showStoresTableBecauseMapDidNotStart();
             return loadPlacesUi(null).catch(onPlacesFailure);
           }
         })
         .catch(function () {
+          showStoresTableBecauseMapDidNotStart();
           return loadPlacesUi(null).catch(onPlacesFailure);
         });
     } else {
+      showStoresTableBecauseMapDidNotStart();
       loadPlacesUi(null).catch(onPlacesFailure);
     }
   }
