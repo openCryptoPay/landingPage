@@ -1062,6 +1062,7 @@
           if (queryKey(currentQuery()) !== queryBefore) {
             loadPlaces().catch(function (error) {
               if (error && error.name === "AbortError") return;
+              placesLoadFailed = true;
               setNote("The place list could not be loaded.");
             });
           }
