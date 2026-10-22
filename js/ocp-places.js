@@ -1172,7 +1172,7 @@
               zoom: 7
             });
             map.addControl(new maplibregl.NavigationControl(), "top-right");
-            return loadPlacesUi(map);
+            return loadPlacesUi(map).catch(onPlacesFailure);
           } catch (error) {
             showStoresTableBecauseMapDidNotStart();
             return loadPlacesUi(null).catch(onPlacesFailure);
