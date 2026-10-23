@@ -294,17 +294,6 @@
   }
 }
 
-.ocp-stores-link {
-  display: flex;
-  justify-content: center;
-  margin-top: 2.75rem;
-  margin-bottom: 2.75rem;
-}
-
-.ocp-stores-link[hidden] {
-  display: none;
-}
-
 .padding-global.padding-section-map.ocp-stores-page {
   padding-bottom: 4rem;
 }
@@ -567,4 +556,95 @@
 .ocp-view-switch-choice[aria-pressed="true"] {
   background: #272b38;
   color: #fff;
+}
+
+.ocp-home-places-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem 2rem;
+}
+
+.ocp-stores-page-link {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  margin-top: 0.7rem;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid #e5e6eb;
+  border-radius: 0.75rem;
+  background: #fff;
+  color: #272b38;
+  font-family: Barlow, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.ocp-stores-page-link:hover,
+.ocp-stores-page-link:focus-visible {
+  color: #2231ef;
+  border-color: #2231ef;
+}
+
+.ocp-stores-page-link:focus-visible {
+  outline: 2px solid #2231ef;
+  outline-offset: 2px;
+}
+
+@media screen and (max-width: 767px) {
+  .ocp-home-places-head {
+    flex-direction: column;
+  }
+
+  .ocp-stores-page-link {
+    margin-top: 0;
+  }
+}
+
+/* Half of the shared map field (42.5rem, and 32rem below 767px). Stores and shop keep the full field. */
+.padding-global.padding-section-map:not(.ocp-stores-page) .map {
+  height: 21.25rem;
+}
+
+/* The home table fills the same frame as the map. The map is pulled 2px outside that frame, so the table is 2px shorter than the map element. Rows scroll inside it. The stores table stays as tall as its rows. */
+.padding-global.padding-section-map:not(.ocp-stores-page) .ocp-place-table-wrap {
+  box-sizing: border-box;
+  height: calc(21.25rem - 2px);
+  overflow: auto;
+  scrollbar-color: #c5c8d0 transparent;
+  scrollbar-width: thin;
+}
+
+.padding-global.padding-section-map:not(.ocp-stores-page) .ocp-place-table-wrap::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.padding-global.padding-section-map:not(.ocp-stores-page) .ocp-place-table-wrap::-webkit-scrollbar-thumb {
+  background: #c5c8d0;
+  border-radius: 8px;
+}
+
+.padding-global.padding-section-map:not(.ocp-stores-page) .ocp-place-table-wrap table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.padding-global.padding-section-map:not(.ocp-stores-page) .ocp-place-table-wrap th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+@media screen and (max-width: 767px) {
+  .padding-global.padding-section-map:not(.ocp-stores-page) .map {
+    height: 16rem;
+  }
+
+  .padding-global.padding-section-map:not(.ocp-stores-page) .ocp-place-table-wrap {
+    height: calc(16rem - 2px);
+  }
 }

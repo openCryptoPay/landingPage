@@ -23,7 +23,7 @@
   var note = document.getElementById("ocp-places-note");
   var tableWrap = document.getElementById("ocp-place-table-wrap");
   var csvButton = document.getElementById("ocp-stores-csv");
-  var storesView = "table";
+  var storesView = "map";
   var placesLoadFailed = false;
   var rowsRendered = false;
   var lastRowCount = 0;
@@ -35,12 +35,9 @@
     if (google) google.remove();
     if (googleLegend) googleLegend.remove();
     own.hidden = false;
-    if (note) note.hidden = false;
     if (blurb) {
       blurb.textContent = "Locations published in the OpenCryptoPay place list.";
     }
-    var storesLink = document.querySelector(".ocp-stores-link");
-    if (storesLink) storesLink.hidden = false;
   }
 
   function setNote(text) {
@@ -898,12 +895,12 @@
           var mapButton = document.createElement("button");
           mapButton.type = "button";
           mapButton.className = "ocp-view-switch-choice";
-          mapButton.setAttribute("aria-pressed", "false");
+          mapButton.setAttribute("aria-pressed", storesView === "map" ? "true" : "false");
           mapButton.appendChild(document.createTextNode("Map"));
           var tableButton = document.createElement("button");
           tableButton.type = "button";
           tableButton.className = "ocp-view-switch-choice";
-          tableButton.setAttribute("aria-pressed", "true");
+          tableButton.setAttribute("aria-pressed", storesView === "table" ? "true" : "false");
           tableButton.appendChild(document.createTextNode("Table"));
           pill.appendChild(mapButton);
           pill.appendChild(tableButton);
@@ -1122,6 +1119,12 @@
     setNote("The place list could not be loaded.");
   }
 
+  function showStoresTableBecauseMapDidNotStart() {
+    storesView = "table";
+    var wrap = document.getElementById("ocp-stores-map-wrap");
+    if (wrap) wrap.hidden = true;
+  }
+
   if (table) {
     var apiNote = document.getElementById("ocp-places-api");
     if (apiNote) {
@@ -1138,20 +1141,28 @@
 
   if (own) {
     loadCss("css/maplibre-gl.css");
-    loadCss("css/ocp-places.css?v=02d050b");
+    loadCss("css/ocp-places.css?v=20261023c");
 
     loadScript("js/maplibre-gl.js")
       .then(function () {
-        var map = new maplibregl.Map({
-          container: own,
-          style: "https://tiles.openfreemap.org/styles/liberty",
-          center: [8.23, 46.8],
-          zoom: 7
-        });
-        map.addControl(new maplibregl.NavigationControl(), "top-right");
-        return loadPlacesUi(map);
+        try {
+          var map = new maplibregl.Map({
+            container: own,
+            style: "https://tiles.openfreemap.org/styles/liberty",
+            center: [8.23, 46.8],
+            zoom: 7
+          });
+          map.addControl(new maplibregl.NavigationControl(), "top-right");
+          return loadPlacesUi(map).catch(onPlacesFailure);
+        } catch (error) {
+          showStoresTableBecauseMapDidNotStart();
+          return loadPlacesUi(null).catch(onPlacesFailure);
+        }
       })
-      .catch(onPlacesFailure);
+      .catch(function () {
+        showStoresTableBecauseMapDidNotStart();
+        return loadPlacesUi(null).catch(onPlacesFailure);
+      });
   } else {
     var storesMap = document.getElementById("ocp-stores-map");
     if (storesMap) {
@@ -1166,15 +1177,18 @@
               zoom: 7
             });
             map.addControl(new maplibregl.NavigationControl(), "top-right");
-            return loadPlacesUi(map);
+            return loadPlacesUi(map).catch(onPlacesFailure);
           } catch (error) {
+            showStoresTableBecauseMapDidNotStart();
             return loadPlacesUi(null).catch(onPlacesFailure);
           }
         })
         .catch(function () {
+          showStoresTableBecauseMapDidNotStart();
           return loadPlacesUi(null).catch(onPlacesFailure);
         });
     } else {
+      showStoresTableBecauseMapDidNotStart();
       loadPlacesUi(null).catch(onPlacesFailure);
     }
   }
