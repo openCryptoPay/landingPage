@@ -1141,7 +1141,7 @@
 
   if (own) {
     loadCss("css/maplibre-gl.css");
-    loadCss("css/ocp-places.css?v=20261023b");
+    loadCss("css/ocp-places.css?v=20261023c");
 
     loadScript("js/maplibre-gl.js")
       .then(function () {
