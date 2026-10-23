@@ -1,3 +1,15 @@
+/* 80ch is the paragraph measure. The 48px heading does not fit in that column. */
+.home-map_header-wrapper {
+  position: relative;
+  z-index: 2;
+  max-width: none;
+}
+
+.home-map_header-wrapper > .paragraph,
+.home-map_header-wrapper > .home-map_legend {
+  max-width: 80ch;
+}
+
 .map-wrapper {
   position: relative;
 }
@@ -15,6 +27,35 @@
   font-size: 0.9rem;
 }
 
+.ocp-activity-swatch {
+  background: #ffe3cc;
+}
+
+.ocp-place-marker.is-daily,
+.ocp-activity-swatch.is-daily {
+  background: #ff4d00;
+}
+
+.ocp-place-marker.is-weekly,
+.ocp-activity-swatch.is-weekly {
+  background: #ff7a29;
+}
+
+.ocp-place-marker.is-monthly,
+.ocp-activity-swatch.is-monthly {
+  background: #ffa05c;
+}
+
+.ocp-place-marker.is-idle,
+.ocp-activity-swatch.is-idle {
+  background: #ffc48f;
+}
+
+.ocp-place-marker.is-none,
+.ocp-activity-swatch.is-none {
+  background: #ffe3cc;
+}
+
 .ocp-place-marker {
   width: 14px;
   height: 14px;
@@ -22,6 +63,145 @@
   border-radius: 50%;
   background: #d23b3b;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+}
+
+.ocp-activity-swatch {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.28);
+}
+
+.ocp-map-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.ocp-symbol-filter {
+  position: relative;
+}
+
+.ocp-symbol-filter-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  box-sizing: border-box;
+  min-width: 7.5rem;
+  height: 38px;
+  margin: 0;
+  padding: 0 1.15rem 0 0;
+  border: 0;
+  background-color: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23272b38' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right center;
+  background-size: 12px 8px;
+  color: #272b38;
+  font-family: Barlow, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.ocp-symbol-filter:hover .ocp-symbol-filter-value,
+.ocp-symbol-filter:focus-within .ocp-symbol-filter-value {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%232231ef' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.ocp-symbol-filter-value:focus {
+  outline: none;
+}
+
+.ocp-symbol-filter-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ocp-symbol-filter-mark {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+}
+
+.ocp-symbol-filter-mark[hidden] {
+  display: none;
+}
+
+.ocp-symbol-filter-icon {
+  display: block;
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.ocp-symbol-filter-menu {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  min-width: 100%;
+  max-height: 16rem;
+  margin: 0;
+  padding: 0.35rem;
+  overflow: auto;
+  border: 1px solid #ced1da;
+  border-radius: 0.75rem;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(16, 24, 39, 0.12);
+}
+
+.ocp-symbol-filter-menu[hidden] {
+  display: none;
+}
+
+.ocp-symbol-filter-option {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.4rem 0.65rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: #272b38;
+  font-family: Barlow, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  letter-spacing: -0.01em;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.ocp-symbol-filter-option:hover,
+.ocp-symbol-filter-option:focus-visible,
+.ocp-symbol-filter-option[aria-selected="true"] {
+  background: #f4f5f8;
+}
+
+.ocp-symbol-filter-option:focus-visible {
+  outline: 2px solid #2231ef;
+  outline-offset: -2px;
+}
+
+@media screen and (max-width: 767px) {
+  .ocp-symbol-filter-value {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+  }
 }
 
 .ocp-tech-provider {
@@ -111,5 +291,360 @@
     flex: 1 1 auto;
     width: auto;
     min-width: 0;
+  }
+}
+
+.padding-global.padding-section-map.ocp-stores-page {
+  padding-bottom: 4rem;
+}
+
+.ocp-stores-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.ocp-stores-csv {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid #e5e6eb;
+  border-radius: 0.75rem;
+  background: #fff;
+  color: #272b38;
+  font-family: Barlow, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  cursor: pointer;
+}
+
+.ocp-stores-csv[hidden] {
+  display: none;
+}
+
+.ocp-places-note.is-static {
+  position: static;
+  margin: 1rem 0 0;
+}
+
+.ocp-place-table-wrap {
+  display: block;
+  margin-top: 2.75rem;
+  overflow-x: auto;
+  border: 1px solid #e5e6eb;
+  border-radius: 1.25rem;
+  background: #fff;
+}
+
+.ocp-place-table-wrap[hidden] {
+  display: none;
+}
+
+.ocp-place-table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #272b38;
+  font-family: Barlow, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.ocp-place-table-wrap th,
+.ocp-place-table-wrap td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e5e6eb;
+  text-align: left;
+  vertical-align: top;
+}
+
+.ocp-place-table-wrap tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.ocp-place-table-wrap th {
+  background: #f7f8fa;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ocp-activity-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ocp-activity-help {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #272b38;
+  line-height: 0;
+  cursor: pointer;
+}
+
+.ocp-activity-help:hover,
+.ocp-activity-help:focus-visible {
+  color: #2231ef;
+}
+
+.ocp-activity-help:focus-visible {
+  outline: 2px solid #2231ef;
+  outline-offset: 2px;
+  border-radius: 50%;
+}
+
+.ocp-activity-help-panel {
+  inset: auto;
+  width: min(18rem, calc(100vw - 1.5rem));
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid #e5e6eb;
+  border-radius: 0.75rem;
+  background: #fff;
+  color: #272b38;
+  font-family: Barlow, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  box-shadow: 0 8px 24px rgba(16, 24, 39, 0.12);
+}
+
+.ocp-activity-help-panel dl {
+  margin: 0;
+}
+
+.ocp-activity-help-panel dt {
+  font-weight: 600;
+}
+
+.ocp-activity-help-panel dd {
+  margin: 0 0 0.55rem;
+}
+
+.ocp-activity-help-panel dd:last-child {
+  margin-bottom: 0;
+}
+
+.ocp-activity-help-panel p {
+  margin: 0.75rem 0 0;
+}
+
+.ocp-place-table-wrap td:first-child {
+  min-width: 16rem;
+  white-space: normal;
+}
+
+.ocp-place-table-wrap td:not(:first-child) {
+  white-space: nowrap;
+}
+
+.ocp-place-table-wrap td:nth-child(2),
+.ocp-place-table-wrap td:last-child {
+  white-space: normal;
+}
+
+.ocp-places-api {
+  margin-top: 1rem;
+  color: #5c6370;
+  font-family: Barlow, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.ocp-places-api p {
+  margin: 0 0 0.35rem;
+}
+
+.ocp-places-api p:last-child {
+  margin-bottom: 0;
+}
+
+.ocp-places-api a {
+  color: #5c6370;
+  text-decoration: underline;
+}
+
+.ocp-places-api code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+
+.ocp-places-api[hidden] {
+  display: none;
+}
+
+.ocp-place-popup img {
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.ocp-place-popup-details {
+  display: inline-block;
+  margin-top: 6px;
+  font-weight: 600;
+}
+
+#ocp-stores-map-wrap[hidden] {
+  display: none;
+}
+
+.ocp-view-switch {
+  flex-basis: 100%;
+}
+
+.ocp-view-switch-pill {
+  display: inline-flex;
+  box-sizing: border-box;
+  align-items: center;
+  height: 40px;
+  padding: 3px;
+  border: 1px solid #ced1da;
+  border-radius: 20px;
+  background: #fff;
+  color: #272b38;
+  font-family: Barlow, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  letter-spacing: -0.01em;
+}
+
+.ocp-view-switch-pill:focus-within {
+  outline: 2px solid #2231ef;
+  outline-offset: 2px;
+}
+
+.ocp-view-switch-choice {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  margin: 0;
+  padding: 0 0.9rem;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  color: #272b38;
+  font-family: Barlow, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.ocp-view-switch-choice:focus {
+  outline: none;
+}
+
+.ocp-view-switch-choice[aria-pressed="true"] {
+  background: #272b38;
+  color: #fff;
+}
+
+.ocp-home-places-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem 2rem;
+}
+
+.ocp-stores-page-link {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  margin-top: 0.7rem;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid #e5e6eb;
+  border-radius: 0.75rem;
+  background: #fff;
+  color: #272b38;
+  font-family: Barlow, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.ocp-stores-page-link:hover,
+.ocp-stores-page-link:focus-visible {
+  color: #2231ef;
+  border-color: #2231ef;
+}
+
+.ocp-stores-page-link:focus-visible {
+  outline: 2px solid #2231ef;
+  outline-offset: 2px;
+}
+
+@media screen and (max-width: 767px) {
+  .ocp-home-places-head {
+    flex-direction: column;
+  }
+
+  .ocp-stores-page-link {
+    margin-top: 0;
+  }
+}
+
+/* Half of the shared map field (42.5rem, and 32rem below 767px). Stores and shop keep the full field. */
+.padding-global.padding-section-map:not(.ocp-stores-page) .map {
+  height: 21.25rem;
+}
+
+/* The home table fills the same frame as the map. The map is pulled 2px outside that frame, so the table is 2px shorter than the map element. Rows scroll inside it. The stores table stays as tall as its rows. */
+.padding-global.padding-section-map:not(.ocp-stores-page) .ocp-place-table-wrap {
+  box-sizing: border-box;
+  height: calc(21.25rem - 2px);
+  overflow: auto;
+  scrollbar-color: #c5c8d0 transparent;
+  scrollbar-width: thin;
+}
+
+.padding-global.padding-section-map:not(.ocp-stores-page) .ocp-place-table-wrap::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.padding-global.padding-section-map:not(.ocp-stores-page) .ocp-place-table-wrap::-webkit-scrollbar-thumb {
+  background: #c5c8d0;
+  border-radius: 8px;
+}
+
+.padding-global.padding-section-map:not(.ocp-stores-page) .ocp-place-table-wrap table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.padding-global.padding-section-map:not(.ocp-stores-page) .ocp-place-table-wrap th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+@media screen and (max-width: 767px) {
+  .padding-global.padding-section-map:not(.ocp-stores-page) .map {
+    height: 16rem;
+  }
+
+  .padding-global.padding-section-map:not(.ocp-stores-page) .ocp-place-table-wrap {
+    height: calc(16rem - 2px);
   }
 }

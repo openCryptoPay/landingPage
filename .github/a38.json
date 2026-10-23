@@ -1,0 +1,43 @@
+{
+  "schema": "a38/v1",
+  "standard": "A38",
+  "documentation": "docs/a38.md",
+  "mode": "enforce",
+  "jobs": [
+    {
+      "id": "baselines",
+      "name": "Page baselines",
+      "timeout_s": 60,
+      "workflow": ".github/workflows/ci.yaml",
+      "job": "baselines",
+      "executor": {
+        "adapter": "commands",
+        "config": {
+          "steps": [["sh", "scripts/check-baselines.sh"]]
+        }
+      }
+    }
+  ],
+  "exclusions": [
+    {
+      "workflow": ".github/workflows/dev.yaml",
+      "job": "build-and-deploy",
+      "reason": "This job uploads the site to the development host with deploy credentials. It is a deploy path, not an author-measured test."
+    },
+    {
+      "workflow": ".github/workflows/prd.yaml",
+      "job": "build-and-deploy",
+      "reason": "This job uploads the site to the production host with deploy credentials. It is a deploy path, not an author-measured test."
+    },
+    {
+      "workflow": ".github/workflows/auto-release-pr.yaml",
+      "job": "create-release-pr",
+      "reason": "This job opens the develop to main release pull request. It is housekeeping and performs no author-measured test."
+    },
+    {
+      "workflow": ".github/workflows/a38-guard.yml",
+      "job": "guard",
+      "reason": "This job is the A38 guard itself. It audits the author report on the trusted base and is not part of the measured suite."
+    }
+  ]
+}
