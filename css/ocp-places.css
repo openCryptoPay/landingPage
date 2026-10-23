@@ -563,8 +563,42 @@
   height: 21.25rem;
 }
 
+/* The home table fills the same frame as the map. The map is pulled 2px outside that frame, so the table is 2px shorter than the map element. Rows scroll inside it. The stores table stays as tall as its rows. */
+.padding-global.padding-section-map:not(.ocp-stores-page) .ocp-place-table-wrap {
+  box-sizing: border-box;
+  height: calc(21.25rem - 2px);
+  overflow: auto;
+  scrollbar-color: #c5c8d0 transparent;
+  scrollbar-width: thin;
+}
+
+.padding-global.padding-section-map:not(.ocp-stores-page) .ocp-place-table-wrap::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.padding-global.padding-section-map:not(.ocp-stores-page) .ocp-place-table-wrap::-webkit-scrollbar-thumb {
+  background: #c5c8d0;
+  border-radius: 8px;
+}
+
+.padding-global.padding-section-map:not(.ocp-stores-page) .ocp-place-table-wrap table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.padding-global.padding-section-map:not(.ocp-stores-page) .ocp-place-table-wrap th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
 @media screen and (max-width: 767px) {
   .padding-global.padding-section-map:not(.ocp-stores-page) .map {
     height: 16rem;
+  }
+
+  .padding-global.padding-section-map:not(.ocp-stores-page) .ocp-place-table-wrap {
+    height: calc(16rem - 2px);
   }
 }

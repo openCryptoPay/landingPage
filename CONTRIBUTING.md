@@ -22,7 +22,7 @@ Each image is 1440 CSS pixels wide and shows the page from the top of the header
 | `stores.html`, Table selected | `baselines/website-stores-table.png` |
 | `shop.php` (`/{npub}`) | `baselines/website-shop.png` |
 
-A new public page adds its baseline in the same change. A change to a page's markup, style, or copy updates that page's baseline in the same change. A change to the activity filter also updates the open-menu baseline and the Daily baseline of that page. The open-menu image shows All, Daily, Weekly, Monthly, Idle, and None. A change to the table view also updates the Table baseline of that page. The Table image shows Table pressed, the map hidden, and the place table visible, with Activity still on All.
+A new public page adds its baseline in the same change. A change to a page's markup, style, or copy updates that page's baseline in the same change. A change to the activity filter also updates the open-menu baseline and the Daily baseline of that page. The open-menu image shows All, Daily, Weekly, Monthly, Idle, and None. A change to the table view also updates the Table baseline of that page. The Table image shows Table pressed, the map hidden, and the place table visible, with Activity still on All. On the home page that field is the same height as the map and the rows scroll inside it. On the stores page the table is as tall as its rows.
 
 Places loaded from the map API can differ from the image. That difference alone does not require a new baseline.
 

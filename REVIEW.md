@@ -11,7 +11,7 @@ Reject the change when any of these is true:
 - `401.html` has a baseline, or a public page listed below lost its baseline.
 - A deploy workflow no longer excludes `baselines/**` and `**/baselines/**`.
 
-Each baseline is one full page, 1440 CSS pixels wide, from the header through the footer. The activity files are the same pages with the activity menu open, showing All, Daily, Weekly, Monthly, Idle, and None. The Daily files are the same pages with Daily selected in the activity filter. The Table files are the same pages with Table pressed, the map hidden, and the place table visible. Activity stays on All.
+Each baseline is one full page, 1440 CSS pixels wide, from the header through the footer. The activity files are the same pages with the activity menu open, showing All, Daily, Weekly, Monthly, Idle, and None. The Daily files are the same pages with Daily selected in the activity filter. The Table files are the same pages with Table pressed, the map hidden, and the place table visible. Activity stays on All. On the home page that field is the same height as the map and the rows scroll inside it. On the stores page the table is as tall as its rows.
 
 | Page | Baseline |
 | --- | --- |
