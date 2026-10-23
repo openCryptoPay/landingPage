@@ -38,8 +38,6 @@
     if (blurb) {
       blurb.textContent = "Locations published in the OpenCryptoPay place list.";
     }
-    var storesLink = document.querySelector(".ocp-stores-link");
-    if (storesLink) storesLink.hidden = false;
   }
 
   function setNote(text) {
@@ -1143,7 +1141,7 @@
 
   if (own) {
     loadCss("css/maplibre-gl.css");
-    loadCss("css/ocp-places.css?v=20261022b");
+    loadCss("css/ocp-places.css?v=20261023a");
 
     loadScript("js/maplibre-gl.js")
       .then(function () {

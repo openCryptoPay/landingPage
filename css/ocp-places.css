@@ -294,17 +294,6 @@
   }
 }
 
-.ocp-stores-link {
-  display: flex;
-  justify-content: center;
-  margin-top: 2.75rem;
-  margin-bottom: 2.75rem;
-}
-
-.ocp-stores-link[hidden] {
-  display: none;
-}
-
 .padding-global.padding-section-map.ocp-stores-page {
   padding-bottom: 4rem;
 }
