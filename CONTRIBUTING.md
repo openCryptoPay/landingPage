@@ -39,8 +39,14 @@ The deploy workflows exclude `baselines/**` and `**/baselines/**` from the site 
 ## A38
 
 This repository follows the A38 standard in DFXswiss/agent
-([docs/a38.md](https://github.com/DFXswiss/agent/blob/88581c74937b8f3eaaccad637d1a7d7b34fe68a2/docs/a38.md#adopting-a38-in-a-repository),
-[docs/a38-guard.md](https://github.com/DFXswiss/agent/blob/88581c74937b8f3eaaccad637d1a7d7b34fe68a2/docs/a38-guard.md)).
+([docs/a38.md](https://github.com/DFXswiss/agent/blob/bf9763f8d59285aa542f5dc22cbdbf451618c5f5/docs/a38.md#adopting-a38-in-a-repository),
+[docs/a38-guard.md](https://github.com/DFXswiss/agent/blob/bf9763f8d59285aa542f5dc22cbdbf451618c5f5/docs/a38-guard.md)).
+
+Two reviews are required before Ready. One review is enough only when the
+pull request opener is listed in one_review_authors in the trusted
+.github/pr-guard.json on the default branch. A missing file, a missing key,
+or an empty list keeps two reviews required. An entry that exists only on
+the pull request head does not count.
 
 - [`.github/a38.json`](.github/a38.json) lists the pull-request jobs the author measures locally.
 - [`.github/pr-guard.json`](.github/pr-guard.json) enforces A38 on `develop`. `main` is the release pull request and stays out of scope. `workflow_approval` releases the listed fork `pull_request` jobs after an enforce pass.
