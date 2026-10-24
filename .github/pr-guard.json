@@ -5,7 +5,7 @@
     "exclude": ["main"],
     "default": "enforce"
   },
-  "one_review_authors": ["TaprootFreak"],
+  "one_review_authors": ["davidleomay", "TaprootFreak", "TaprootFreakAI", "Danswar", "davidleomayAI", "Daniel-DFX"],
   "workflow_approval": {
     "enabled": true,
     "workflows": [".github/workflows/ci.yaml"]
