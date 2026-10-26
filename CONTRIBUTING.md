@@ -39,8 +39,8 @@ The deploy workflows exclude `baselines/**` and `**/baselines/**` from the site 
 ## A38
 
 This repository follows the A38 standard in DFXswiss/agent
-([docs/a38.md](https://github.com/DFXswiss/agent/blob/bf9763f8d59285aa542f5dc22cbdbf451618c5f5/docs/a38.md#adopting-a38-in-a-repository),
-[docs/a38-guard.md](https://github.com/DFXswiss/agent/blob/bf9763f8d59285aa542f5dc22cbdbf451618c5f5/docs/a38-guard.md)).
+([docs/a38.md](https://github.com/DFXswiss/agent/blob/e63980625f5b778c5a93104b0bf5de7fb5e379a8/docs/a38.md#adopting-a38-in-a-repository),
+[docs/a38-guard.md](https://github.com/DFXswiss/agent/blob/e63980625f5b778c5a93104b0bf5de7fb5e379a8/docs/a38-guard.md)).
 
 Two reviews are required before Ready. One review is enough only when the
 pull request opener is listed in one_review_authors in the trusted
