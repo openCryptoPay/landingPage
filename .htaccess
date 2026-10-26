@@ -11,7 +11,15 @@ RewriteRule ^(npub1[02-9ac-hj-np-z]{58}|[0-9a-f]{64})/$ https://opencryptopay.io
 # The redirect is cached like the shop page's own answers.
 <IfModule mod_headers.c>
   Header always set Cache-Control "public, max-age=60" env=OCP_SHOP_SLASH
+  Header always set Cache-Control "public, max-age=60" env=OCP_MAP_SLASH
 </IfModule>
 
 # The npub, or the 64 hex characters of the key, are rendered by shop.php.
 RewriteRule ^(npub1[02-9ac-hj-np-z]{58}|[0-9a-f]{64})$ /shop.php?id=$1 [L]
+
+# /map is the stores page and the address stays /map. A trailing slash would
+# resolve css/ and js/ under /map/, so it redirects to the fixed site origin.
+RewriteCond %{HTTP_HOST} ^(www\.)?dev\.opencryptopay\.io(:\d+)?$ [NC]
+RewriteRule ^map/$ https://dev.opencryptopay.io/map [R=301,L,E=OCP_MAP_SLASH:1]
+RewriteRule ^map/$ https://opencryptopay.io/map [R=301,L,E=OCP_MAP_SLASH:1]
+RewriteRule ^map$ /stores.html [L]
