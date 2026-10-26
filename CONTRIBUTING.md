@@ -49,6 +49,6 @@ or an empty list keeps two reviews required. An entry that exists only on
 the pull request head does not count.
 
 - [`.github/a38.json`](.github/a38.json) lists the pull-request jobs the author measures locally.
-- [`.github/pr-guard.json`](.github/pr-guard.json) enforces A38 on `develop`. `main` is the release pull request and stays out of scope. `workflow_approval` releases the listed fork `pull_request` jobs after an enforce pass.
+- [`.github/pr-guard.json`](.github/pr-guard.json) enforces A38 on `develop`. `main` is the release pull request and stays out of scope. `workflow_approval.workflows` stays required when approval is enabled and does not filter: after an enforce pass the guard approves every initial held fork `pull_request` run.
 - [`.github/workflows/a38-guard.yml`](.github/workflows/a38-guard.yml) is `dfx pr guard`. The action is pinned to a commit. The job does not check out the pull request.
 
