@@ -202,15 +202,34 @@ function photoOf($photo): ?array
 /**
  * The shop's Google Maps link from the API answer, or null. Only an https link
  * of www.google.com, google.com or maps.google.com under /maps, or of
- * maps.app.goo.gl, is shown; the API applies the same hosts when it stores one.
+ * maps.app.goo.gl with a path, is shown; the API applies the same hosts when it
+ * stores one. Scheme and host match in any case, as in the API. At most 2000
+ * characters, with no whitespace, quote, angle bracket, backslash, userinfo or
+ * port. A path the API normalised from dot segments is not shown.
  */
 function googleMapsUrlOf($value): ?string
 {
-    if (!is_string($value) || strlen($value) > 2000) {
+    if (!is_string($value) || preg_match('/[\s"<>\\\\]/u', $value) !== 0) {
         return null;
     }
-    $pattern = '#^https://(?:(?:www\.|maps\.)?google\.com/maps(?:[/?\#][^\s"<>\\\\]*)?|maps\.app\.goo\.gl/[^\s"<>\\\\]+)$#';
-    return preg_match($pattern, $value) === 1 ? $value : null;
+    $length = function_exists('mb_strlen') ? mb_strlen($value, 'UTF-8') : strlen($value);
+    if ($length < 1 || $length > 2000) {
+        return null;
+    }
+    $parts = parse_url($value);
+    if (!is_array($parts) || strtolower($parts['scheme'] ?? '') !== 'https'
+        || isset($parts['user']) || isset($parts['pass']) || isset($parts['port'])) {
+        return null;
+    }
+    $host = strtolower($parts['host'] ?? '');
+    $path = $parts['path'] ?? '';
+    if ($host === 'maps.app.goo.gl') {
+        return $path !== '' && $path !== '/' ? $value : null;
+    }
+    if (!in_array($host, ['www.google.com', 'google.com', 'maps.google.com'], true)) {
+        return null;
+    }
+    return $path === '/maps' || str_starts_with($path, '/maps/') ? $value : null;
 }
 
 /** Send the page head, nav and the opening of the main section. */
