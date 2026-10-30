@@ -803,6 +803,7 @@
         var matched = [];
         var placesTask = null;
         var visibleMarkers = [];
+        var frameOnFilter = false;
 
         function currentQuery() {
           return {
@@ -839,6 +840,7 @@
         }
 
         function frameVisibleMarkers() {
+          if (!frameOnFilter) return;
           if (!map) return;
           var wrap = document.getElementById("ocp-stores-map-wrap");
           if (wrap && wrap.hidden) return;
@@ -1091,19 +1093,33 @@
         }
 
         techControl.select.addEventListener("change", function () {
+          frameOnFilter = true;
           var before = queryKey(currentQuery());
           syncPaymentOptions();
           applyFilter();
           if (queryKey(currentQuery()) !== before) reloadPlaces();
         });
-        countryControl.select.addEventListener("change", reloadPlaces);
-        nameControl.select.addEventListener("change", reloadPlaces);
+        countryControl.select.addEventListener("change", function () {
+          frameOnFilter = true;
+          reloadPlaces();
+        });
+        nameControl.select.addEventListener("change", function () {
+          frameOnFilter = true;
+          reloadPlaces();
+        });
         chainControl.select.addEventListener("change", function () {
+          frameOnFilter = true;
           syncPaymentOptions();
           reloadPlaces();
         });
-        assetControl.select.addEventListener("change", reloadPlaces);
-        activityControl.select.addEventListener("change", reloadPlaces);
+        assetControl.select.addEventListener("change", function () {
+          frameOnFilter = true;
+          reloadPlaces();
+        });
+        activityControl.select.addEventListener("change", function () {
+          frameOnFilter = true;
+          reloadPlaces();
+        });
         syncPaymentOptions();
         return loadPlaces().catch(function (error) {
           if (error && error.name === "AbortError") return;
