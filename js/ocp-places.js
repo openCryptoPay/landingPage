@@ -47,7 +47,7 @@
   if (completeList && table) {
     var headRow = table.querySelector("thead tr");
     if (headRow) {
-      ["Active", "Complete", "Problems", "External id", "Record id", "Created", "Last payment", "Payment methods"].forEach(function (label) {
+      ["Active"].forEach(function (label) {
         var th = document.createElement("th");
         th.scope = "col";
         th.textContent = label;
@@ -789,13 +789,6 @@
       addCell(row, displayedActivity(place));
       if (completeList) {
         addCell(row, place.active === true ? "yes" : "no");
-        addCell(row, place.complete === true ? "yes" : "no");
-        addCell(row, Array.isArray(place.problems) ? place.problems.join("; ") : "");
-        addCell(row, trimmedField(place.externalId));
-        addCell(row, trimmedField(place.recordId));
-        addCell(row, trimmedField(place.createdAt));
-        addCell(row, place.lastTransactionAt == null ? "" : trimmedField(place.lastTransactionAt));
-        addCell(row, place.paymentMethods == null ? "" : trimmedField(place.paymentMethods));
       }
       tbody.appendChild(row);
     });
@@ -1179,7 +1172,7 @@
       }
       var paramsNote = document.getElementById("ocp-places-api-params");
       if (completeList && paramsNote) {
-        paramsNote.textContent = "flag=completeList returns every stored shop, including inactive and incomplete rows. country, shopName, blockchain, and asset still apply. Each row also has recordId, externalId, paymentMethods, createdAt, lastTransactionAt, active, complete, problems, and photos.";
+        paramsNote.textContent = "flag=completeList returns every stored shop, including inactive and incomplete rows. The table adds Active. country, shopName, blockchain, and asset still apply.";
       }
       var filtersLink = document.getElementById("ocp-places-api-filters");
       var apiFiltersUrl = filtersUrl();

@@ -32,6 +32,12 @@ The shop page is rendered against the fixed sample shop in `baselines/shop-sampl
 
 The deploy workflows exclude `baselines/**` and `**/baselines/**` from the site upload. Leave that exclusion in place.
 
+## Payment times
+
+Never show a concrete payment time. A shop's payment instant is private.
+
+The home and stores tables must not add a Last payment column. No page, note, or CSV may render `lastTransactionAt`, `occurredAt`, or any other payment instant, even when the API sends one. `?flag=completeList` adds only the Active column. Do not add Complete, Problems, External id, Record id, Created, Last payment, or Payment methods to that table.
+
 ## Shop page hosting
 
 `/{npub}` is served by `shop.php` through the rewrite rules in `.htaccess`. The host needs PHP 8 with the curl extension and Apache with `mod_rewrite` and `mod_headers`, with `AllowOverride FileInfo` (or `All`) for the document root so `.htaccess` applies. Without curl every shop page answers 503, because only curl bounds the whole API call, DNS lookup included, to 3 seconds.
