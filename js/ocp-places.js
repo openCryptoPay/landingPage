@@ -17,13 +17,15 @@
   var table = document.getElementById("ocp-place-table");
   if (!own && !table) return;
 
+  var completeList = new URLSearchParams(location.search).get("flag") === "completeList";
+  var completeListCountries = {};
   var google = document.getElementById("ocp-google");
   var googleLegend = document.getElementById("ocp-google-legend");
   var blurb = document.getElementById("ocp-map-blurb");
   var note = document.getElementById("ocp-places-note");
   var tableWrap = document.getElementById("ocp-place-table-wrap");
   var csvButton = document.getElementById("ocp-stores-csv");
-  var storesView = "map";
+  var storesView = completeList && table ? "table" : "map";
   var placesLoadFailed = false;
   var rowsRendered = false;
   var lastRowCount = 0;
@@ -37,6 +39,20 @@
     own.hidden = false;
     if (blurb) {
       blurb.textContent = "Locations published in the OpenCryptoPay place list.";
+    }
+  }
+  if (completeList && blurb) {
+    blurb.textContent = "Every stored shop, including inactive and incomplete rows.";
+  }
+  if (completeList && table) {
+    var headRow = table.querySelector("thead tr");
+    if (headRow) {
+      ["Active", "Complete", "Problems", "External id", "Record id", "Created", "Last payment", "Payment methods"].forEach(function (label) {
+        var th = document.createElement("th");
+        th.scope = "col";
+        th.textContent = label;
+        headRow.appendChild(th);
+      });
     }
   }
 
@@ -169,6 +185,7 @@
 
   function placesRequestUrl(query) {
     var params = [];
+    if (completeList) params.push("flag=completeList");
     if (query.country) params.push("country=" + encodeURIComponent(query.country));
     if (query.shopName) params.push("shopName=" + encodeURIComponent(query.shopName));
     if (query.blockchain) params.push("blockchain=" + encodeURIComponent(query.blockchain));
@@ -770,6 +787,16 @@
       addCell(row, shop ? shop : "Others");
       addCell(row, techProviderOf(place));
       addCell(row, displayedActivity(place));
+      if (completeList) {
+        addCell(row, place.active === true ? "yes" : "no");
+        addCell(row, place.complete === true ? "yes" : "no");
+        addCell(row, Array.isArray(place.problems) ? place.problems.join("; ") : "");
+        addCell(row, trimmedField(place.externalId));
+        addCell(row, trimmedField(place.recordId));
+        addCell(row, trimmedField(place.createdAt));
+        addCell(row, place.lastTransactionAt == null ? "" : trimmedField(place.lastTransactionAt));
+        addCell(row, place.paymentMethods == null ? "" : trimmedField(place.paymentMethods));
+      }
       tbody.appendChild(row);
     });
     rowsRendered = true;
@@ -980,8 +1007,23 @@
           return unstatedPaymentMatches(place, query.blockchain, query.asset);
         }
 
+        function rememberCompleteListCountries(places) {
+          if (!completeList) return;
+          countryCodes(filtersBody).forEach(function (code) {
+            completeListCountries[code] = true;
+          });
+          places.forEach(function (place) {
+            var code = trimmedField(place && place.country);
+            if (code) completeListCountries[code] = true;
+          });
+          var merged = Object.keys(completeListCountries);
+          merged.sort();
+          fillSelect(countryControl.select, merged);
+        }
+
         function showPlaces(places) {
           placesLoadFailed = false;
+          rememberCompleteListCountries(places);
           var techBefore = techControl.select.value;
           var query = currentQuery();
           var queryBefore = queryKey(query);
@@ -1130,8 +1172,15 @@
     if (apiNote) {
       apiNote.hidden = false;
       var listLink = document.getElementById("ocp-places-api-list");
-      listLink.href = placesUrl;
-      listLink.textContent = "GET " + placesUrl;
+      var listHref = completeList ? placesUrl + "?flag=completeList" : placesUrl;
+      if (listLink) {
+        listLink.href = listHref;
+        listLink.textContent = "GET " + listHref;
+      }
+      var paramsNote = document.getElementById("ocp-places-api-params");
+      if (completeList && paramsNote) {
+        paramsNote.textContent = "flag=completeList returns every stored shop, including inactive and incomplete rows. country, shopName, blockchain, and asset still apply. Each row also has recordId, externalId, paymentMethods, createdAt, lastTransactionAt, active, complete, problems, and photos.";
+      }
       var filtersLink = document.getElementById("ocp-places-api-filters");
       var apiFiltersUrl = filtersUrl();
       filtersLink.href = apiFiltersUrl;
