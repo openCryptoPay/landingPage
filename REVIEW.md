@@ -5,7 +5,8 @@
 Reject the change when any of these is true:
 
 - A page, note, or CSV shows a concrete payment time. That includes `lastTransactionAt`, `occurredAt`, and any other instant of a shop payment.
-- The table for `?flag=completeList` adds a column other than Active.
+- The table for `?flag=completeList` omits Nostr id or Active, or adds any other column.
+- The Nostr id column shows a value other than the shop npub, or a value when the shop has no key.
 
 ## Page links
 

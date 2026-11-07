@@ -55,7 +55,7 @@
   if (completeList && table) {
     var headRow = table.querySelector("thead tr");
     if (headRow) {
-      ["Active"].forEach(function (label) {
+      ["Nostr id", "Active"].forEach(function (label) {
         var th = document.createElement("th");
         th.scope = "col";
         th.textContent = label;
@@ -626,6 +626,10 @@
     return typeof place.id === "string" && NPUB.test(place.id) ? "/" + place.id : null;
   }
 
+  function displayedNostr(place) {
+    return typeof place.id === "string" && NPUB.test(place.id) ? place.id : "";
+  }
+
   function displayedLocation(place) {
     return joinedNonEmpty([
       joinedNonEmpty([trimmedField(place.street), trimmedField(place.houseNumber)], " "),
@@ -811,6 +815,10 @@
       addCell(row, techProviderOf(place));
       addCell(row, displayedActivity(place));
       if (completeList) {
+        var nostrCell = document.createElement("td");
+        nostrCell.className = "ocp-nostr-id";
+        nostrCell.textContent = displayedNostr(place);
+        row.appendChild(nostrCell);
         addCell(row, place.active === true ? "yes" : "no");
       }
       tbody.appendChild(row);
@@ -1205,7 +1213,7 @@
       }
       var paramsNote = document.getElementById("ocp-places-api-params");
       if (completeList && paramsNote) {
-        paramsNote.textContent = "flag=completeList returns every stored shop, including inactive and incomplete rows. The table adds Active. country, shopName, blockchain, and asset still apply. provider=dfxswiss or provider=21gifts selects that provider, and view=table or view=map selects the view.";
+        paramsNote.textContent = "flag=completeList returns every stored shop, including inactive and incomplete rows. The table adds Nostr id and Active. country, shopName, blockchain, and asset still apply. provider=dfxswiss or provider=21gifts selects that provider, and view=table or view=map selects the view.";
       }
       var filtersLink = document.getElementById("ocp-places-api-filters");
       var apiFiltersUrl = filtersUrl();
@@ -1216,7 +1224,7 @@
 
   if (own) {
     loadCss("css/maplibre-gl.css");
-    loadCss("css/ocp-places.css?v=20261023c");
+    loadCss("css/ocp-places.css?v=20261107d");
 
     loadScript("js/maplibre-gl.js")
       .then(function () {
