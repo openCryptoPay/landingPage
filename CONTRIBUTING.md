@@ -32,6 +32,10 @@ The shop page is rendered against the fixed sample shop in `baselines/shop-sampl
 
 The deploy workflows exclude `baselines/**` and `**/baselines/**` from the site upload. Leave that exclusion in place.
 
+## Page links
+
+The home and stores pages read `provider` and `view` from the link. `provider=dfxswiss` selects DFX.swiss, and `provider=21gifts` selects 21.gifts. Any other value leaves the provider on All. `view=table` shows the table, and `view=map` shows the map. An unknown view leaves the page on its usual view.
+
 ## Payment times
 
 Never show a concrete payment time. A shop's payment instant is private.

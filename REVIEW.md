@@ -7,6 +7,15 @@ Reject the change when any of these is true:
 - A page, note, or CSV shows a concrete payment time. That includes `lastTransactionAt`, `occurredAt`, and any other instant of a shop payment.
 - The table for `?flag=completeList` adds a column other than Active.
 
+## Page links
+
+Reject the change when any of these is true:
+
+- `provider=dfxswiss` or `provider=21gifts` does not select that provider.
+- An unknown `provider` hides every shop or selects a provider.
+- `view=table` does not show the table, or `view=map` does not show the map.
+- An unknown `view` changes the page away from its usual view.
+
 ## Page baselines
 
 Reject the change when any of these is true:

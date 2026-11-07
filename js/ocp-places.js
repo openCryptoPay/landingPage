@@ -17,7 +17,10 @@
   var table = document.getElementById("ocp-place-table");
   if (!own && !table) return;
 
-  var completeList = new URLSearchParams(location.search).get("flag") === "completeList";
+  var pageSearch = new URLSearchParams(location.search);
+  var completeList = pageSearch.get("flag") === "completeList";
+  var urlProvider = canonicalProvider(pageSearch.get("provider"));
+  var applyUrlProvider = urlProvider !== "";
   var completeListCountries = {};
   var google = document.getElementById("ocp-google");
   var googleLegend = document.getElementById("ocp-google-legend");
@@ -25,7 +28,8 @@
   var note = document.getElementById("ocp-places-note");
   var tableWrap = document.getElementById("ocp-place-table-wrap");
   var csvButton = document.getElementById("ocp-stores-csv");
-  var storesView = completeList && table ? "table" : "map";
+  var requestedView = requestedViewOf(pageSearch.get("view"));
+  var storesView = requestedView === "table" && table ? "table" : requestedView === "map" ? "map" : completeList && table ? "table" : "map";
   var placesLoadFailed = false;
   var rowsRendered = false;
   var lastRowCount = 0;
@@ -43,6 +47,10 @@
   }
   if (completeList && blurb) {
     blurb.textContent = "Every stored shop, including inactive and incomplete rows.";
+  }
+  if (storesView === "table") {
+    var mapWrap = document.getElementById("ocp-stores-map-wrap");
+    if (mapWrap) mapWrap.hidden = true;
   }
   if (completeList && table) {
     var headRow = table.querySelector("thead tr");
@@ -94,6 +102,21 @@
       return "DFX.swiss";
     }
     return value;
+  }
+
+  function canonicalProvider(raw) {
+    if (typeof raw !== "string") return "";
+    var token = raw.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (token === "dfxswiss") return "DFX.swiss";
+    if (token === "21gifts") return "21.gifts";
+    return "";
+  }
+
+  function requestedViewOf(raw) {
+    if (typeof raw !== "string") return "";
+    var token = raw.trim().toLowerCase();
+    if (token === "table" || token === "map") return token;
+    return "";
   }
 
   function uniqueProviders(places) {
@@ -1082,6 +1105,15 @@
           });
           matched = kept;
           fillSelect(techControl.select, uniqueProviders(providerRows));
+          if (applyUrlProvider) {
+            var providerKnown = false;
+            var providerOptions = techControl.select.options;
+            for (var optionIndex = 0; optionIndex < providerOptions.length; optionIndex += 1) {
+              if (providerOptions[optionIndex].value === urlProvider) providerKnown = true;
+            }
+            if (providerKnown) techControl.select.value = urlProvider;
+            if (providerKnown || providerRows.length > 0) applyUrlProvider = false;
+          }
           if (techControl.select.value !== techBefore) syncPaymentOptions();
           applyFilter();
           if (map && !table) {
@@ -1126,6 +1158,7 @@
         }
 
         techControl.select.addEventListener("change", function () {
+          applyUrlProvider = false;
           var before = queryKey(currentQuery());
           syncPaymentOptions();
           applyFilter();
@@ -1172,7 +1205,7 @@
       }
       var paramsNote = document.getElementById("ocp-places-api-params");
       if (completeList && paramsNote) {
-        paramsNote.textContent = "flag=completeList returns every stored shop, including inactive and incomplete rows. The table adds Active. country, shopName, blockchain, and asset still apply.";
+        paramsNote.textContent = "flag=completeList returns every stored shop, including inactive and incomplete rows. The table adds Active. country, shopName, blockchain, and asset still apply. provider=dfxswiss or provider=21gifts selects that provider, and view=table or view=map selects the view.";
       }
       var filtersLink = document.getElementById("ocp-places-api-filters");
       var apiFiltersUrl = filtersUrl();
