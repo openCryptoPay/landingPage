@@ -1,5 +1,12 @@
 # Review
 
+## Payment times
+
+Reject the change when any of these is true:
+
+- A page, note, or CSV shows a concrete payment time. That includes `lastTransactionAt`, `occurredAt`, and any other instant of a shop payment.
+- The table for `?flag=completeList` adds a column other than Active.
+
 ## Page baselines
 
 Reject the change when any of these is true:
