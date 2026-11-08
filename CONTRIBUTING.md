@@ -40,7 +40,7 @@ The home and stores pages read `provider` and `view` from the link. `provider=df
 
 Never show a concrete payment time. A shop's payment instant is private.
 
-The home and stores tables must not add a Last payment column. No page, note, or CSV may render `lastTransactionAt`, `occurredAt`, or any other payment instant, even when the API sends one. `?flag=completeList` adds the Nostr id column and the Active column. Nostr id is the shop npub, or empty when the shop has no key. Do not add Complete, Problems, External id, Record id, Created, Last payment, or Payment methods to that table.
+The home and stores tables must not add a Last payment column. No page, note, or CSV may render `lastTransactionAt`, `occurredAt`, or any other payment instant, even when the API sends one. `?flag=completeList` adds the Nostr id column and the Active column. Nostr id is the shop npub, or empty when the shop has no key. Active is yes when `activity` is `daily`, `within7Days`, or `within30Days`. Active is no when `activity` is `olderThan30Days`, `none`, or anything else. Do not fill Active from the stored `active` flag. Do not add Complete, Problems, External id, Record id, Created, Last payment, or Payment methods to that table.
 
 ## Shop page hosting
 

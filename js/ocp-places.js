@@ -652,6 +652,18 @@
     }
   }
 
+  // Active follows the payment activity. The stored on/off flag is not this column.
+  function displayedActive(place) {
+    switch (place.activity) {
+      case "daily":
+      case "within7Days":
+      case "within30Days":
+        return "yes";
+      default:
+        return "no";
+    }
+  }
+
   function activityMarkerClass(place) {
     switch (place.activity) {
       case "daily":
@@ -819,7 +831,7 @@
         nostrCell.className = "ocp-nostr-id";
         nostrCell.textContent = displayedNostr(place);
         row.appendChild(nostrCell);
-        addCell(row, place.active === true ? "yes" : "no");
+        addCell(row, displayedActive(place));
       }
       tbody.appendChild(row);
     });
@@ -1213,7 +1225,7 @@
       }
       var paramsNote = document.getElementById("ocp-places-api-params");
       if (completeList && paramsNote) {
-        paramsNote.textContent = "flag=completeList returns every stored shop, including inactive and incomplete rows. The table adds Nostr id and Active. country, shopName, blockchain, and asset still apply. provider=dfxswiss or provider=21gifts selects that provider, and view=table or view=map selects the view.";
+        paramsNote.textContent = "flag=completeList returns every stored shop, including rows switched off and incomplete rows. The table adds Nostr id and Active. Active is yes when the shop had a payment in the last 30 days, and no otherwise. country, shopName, blockchain, and asset still apply. provider=dfxswiss or provider=21gifts selects that provider, and view=table or view=map selects the view.";
       }
       var filtersLink = document.getElementById("ocp-places-api-filters");
       var apiFiltersUrl = filtersUrl();
