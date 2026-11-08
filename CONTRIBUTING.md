@@ -32,6 +32,16 @@ The shop page is rendered against the fixed sample shop in `baselines/shop-sampl
 
 The deploy workflows exclude `baselines/**` and `**/baselines/**` from the site upload. Leave that exclusion in place.
 
+## Page links
+
+The home and stores pages read `provider` and `view` from the link. `provider=dfxswiss` selects DFX.swiss, and `provider=21gifts` selects 21.gifts. Any other value leaves the provider on All. `view=table` shows the table, and `view=map` shows the map. An unknown view leaves the page on its usual view.
+
+## Payment times
+
+Never show a concrete payment time. A shop's payment instant is private.
+
+The home and stores tables must not add a Last payment column. No page, note, or CSV may render `lastTransactionAt`, `occurredAt`, or any other payment instant, even when the API sends one. `?flag=completeList` adds the Nostr id column and the Active column. Nostr id is the shop npub, or empty when the shop has no key. Active is yes when `activity` is `daily`, `within7Days`, or `within30Days`. Active is no when `activity` is `olderThan30Days`, `none`, or anything else. Do not fill Active from the stored `active` flag. Do not add Complete, Problems, External id, Record id, Created, Last payment, or Payment methods to that table.
+
 ## Shop page hosting
 
 `/{npub}` is served by `shop.php` through the rewrite rules in `.htaccess`. The host needs PHP 8 with the curl extension and Apache with `mod_rewrite` and `mod_headers`, with `AllowOverride FileInfo` (or `All`) for the document root so `.htaccess` applies. Without curl every shop page answers 503, because only curl bounds the whole API call, DNS lookup included, to 3 seconds.
@@ -39,10 +49,16 @@ The deploy workflows exclude `baselines/**` and `**/baselines/**` from the site 
 ## A38
 
 This repository follows the A38 standard in DFXswiss/agent
-([docs/a38.md](https://github.com/DFXswiss/agent/blob/88581c74937b8f3eaaccad637d1a7d7b34fe68a2/docs/a38.md#adopting-a38-in-a-repository),
-[docs/a38-guard.md](https://github.com/DFXswiss/agent/blob/88581c74937b8f3eaaccad637d1a7d7b34fe68a2/docs/a38-guard.md)).
+([docs/a38.md](https://github.com/DFXswiss/agent/blob/b421c4a7c957738187aa620a44e2f115dd939bd1/docs/a38.md#adopting-a38-in-a-repository),
+[docs/a38-guard.md](https://github.com/DFXswiss/agent/blob/b421c4a7c957738187aa620a44e2f115dd939bd1/docs/a38-guard.md)).
+
+Two reviews are required before Ready. One review is enough only when the
+pull request opener is listed in one_review_authors in the trusted
+.github/pr-guard.json on the default branch. A missing file, a missing key,
+or an empty list keeps two reviews required. An entry that exists only on
+the pull request head does not count.
 
 - [`.github/a38.json`](.github/a38.json) lists the pull-request jobs the author measures locally.
-- [`.github/pr-guard.json`](.github/pr-guard.json) enforces A38 on `develop`. `main` is the release pull request and stays out of scope. `workflow_approval` releases the listed fork `pull_request` jobs after an enforce pass.
+- [`.github/pr-guard.json`](.github/pr-guard.json) enforces A38 on `develop`. `main` is the release pull request and stays out of scope. `workflow_approval.workflows` stays required when approval is enabled and does not filter: after an enforce pass the guard approves every initial held fork `pull_request` run.
 - [`.github/workflows/a38-guard.yml`](.github/workflows/a38-guard.yml) is `dfx pr guard`. The action is pinned to a commit. The job does not check out the pull request.
 

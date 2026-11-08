@@ -55,6 +55,7 @@ if ($path === "/map/places/{$npub}") {
         'country' => 'CH',
         'supports' => [['blockchain' => 'Bitcoin', 'asset' => 'BTC'], ['blockchain' => 'Lightning', 'asset' => 'BTC']],
         'activity' => 'within7Days',
+        'googleMapsUrl' => 'https://www.google.com/maps/search/?api=1&query=47.3769,8.5417',
         'coverPhoto' => ['url' => $photos[0]['url'], 'width' => 1080, 'height' => 567],
         'photos' => $photos,
     ]]);

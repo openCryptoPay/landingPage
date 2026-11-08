@@ -199,6 +199,39 @@ function photoOf($photo): ?array
     ];
 }
 
+/**
+ * The shop's Google Maps link from the API answer, or null. Only an https link
+ * of www.google.com, google.com or maps.google.com under /maps, or of
+ * maps.app.goo.gl with a path, is shown; the API applies the same hosts when it
+ * stores one. Scheme and host match in any case, as in the API. At most 2000
+ * characters, with no whitespace, quote, angle bracket, backslash, userinfo or
+ * port. A path the API normalised from dot segments is not shown.
+ */
+function googleMapsUrlOf($value): ?string
+{
+    if (!is_string($value) || preg_match('/[\s"<>\\\\]/u', $value) !== 0) {
+        return null;
+    }
+    $length = function_exists('mb_strlen') ? mb_strlen($value, 'UTF-8') : strlen($value);
+    if ($length < 1 || $length > 2000) {
+        return null;
+    }
+    $parts = parse_url($value);
+    if (!is_array($parts) || strtolower($parts['scheme'] ?? '') !== 'https'
+        || isset($parts['user']) || isset($parts['pass']) || isset($parts['port'])) {
+        return null;
+    }
+    $host = strtolower($parts['host'] ?? '');
+    $path = $parts['path'] ?? '';
+    if ($host === 'maps.app.goo.gl') {
+        return $path !== '' && $path !== '/' ? $value : null;
+    }
+    if (!in_array($host, ['www.google.com', 'google.com', 'maps.google.com'], true)) {
+        return null;
+    }
+    return $path === '/maps' || str_starts_with($path, '/maps/') ? $value : null;
+}
+
 /** Send the page head, nav and the opening of the main section. */
 function pageStart(string $title, string $description, string $image, ?string $canonical, string $extraHead = ''): void
 {
@@ -410,6 +443,7 @@ if (cut($summary, 301) !== cut($summary, 300)) {
 $directions = $hasPosition
     ? 'https://www.openstreetmap.org/directions?route=' . rawurlencode(';' . $lat . ',' . $lon)
     : 'https://www.openstreetmap.org/search?query=' . rawurlencode($address);
+$googleMaps = googleMapsUrlOf($place['googleMapsUrl'] ?? null);
 
 $jsonLd = [
     '@context' => 'https://schema.org',
@@ -432,6 +466,9 @@ if ($hasPosition) {
 }
 if ($photos !== []) {
     $jsonLd['image'] = array_map(static fn ($photo) => $photo['url'], $photos);
+}
+if ($googleMaps !== null) {
+    $jsonLd['hasMap'] = $googleMaps;
 }
 
 http_response_code(200);
@@ -471,6 +508,10 @@ pageStart(
 <?php if ($address !== '') { ?>
                 <dt>Address</dt>
                 <dd><?= h($address) ?> · <a class="ocp-shop-link" href="<?= h($directions) ?>" target="_blank" rel="noopener">Directions</a></dd>
+<?php } ?>
+<?php if ($googleMaps !== null) { ?>
+                <dt>Google Maps</dt>
+                <dd><a class="ocp-shop-link" href="<?= h($googleMaps) ?>" target="_blank" rel="noopener">Open in Google Maps</a></dd>
 <?php } ?>
 <?php if ($shopType !== '') { ?>
                 <dt>Shop type</dt>
