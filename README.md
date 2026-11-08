@@ -331,12 +331,13 @@ A payment provider MAY add a `payerData` record to this response as defined in [
 ```JSON
 {
   "payerData": {
-    "refund": { "mandatory": false }
+    "refund": { "mandatory": false },
+    "cashback": { "mandatory": false }
   }
 }
 ```
 
-OpenCryptoPay defines one additional kind, `refund`. The record entry is `{ "mandatory": boolean }`. The value the wallet sends is a string: the bare address for the selected `method`, without a URI scheme (such as `ethereum:`, `bitcoin:` or `lightning:`), amount or other parameters.
+OpenCryptoPay defines two additional kinds, `refund` and [`cashback`](#cashback). For both, the record entry is `{ "mandatory": boolean }`. The `refund` value the wallet sends is a string: the bare address for the selected `method`, without a URI scheme (such as `ethereum:`, `bitcoin:` or `lightning:`), amount or other parameters.
 
 | Method | `refund` value |
 | --- | --- |
@@ -354,6 +355,12 @@ OpenCryptoPay defines one additional kind, `refund`. The record entry is `{ "man
 | `BinancePay`, `TaprootAsset` | `refund` does not apply. |
 
 For a method that is not in this table, `refund` does not apply. When the wallet sends `refund`, it MUST send an address that the payer controls and at which the payer can receive the selected `asset` (for Solana tokens through the associated token account of that address, for Internet Computer through the default account of that Principal). The address belongs to the selected `method`; if the wallet changes the method, it sends the address for the new method. For a method where `refund` does not apply, the wallet MUST NOT send it and the provider MUST NOT require it, even when the record marks it mandatory.
+
+##### Cashback
+
+A provider lists `cashback` when it may pay the payer a reward for the payment. Whether a reward is paid, for which methods and assets, its amount, and the asset and network it is paid in are the provider's own terms; `cashback` only tells the provider where to pay it.
+
+The `cashback` value is a string: an EVM account address, `0x` followed by 40 hexadecimal characters (EIP-55 checksum casing MAY be used), without a URI scheme. It is the same kind of address for every `method`, because it does not depend on the network the payer pays on. When the wallet sends `cashback`, it MUST send an address that the payer controls on every EVM network, not a contract or an exchange deposit address.
 
 #### Exceptions
 
@@ -406,11 +413,13 @@ In our example a payment in USDT on Ethereum with `{"refund":"0x1111111111111111
 
 For a payment over Lightning the object would be `{"refund":"alice@example.com"}`, sent as `payerdata=%7B%22refund%22%3A%22alice%40example.com%22%7D`.
 
-Except in the [simplified flow](#simplified-flow), the wallet sends only kinds listed in the `payerData` record. If a kind is `"mandatory": true`, the wallet MUST send it or not proceed with this payment; this does not apply to `refund` on a method where `refund` does not apply. A wallet SHOULD send `refund` when it is listed and applies to the selected method. A wallet MUST NOT send as `refund` an address it does not control, in particular not an exchange deposit address.
+Except in the [simplified flow](#simplified-flow), the wallet sends only kinds listed in the `payerData` record. If a kind is `"mandatory": true`, the wallet MUST send it or not proceed with this payment; this does not apply to `refund` on a method where `refund` does not apply. A wallet SHOULD send `refund` when it is listed and applies to the selected method. A wallet MUST NOT send as `refund` an address it does not control, in particular not an exchange deposit address. A wallet SHOULD send `cashback` when it is listed, whatever the selected method.
 
 A provider MUST NOT treat a missing `refund` as an error unless `refund` is `"mandatory": true` and applies to the selected method, so wallets without support keep working. When a listed mandatory kind is missing or a listed kind that applies to the selected method has a malformed value, the provider MUST answer HTTP 400 with a message that names the missing or malformed kind; on a method where `refund` does not apply, a missing `refund` is neither. A kind the provider does not list MUST be ignored without validation. A `refund` sent for a method where `refund` does not apply MUST be ignored without validation as well.
 
 The `refund` value is supplied by the wallet; the provider validates its format as described above but cannot verify that the payer controls the address. A provider uses `refund` only to return funds as described in [Refunds](#refunds).
+
+A provider MUST NOT treat a missing `cashback` as an error unless `cashback` is `"mandatory": true`. For a payment the provider pays no reward for, it MUST ignore a sent `cashback` without validation; otherwise a malformed `cashback` is a malformed value under the rule above. The provider validates the format but cannot verify that the payer controls the address, and uses `cashback` only to pay a reward. A provider pays a reward for funds only to a `cashback` address that every request carried for which a matching set of transaction details was returned, with sets matching and counting as described in [Refunds](#refunds); if those requests did not all carry `cashback` with the same address (compared case-insensitively), it MUST NOT pay a reward for these funds to any of them.
 
 A GET HTTP call to this endpoint will return a JSON with the following structure.
 
