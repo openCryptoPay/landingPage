@@ -1,5 +1,5 @@
 # dfx pr guard.
-# Pinned to DFXswiss/agent b421c4a7c957738187aa620a44e2f115dd939bd1.
+# Pinned to DFXswiss/agent 3528240c62d72e8f50f8ec5ddda0c4d213f0f04a.
 # Do not check out the pull-request head for this job.
 
 name: dfx pr guard
@@ -46,7 +46,7 @@ jobs:
     timeout-minutes: ${{ (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.all_open)) && 45 || 10 }}
     steps:
       - name: dfx pr guard
-        uses: DFXswiss/agent/.github/actions/a38-guard@b421c4a7c957738187aa620a44e2f115dd939bd1
+        uses: DFXswiss/agent/.github/actions/a38-guard@3528240c62d72e8f50f8ec5ddda0c4d213f0f04a
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}

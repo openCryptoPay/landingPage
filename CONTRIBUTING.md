@@ -49,8 +49,8 @@ The home and stores tables must not add a Last payment column. No page, note, or
 ## A38
 
 This repository follows the A38 standard in DFXswiss/agent
-([docs/a38.md](https://github.com/DFXswiss/agent/blob/b421c4a7c957738187aa620a44e2f115dd939bd1/docs/a38.md#adopting-a38-in-a-repository),
-[docs/a38-guard.md](https://github.com/DFXswiss/agent/blob/b421c4a7c957738187aa620a44e2f115dd939bd1/docs/a38-guard.md)).
+([docs/a38.md](https://github.com/DFXswiss/agent/blob/3528240c62d72e8f50f8ec5ddda0c4d213f0f04a/docs/a38.md#adopting-a38-in-a-repository),
+[docs/a38-guard.md](https://github.com/DFXswiss/agent/blob/3528240c62d72e8f50f8ec5ddda0c4d213f0f04a/docs/a38-guard.md)).
 
 Two reviews are required before Ready. One review is enough only when the
 pull request opener is listed in one_review_authors in the trusted
