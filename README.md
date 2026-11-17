@@ -331,12 +331,13 @@ A payment provider MAY add a `payerData` record to this response as defined in [
 ```JSON
 {
   "payerData": {
-    "refund": { "mandatory": false }
+    "refund": { "mandatory": false },
+    "wallet": { "mandatory": false }
   }
 }
 ```
 
-OpenCryptoPay defines one additional kind, `refund`. The record entry is `{ "mandatory": boolean }`. The value the wallet sends is a string: the bare address for the selected `method`, without a URI scheme (such as `ethereum:`, `bitcoin:` or `lightning:`), amount or other parameters.
+OpenCryptoPay defines two additional kinds, `refund` and [`wallet`](#wallet). For both, the record entry is `{ "mandatory": boolean }`. The `refund` value the wallet sends is a string: the bare address for the selected `method`, without a URI scheme (such as `ethereum:`, `bitcoin:` or `lightning:`), amount or other parameters.
 
 | Method | `refund` value |
 | --- | --- |
@@ -354,6 +355,10 @@ OpenCryptoPay defines one additional kind, `refund`. The record entry is `{ "man
 | `BinancePay`, `TaprootAsset` | `refund` does not apply. |
 
 For a method that is not in this table, `refund` does not apply. When the wallet sends `refund`, it MUST send an address that the payer controls and at which the payer can receive the selected `asset` (for Solana tokens through the associated token account of that address, for Internet Computer through the default account of that Principal). The address belongs to the selected `method`; if the wallet changes the method, it sends the address for the new method. For a method where `refund` does not apply, the wallet MUST NOT send it and the provider MUST NOT require it, even when the record marks it mandatory.
+
+##### Wallet
+
+A provider MAY list `wallet` to learn which wallet application the payer pays with. The value is a string: the reverse domain name identifier of the wallet application, such as `com.example.wallet`, with at most 128 characters and at least two labels separated by dots; each label starts with an ASCII letter or digit, followed only by ASCII letters, digits, `-` or `_`. `wallet` applies to every `method`. The value is supplied by the wallet; the provider cannot verify it.
 
 #### Exceptions
 
@@ -406,9 +411,9 @@ In our example a payment in USDT on Ethereum with `{"refund":"0x1111111111111111
 
 For a payment over Lightning the object would be `{"refund":"alice@example.com"}`, sent as `payerdata=%7B%22refund%22%3A%22alice%40example.com%22%7D`.
 
-Except in the [simplified flow](#simplified-flow), the wallet sends only kinds listed in the `payerData` record. If a kind is `"mandatory": true`, the wallet MUST send it or not proceed with this payment; this does not apply to `refund` on a method where `refund` does not apply. A wallet SHOULD send `refund` when it is listed and applies to the selected method. A wallet MUST NOT send as `refund` an address it does not control, in particular not an exchange deposit address.
+Except in the [simplified flow](#simplified-flow), the wallet sends only kinds listed in the `payerData` record. If a kind is `"mandatory": true`, the wallet MUST send it or not proceed with this payment; this does not apply to `refund` on a method where `refund` does not apply. A wallet SHOULD send `refund` when it is listed and applies to the selected method. A wallet MUST NOT send as `refund` an address it does not control, in particular not an exchange deposit address. A wallet MAY send `wallet` when it is listed.
 
-A provider MUST NOT treat a missing `refund` as an error unless `refund` is `"mandatory": true` and applies to the selected method, so wallets without support keep working. When a listed mandatory kind is missing or a listed kind that applies to the selected method has a malformed value, the provider MUST answer HTTP 400 with a message that names the missing or malformed kind; on a method where `refund` does not apply, a missing `refund` is neither. A kind the provider does not list MUST be ignored without validation. A `refund` sent for a method where `refund` does not apply MUST be ignored without validation as well.
+A provider MUST NOT treat a missing `refund` as an error unless `refund` is `"mandatory": true` and applies to the selected method, so wallets without support keep working. When a listed mandatory kind is missing or a listed kind that applies to the selected method has a malformed value, the provider MUST answer HTTP 400 with a message that names the missing or malformed kind; on a method where `refund` does not apply, a missing `refund` is neither. A kind the provider does not list MUST be ignored without validation. A `refund` sent for a method where `refund` does not apply MUST be ignored without validation as well. A provider MUST NOT treat a missing `wallet` as an error unless `wallet` is `"mandatory": true`.
 
 The `refund` value is supplied by the wallet; the provider validates its format as described above but cannot verify that the payer controls the address. A provider uses `refund` only to return funds as described in [Refunds](#refunds).
 
@@ -552,7 +557,7 @@ To simplify the process, steps 2 and 3 can be done with a single HTTP call by ad
 
 In our example the URL would be https://api.dfx.swiss/v1/lnurlp/pl_beeddb41cd4b6d9e?method=Ethereum&asset=ETH or https://api.dfx.swiss/pl/?lightning=LNURL1DP68GURN8GHJ7CTSDYHXGENC9EEHW6TNWVHHVVF0D3H82UNVWQHHQMZLVFJK2ERYVG6RZCMYX33RVEPEV5YEJ9WT&method=Ethereum&asset=ETH.
 
-In the simplified flow the wallet has not seen a `payerData` record yet. It MAY still attach `payerdata` with only `refund` when `refund` applies to the selected method. The provider applies all rules of [step 3](#3-transaction-details) for its own `payerData` record to this call, as if the wallet had seen that record. If the provider answers such a request with an error, the wallet falls back to [step 2](#2-payment-details) and [step 3](#3-transaction-details).
+In the simplified flow the wallet has not seen a `payerData` record yet. It MAY still attach `payerdata` with `wallet`, with `refund` when `refund` applies to the selected method, or with both, but with no other kind. The provider applies all rules of [step 3](#3-transaction-details) for its own `payerData` record to this call, as if the wallet had seen that record. If the provider answers such a request with an error, the wallet falls back to [step 2](#2-payment-details) and [step 3](#3-transaction-details).
 
 ## Refunds
 
