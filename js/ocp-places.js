@@ -17,13 +17,19 @@
   var table = document.getElementById("ocp-place-table");
   if (!own && !table) return;
 
+  var pageSearch = new URLSearchParams(location.search);
+  var completeList = pageSearch.get("flag") === "completeList";
+  var urlProvider = canonicalProvider(pageSearch.get("provider"));
+  var applyUrlProvider = urlProvider !== "";
+  var completeListCountries = {};
   var google = document.getElementById("ocp-google");
   var googleLegend = document.getElementById("ocp-google-legend");
   var blurb = document.getElementById("ocp-map-blurb");
   var note = document.getElementById("ocp-places-note");
   var tableWrap = document.getElementById("ocp-place-table-wrap");
   var csvButton = document.getElementById("ocp-stores-csv");
-  var storesView = "map";
+  var requestedView = requestedViewOf(pageSearch.get("view"));
+  var storesView = requestedView === "table" && table ? "table" : requestedView === "map" ? "map" : completeList && table ? "table" : "map";
   var placesLoadFailed = false;
   var rowsRendered = false;
   var lastRowCount = 0;
@@ -37,6 +43,24 @@
     own.hidden = false;
     if (blurb) {
       blurb.textContent = "Locations published in the OpenCryptoPay place list.";
+    }
+  }
+  if (completeList && blurb) {
+    blurb.textContent = "Every stored shop, including inactive and incomplete rows.";
+  }
+  if (storesView === "table") {
+    var mapWrap = document.getElementById("ocp-stores-map-wrap");
+    if (mapWrap) mapWrap.hidden = true;
+  }
+  if (completeList && table) {
+    var headRow = table.querySelector("thead tr");
+    if (headRow) {
+      ["Nostr id", "Active"].forEach(function (label) {
+        var th = document.createElement("th");
+        th.scope = "col";
+        th.textContent = label;
+        headRow.appendChild(th);
+      });
     }
   }
 
@@ -78,6 +102,21 @@
       return "DFX.swiss";
     }
     return value;
+  }
+
+  function canonicalProvider(raw) {
+    if (typeof raw !== "string") return "";
+    var token = raw.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (token === "dfxswiss") return "DFX.swiss";
+    if (token === "21gifts") return "21.gifts";
+    return "";
+  }
+
+  function requestedViewOf(raw) {
+    if (typeof raw !== "string") return "";
+    var token = raw.trim().toLowerCase();
+    if (token === "table" || token === "map") return token;
+    return "";
   }
 
   function uniqueProviders(places) {
@@ -169,6 +208,7 @@
 
   function placesRequestUrl(query) {
     var params = [];
+    if (completeList) params.push("flag=completeList");
     if (query.country) params.push("country=" + encodeURIComponent(query.country));
     if (query.shopName) params.push("shopName=" + encodeURIComponent(query.shopName));
     if (query.blockchain) params.push("blockchain=" + encodeURIComponent(query.blockchain));
@@ -586,6 +626,10 @@
     return typeof place.id === "string" && NPUB.test(place.id) ? "/" + place.id : null;
   }
 
+  function displayedNostr(place) {
+    return typeof place.id === "string" && NPUB.test(place.id) ? place.id : "";
+  }
+
   function displayedLocation(place) {
     return joinedNonEmpty([
       joinedNonEmpty([trimmedField(place.street), trimmedField(place.houseNumber)], " "),
@@ -605,6 +649,18 @@
         return "Idle";
       default:
         return "None";
+    }
+  }
+
+  // Active follows the payment activity. The stored on/off flag is not this column.
+  function displayedActive(place) {
+    switch (place.activity) {
+      case "daily":
+      case "within7Days":
+      case "within30Days":
+        return "yes";
+      default:
+        return "no";
     }
   }
 
@@ -770,6 +826,13 @@
       addCell(row, shop ? shop : "Others");
       addCell(row, techProviderOf(place));
       addCell(row, displayedActivity(place));
+      if (completeList) {
+        var nostrCell = document.createElement("td");
+        nostrCell.className = "ocp-nostr-id";
+        nostrCell.textContent = displayedNostr(place);
+        row.appendChild(nostrCell);
+        addCell(row, displayedActive(place));
+      }
       tbody.appendChild(row);
     });
     rowsRendered = true;
@@ -980,8 +1043,23 @@
           return unstatedPaymentMatches(place, query.blockchain, query.asset);
         }
 
+        function rememberCompleteListCountries(places) {
+          if (!completeList) return;
+          countryCodes(filtersBody).forEach(function (code) {
+            completeListCountries[code] = true;
+          });
+          places.forEach(function (place) {
+            var code = trimmedField(place && place.country);
+            if (code) completeListCountries[code] = true;
+          });
+          var merged = Object.keys(completeListCountries);
+          merged.sort();
+          fillSelect(countryControl.select, merged);
+        }
+
         function showPlaces(places) {
           placesLoadFailed = false;
+          rememberCompleteListCountries(places);
           var techBefore = techControl.select.value;
           var query = currentQuery();
           var queryBefore = queryKey(query);
@@ -1047,6 +1125,15 @@
           });
           matched = kept;
           fillSelect(techControl.select, uniqueProviders(providerRows));
+          if (applyUrlProvider) {
+            var providerKnown = false;
+            var providerOptions = techControl.select.options;
+            for (var optionIndex = 0; optionIndex < providerOptions.length; optionIndex += 1) {
+              if (providerOptions[optionIndex].value === urlProvider) providerKnown = true;
+            }
+            if (providerKnown) techControl.select.value = urlProvider;
+            if (providerKnown || providerRows.length > 0) applyUrlProvider = false;
+          }
           if (techControl.select.value !== techBefore) syncPaymentOptions();
           applyFilter();
           if (map && !table) {
@@ -1091,6 +1178,7 @@
         }
 
         techControl.select.addEventListener("change", function () {
+          applyUrlProvider = false;
           var before = queryKey(currentQuery());
           syncPaymentOptions();
           applyFilter();
@@ -1130,8 +1218,15 @@
     if (apiNote) {
       apiNote.hidden = false;
       var listLink = document.getElementById("ocp-places-api-list");
-      listLink.href = placesUrl;
-      listLink.textContent = "GET " + placesUrl;
+      var listHref = completeList ? placesUrl + "?flag=completeList" : placesUrl;
+      if (listLink) {
+        listLink.href = listHref;
+        listLink.textContent = "GET " + listHref;
+      }
+      var paramsNote = document.getElementById("ocp-places-api-params");
+      if (completeList && paramsNote) {
+        paramsNote.textContent = "flag=completeList returns every stored shop, including rows switched off and incomplete rows. The table adds Nostr id and Active. Active is yes when the shop had a payment in the last 30 days, and no otherwise. country, shopName, blockchain, and asset still apply. provider=dfxswiss or provider=21gifts selects that provider, and view=table or view=map selects the view.";
+      }
       var filtersLink = document.getElementById("ocp-places-api-filters");
       var apiFiltersUrl = filtersUrl();
       filtersLink.href = apiFiltersUrl;
@@ -1141,7 +1236,7 @@
 
   if (own) {
     loadCss("css/maplibre-gl.css");
-    loadCss("css/ocp-places.css?v=20261023c");
+    loadCss("css/ocp-places.css?v=20261107d");
 
     loadScript("js/maplibre-gl.js")
       .then(function () {

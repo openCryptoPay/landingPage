@@ -1,5 +1,25 @@
 # Review
 
+## Payment times
+
+Reject the change when any of these is true:
+
+- A page, note, or CSV shows a concrete payment time. That includes `lastTransactionAt`, `occurredAt`, and any other instant of a shop payment.
+- The table for `?flag=completeList` omits Nostr id or Active, or adds any other column.
+- The Nostr id column shows a value other than the shop npub, or a value when the shop has no key.
+- Active is filled from the stored `active` flag.
+- Active is yes when `activity` is not `daily`, `within7Days`, or `within30Days`.
+- Active is no when `activity` is `daily`, `within7Days`, or `within30Days`.
+
+## Page links
+
+Reject the change when any of these is true:
+
+- `provider=dfxswiss` or `provider=21gifts` does not select that provider.
+- An unknown `provider` hides every shop or selects a provider.
+- `view=table` does not show the table, or `view=map` does not show the map.
+- An unknown `view` changes the page away from its usual view.
+
 ## Page baselines
 
 Reject the change when any of these is true:

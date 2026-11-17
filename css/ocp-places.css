@@ -452,6 +452,15 @@
   white-space: normal;
 }
 
+.ocp-place-table-wrap td.ocp-nostr-id {
+  max-width: 16rem;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 18px;
+}
+
 .ocp-places-api {
   margin-top: 1rem;
   color: #5c6370;
